@@ -1,0 +1,7 @@
+.DS_STORE
+.goreleaser.yml
+dist
+out
+old-out
+http-out
+test-sign

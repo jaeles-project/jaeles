@@ -23,6 +23,13 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 			reqs = append(reqs, injectedReqs...)
 		}
 	}
+
+	// fmt.Println("New request:", len(reqs))
+	// for _, req := range reqs {
+	// 	fmt.Println(req.Headers)
+	// 	fmt.Printf("------------\n\n")
+	// }
+
 	return reqs
 }
 
@@ -351,16 +358,18 @@ func Header(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 	target["payload"] = payload
 
 	injectedReq := req
-	var isNewHeader bool
+	var isExistHeader bool
 	// check if inject header is  new or not
 	for _, header := range req.Headers {
-		isNewHeader = funk.Contains(header, headerName)
-		if isNewHeader == true {
+		isExistHeader = funk.Contains(header, headerName)
+		if isExistHeader == true {
 			break
+		} else {
+			isExistHeader = false
 		}
 	}
 
-	if isNewHeader == false {
+	if isExistHeader == false {
 		newHeaders := req.Headers
 		target["original"] = ""
 		newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
@@ -389,7 +398,6 @@ func Header(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 		}
 		injectedReq.Headers = newHeaders
 		reqs = append(reqs, injectedReq)
-
 	}
 
 	return reqs

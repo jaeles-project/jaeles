@@ -16,6 +16,9 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+// @NOTE: This middleware allow execute command on your machine
+// So make sure you trusted authenticaed user because he can create a signature.
+
 // MiddleWare is main function for middleware
 func MiddleWare(rec *libs.Record, options libs.Options) {
 	// func MiddleWare(req *libs.Request) {

@@ -128,7 +128,6 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 	if sign.Type == "list" && len(sign.Variables) > 0 {
 		realVariables := ParseVariable(sign)
 		// Replace template with variable
-		// @TODO: adding multple variable later
 		for _, variable := range realVariables {
 			target := sign.Target
 			// replace here
@@ -296,7 +295,35 @@ func ParsePayloads(sign libs.Signature) []string {
 	} else {
 		payloads = append(payloads, "")
 	}
-	return payloads
+
+	for index, value := range payloads {
+		// strip out blank line
+		if strings.Trim(value, " ") == "" {
+			payloads = append(payloads[:index], payloads[index+1:]...)
+		}
+	}
+
+	// replace payload with variables
+	var realPayloads []string
+	if len(sign.Variables) > 0 {
+		realVariables := ParseVariable(sign)
+		if len(realVariables) > 0 {
+			for _, variable := range realVariables {
+				target := make(map[string]string)
+				// replace here
+				for k, v := range variable {
+					target[k] = v
+				}
+				for _, payload := range payloads {
+					realPayloads = append(realPayloads, ResolveVariable(payload, target))
+				}
+
+			}
+		}
+	} else {
+		realPayloads = payloads
+	}
+	return realPayloads
 }
 
 // ParseBurpRequest parse burp style request

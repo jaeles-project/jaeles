@@ -128,7 +128,6 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 	if sign.Type == "list" && len(sign.Variables) > 0 {
 		realVariables := ParseVariable(sign)
 		// Replace template with variable
-		// for _, value := range realVariables {
 		// @TODO: adding multple variable later
 		for _, variable := range realVariables {
 			target := sign.Target
@@ -136,8 +135,8 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 			for k, v := range variable {
 				target[k] = v
 			}
-			// in case we only want to run a middleware alone
 
+			// in case we only want to run a middleware alone
 			if req.Raw != "" {
 				rawReq := ResolveVariable(req.Raw, target)
 				burpReq := ParseBurpRequest(rawReq)
@@ -164,7 +163,6 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 				Reqs = append(Reqs, Req)
 			}
 		}
-		// }
 	}
 	if sign.Type == "" || sign.Type == "single" {
 		Req := req
@@ -232,6 +230,17 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 			// variable as a file
 			rawVariables[key] = ReadingFile(value)
 		}
+	}
+
+	if len(rawVariables) == 1 {
+		for k, v := range rawVariables {
+			variable := make(map[string]string)
+			for _, value := range v {
+				variable[k] = value
+			}
+			realVariables = append(realVariables, variable)
+		}
+		return realVariables
 	}
 
 	// select max number of list

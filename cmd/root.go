@@ -113,8 +113,10 @@ func initConfig() {
 		libs.InforF("Write new config to: %v", configPath)
 		// save default config if not exist
 		v.SetDefault("defaultSign", "*")
+		v.SetDefault("cors", "*")
 		v.SetDefault("username", username)
 		v.SetDefault("password", password)
+		v.SetDefault("secret", core.GenHash(core.GetTS()))
 		v.SetDefault("port", "5000")
 		v.WriteConfigAs(configPath)
 
@@ -128,5 +130,10 @@ func initConfig() {
 	}
 	config.defaultSign = fmt.Sprintf("%v", v.Get("defaultSign"))
 	config.port = fmt.Sprintf("%v", v.Get("port"))
+
+	// WARNING: change me if you really want to deploy on remote server
+	// allow all origin
+	options.Cors = fmt.Sprintf("%v", v.Get("cors"))
+	options.JWTSecret = fmt.Sprintf("%v", v.Get("secret"))
 
 }

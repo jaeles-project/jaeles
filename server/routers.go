@@ -42,10 +42,18 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 	// default is ~/.jaeles/ui/
 	uiPath := path.Join(options.RootFolder, "/plugins/ui")
 	r.Use(static.Serve("/", static.LocalFile(uiPath, true)))
-	// WARNING: change me if you really want to deploy on remote server
-	// allow all origin
+
+	allowOrigin := "*"
+	secret := "something you have to change"
+	if options.JWTSecret != "" {
+		secret = options.JWTSecret
+	}
+	if options.Cors != "" {
+		allowOrigin = options.Cors
+	}
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{allowOrigin},
 		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
 		AllowHeaders:     []string{"Authorization"},
 		AllowCredentials: true,
@@ -54,8 +62,9 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 
 	// the jwt middleware
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm:       "test zone",
-		Key:         []byte("something to sha512"),
+		Realm: "test zone",
+		Key:   []byte(secret),
+		// Key:         []byte("something to sha512"),
 		Timeout:     time.Hour * 360,
 		MaxRefresh:  time.Hour * 720,
 		IdentityKey: identityKey,

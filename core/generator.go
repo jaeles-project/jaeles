@@ -24,12 +24,6 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 		}
 	}
 
-	// fmt.Println("New request:", len(reqs))
-	// for _, req := range reqs {
-	// 	fmt.Println(req.Headers)
-	// 	fmt.Printf("------------\n\n")
-	// }
-
 	return reqs
 }
 
@@ -38,34 +32,44 @@ func RunGenerator(req libs.Request, payload string, genString string) []libs.Req
 	var reqs []libs.Request
 	vm := otto.New()
 
-	// Encode part
-	vm.Set("EncodeURL", func(call otto.FunctionCall) otto.Value {
-		value := url.QueryEscape(call.Argument(0).String())
-		result, _ := vm.ToValue(value)
-		return result
-	})
-
 	vm.Set("Query", func(call otto.FunctionCall) otto.Value {
 		injectedReq := Query(req, payload, call.ArgumentList)
-		reqs = append(reqs, injectedReq...)
+		if len(injectedReq) > 0 {
+			reqs = append(reqs, injectedReq...)
+		}
 		return otto.Value{}
 	})
 
 	vm.Set("Body", func(call otto.FunctionCall) otto.Value {
 		injectedReq := Body(req, payload, call.ArgumentList)
-		reqs = append(reqs, injectedReq...)
+		if len(injectedReq) > 0 {
+			reqs = append(reqs, injectedReq...)
+		}
 		return otto.Value{}
 	})
 
 	vm.Set("Path", func(call otto.FunctionCall) otto.Value {
 		injectedReq := Path(req, payload, call.ArgumentList)
-		reqs = append(reqs, injectedReq...)
+		if len(injectedReq) > 0 {
+			reqs = append(reqs, injectedReq...)
+		}
 		return otto.Value{}
 	})
 
 	vm.Set("Header", func(call otto.FunctionCall) otto.Value {
 		injectedReq := Header(req, payload, call.ArgumentList)
-		reqs = append(reqs, injectedReq...)
+		if len(injectedReq) > 0 {
+			reqs = append(reqs, injectedReq...)
+		}
+		return otto.Value{}
+	})
+
+	vm.Set("Cookie", func(call otto.FunctionCall) otto.Value {
+		injectedReq := Cookie(req, payload, call.ArgumentList)
+		if len(injectedReq) > 0 {
+			reqs = append(reqs, injectedReq...)
+		}
+
 		return otto.Value{}
 	})
 
@@ -345,6 +349,135 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 		}
 
 	}
+	return reqs
+}
+
+// Cookie gen request with Cookie
+func Cookie(req libs.Request, payload string, arguments []otto.Value) []libs.Request {
+	var reqs []libs.Request
+	injectedString := arguments[0].String()
+	cookieName := "undefined"
+	if len(arguments) > 1 {
+		cookieName = arguments[1].String()
+	}
+
+	target := ParseTarget(req.URL)
+	target["payload"] = payload
+
+	var haveCookie bool
+	var cookieExist bool
+	var originalCookies string
+	originCookies := make(map[string]string)
+	// check if request have cookie or not
+	for _, header := range req.Headers {
+		haveCookie = funk.Contains(header, "Cookie")
+		if haveCookie == true {
+			// got a cookie
+			for _, v := range header {
+				originalCookies = v
+				rawCookies := strings.Split(v, ";")
+				for _, rawCookie := range rawCookies {
+
+					name := strings.Split(strings.TrimSpace(rawCookie), "=")[0]
+					// just in case some weird part after '='
+					value := strings.Join(strings.Split(strings.TrimSpace(rawCookie), "=")[1:], "")
+					originCookies[name] = value
+				}
+			}
+			break
+		} else {
+			haveCookie = false
+		}
+
+	}
+	if haveCookie == true && funk.Contains(originCookies, cookieName) {
+		cookieExist = true
+	}
+
+	// start gen request
+	if haveCookie == true {
+		// replace entire old cookie if you don't define cookie name
+		if cookieName == "undefined" {
+			newHeaders := req.Headers
+			target["original"] = originalCookies
+			newCookie := Encoder(req.Encoding, ResolveVariable(injectedString, target))
+
+			for _, header := range req.Headers {
+				for k := range header {
+					if k == "Cookie" {
+						head := map[string]string{
+							"Cookie": newCookie,
+						}
+						newHeaders = append(newHeaders, head)
+					} else {
+						newHeaders = append(newHeaders, header)
+					}
+
+				}
+			}
+			injectedReq := req
+			injectedReq.Headers = newHeaders
+			reqs = append(reqs, injectedReq)
+			return reqs
+		}
+
+		var newHeaders []map[string]string
+		// replace old header
+		for _, header := range req.Headers {
+			for k := range header {
+				// do things with Cookie header
+				if k == "Cookie" {
+					if cookieExist == true {
+						target["original"] = originCookies[cookieName]
+						newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
+						originCookies[cookieName] = newValue
+
+					} else {
+						target["original"] = ""
+						newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
+						originCookies[cookieName] = newValue
+					}
+
+					// join it again to append to the rest of header
+					var realCookies string
+					for name, value := range originCookies {
+						realCookies += fmt.Sprintf("%v=%v; ", name, value)
+					}
+					newHead := map[string]string{
+						"Cookie": realCookies,
+					}
+
+					// replace cookie
+					newHeaders = append(newHeaders, newHead)
+				} else {
+					newHeaders = append(newHeaders, header)
+				}
+			}
+		}
+		injectedReq := req
+		injectedReq.Headers = newHeaders
+		reqs = append(reqs, injectedReq)
+
+	} else {
+		target["original"] = ""
+		var realCookies string
+		newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
+		if cookieName == "undefined" {
+			realCookies = fmt.Sprintf("%v; ", newValue)
+
+		} else {
+			realCookies = fmt.Sprintf("%v=%v; ", cookieName, newValue)
+		}
+		head := map[string]string{
+			"Cookie": realCookies,
+		}
+		injectedReq := req
+		newHeaders := req.Headers
+		newHeaders = append(newHeaders, head)
+		injectedReq.Headers = newHeaders
+		reqs = append(reqs, injectedReq)
+	}
+
 	return reqs
 }
 

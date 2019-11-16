@@ -19,4 +19,6 @@ type Options struct {
 	Debug       bool
 	NoOutput    bool
 	Bind        string
+	JWTSecret   string
+	Cors        string
 }

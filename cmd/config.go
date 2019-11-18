@@ -66,9 +66,9 @@ func runConfig(cmd *cobra.Command, args []string) error {
 
 	// clean all the things
 	if action == "clean" {
-		database.CleanSigns()
-		database.CleanRecords()
-		database.CleanScans()
+		os.RemoveAll(path.Join(options.RootFolder, "sqlite.db"))
+		os.RemoveAll(path.Join(options.RootFolder, "config.yaml"))
+		os.RemoveAll(path.Join(options.RootFolder, "burp.json"))
 	}
 
 	// create or update user

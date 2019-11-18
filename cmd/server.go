@@ -146,6 +146,7 @@ func runServer(cmd *cobra.Command, args []string) error {
 	bind := fmt.Sprintf("%v:%v", host, port)
 	options.Bind = bind
 	libs.InforF("Start API server at %v", fmt.Sprintf("http://%v/#/", bind))
+
 	server.InitRouter(options, result)
 
 	// wg.Wait()

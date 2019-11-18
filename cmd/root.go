@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/Jeffail/gabs"
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
@@ -88,7 +89,7 @@ func initConfig() {
 		defer db.Close()
 		// Create new user
 		username = "jaeles"
-		password = core.GenHash(core.GetTS())[:6]
+		password = core.GenHash(core.GetTS())[:10]
 		database.CreateUser(username, password)
 		libs.GoodF("Create new credentials %v:%v", username, password)
 
@@ -112,12 +113,13 @@ func initConfig() {
 	if !core.FileExists(configPath) {
 		libs.InforF("Write new config to: %v", configPath)
 		// save default config if not exist
+		bind := "http://127.0.0.1:5000"
 		v.SetDefault("defaultSign", "*")
 		v.SetDefault("cors", "*")
 		v.SetDefault("username", username)
 		v.SetDefault("password", password)
 		v.SetDefault("secret", core.GenHash(core.GetTS()))
-		v.SetDefault("port", "5000")
+		v.SetDefault("bind", bind)
 		v.WriteConfigAs(configPath)
 
 	} else {
@@ -126,7 +128,6 @@ func initConfig() {
 		}
 		b, _ := ioutil.ReadFile(configPath)
 		v.ReadConfig(bytes.NewBuffer(b))
-
 	}
 	config.defaultSign = fmt.Sprintf("%v", v.Get("defaultSign"))
 	config.port = fmt.Sprintf("%v", v.Get("port"))
@@ -135,5 +136,23 @@ func initConfig() {
 	// allow all origin
 	options.Cors = fmt.Sprintf("%v", v.Get("cors"))
 	options.JWTSecret = fmt.Sprintf("%v", v.Get("secret"))
+
+	// store default credentials for Burp plugin
+	burpConfigPath := path.Join(options.RootFolder, "burp.json")
+	if !core.FileExists(burpConfigPath) {
+		jsonObj := gabs.New()
+		jsonObj.Set("", "JWT")
+		jsonObj.Set(fmt.Sprintf("%v", v.Get("username")), "username")
+		jsonObj.Set(fmt.Sprintf("%v", v.Get("password")), "password")
+		bind := fmt.Sprintf("%v", v.Get("bind"))
+		if bind == "" {
+			bind = "http://127.0.0.1:5000"
+		}
+		jsonObj.Set(fmt.Sprintf("http://%v/api/parse", bind), "endpoint")
+		core.WriteToFile(burpConfigPath, jsonObj.String())
+		if options.Verbose {
+			libs.InforF("Store default credentials for client at: %v", burpConfigPath)
+		}
+	}
 
 }

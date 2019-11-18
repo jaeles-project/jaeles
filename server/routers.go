@@ -62,9 +62,8 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 
 	// the jwt middleware
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm: "test zone",
-		Key:   []byte(secret),
-		// Key:         []byte("something to sha512"),
+		Realm:       "test zone",
+		Key:         []byte(secret),
 		Timeout:     time.Hour * 360,
 		MaxRefresh:  time.Hour * 720,
 		IdentityKey: identityKey,
@@ -155,4 +154,5 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 	if err := http.ListenAndServe(options.Bind, r); err != nil {
 		log.Fatal(err)
 	}
+
 }

@@ -28,7 +28,7 @@ var config struct {
 var RootCmd = &cobra.Command{
 	Use:   "jaeles",
 	Short: "Jaeles Scanner",
-	Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing %v by %v`, libs.VERSION, libs.AUTHOR),
+	Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing - %v by %v`, libs.VERSION, libs.AUTHOR),
 }
 
 // Execute main function

@@ -35,6 +35,7 @@ jaeles scan --retry 3 --verbose -s "signatures/cves/jira-*" -U /tmp/list_of_urls
 jaeles --verbose server -s sqli
 ```
 
+
 ## Showcases
 More showcase [here](https://jaeles-project.github.io/showcases/)
 
@@ -42,6 +43,12 @@ More showcase [here](https://jaeles-project.github.io/showcases/)
 <p align="center">
 Detect Jira SSRF CVE-2019-8451
 </p>
+
+### Burp Integration
+
+![Burp Integration](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/Burp-Integration.gif?raw=true)
+
+Plugin can be found [here](https://github.com/jaeles-project/jaeles-plugins/blob/master/jaeles-burp.py) and Video Guide [here](https://youtu.be/1lxsYhfTq3M)
 
 ## Contribute
 

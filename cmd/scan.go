@@ -222,6 +222,10 @@ func runScan(cmd *cobra.Command, args []string) error {
 						fmt.Println(realRec.Request.MiddlewareOutput)
 					}
 				}
+				// resolve detection this time because we need parse something in the variable
+				target := core.ParseTarget(realRec.Request.URL)
+				target = core.MoreVariables(target, options)
+				realRec.Request.Detections = core.ResolveDetection(realRec.Request.Detections, target)
 				// start to run detection
 				core.Analyze(options, &realRec)
 

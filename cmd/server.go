@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -57,7 +59,25 @@ func runServer(cmd *cobra.Command, args []string) error {
 					Signs = append(Signs, signName)
 				}
 			}
-			if signName == "" {
+			if signName != "" {
+				// get more sign nature
+				if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
+					asbPath, _ := filepath.Abs(signName)
+					baseSelect := filepath.Base(signName)
+					rawSigns := core.GetFileNames(filepath.Dir(asbPath), "yaml")
+					for _, signFile := range rawSigns {
+						baseSign := filepath.Base(signFile)
+						r, err := regexp.Compile(baseSelect)
+						if err != nil {
+							continue
+						}
+						if r.MatchString(baseSign) {
+							Signs = append(Signs, signFile)
+						}
+					}
+				}
+			} else {
+
 				signName = database.GetDefaultSign()
 			}
 			Signs = append(Signs, database.SelectSign(signName)...)

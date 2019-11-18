@@ -17,8 +17,14 @@ import (
 func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 	var reqs []libs.Request
 	realPayloads := ParsePayloads(sign)
+
 	for _, payload := range realPayloads {
+		// replace payloads in detections
+		target := ParseTarget(req.URL)
+		target["payload"] = payload
 		for _, genString := range req.Generators {
+			// resolve detection this time because we need parse something in the variable
+			req.Detections = ResolveDetection(req.Detections, target)
 			injectedReqs := RunGenerator(req, payload, genString)
 			reqs = append(reqs, injectedReqs...)
 		}

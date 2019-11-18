@@ -109,6 +109,10 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 // GetComponent get component to run detection
 func GetComponent(record libs.Record, component string) string {
 	switch strings.ToLower(component) {
+	case "orequest":
+		return record.OriginReq.Beautify
+	case "oresponse":
+		return record.OriginRes.Beautify
 	case "request":
 		return record.Request.Beautify
 	case "response":

@@ -25,6 +25,9 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 		for _, genString := range req.Generators {
 			// resolve detection this time because we need parse something in the variable
 			req.Detections = ResolveDetection(req.Detections, target)
+			if req.Method == "" {
+				req.Method = "GET"
+			}
 			injectedReqs := RunGenerator(req, payload, genString)
 			reqs = append(reqs, injectedReqs...)
 		}

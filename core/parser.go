@@ -63,7 +63,9 @@ func ParseTarget(raw string) map[string]string {
 		// fmt.Println("parse again")
 	}
 	var hostname string
+	var query string
 	port := u.Port()
+	query = u.RawQuery
 	if u.Port() == "" {
 		if strings.Contains(u.Scheme, "https") {
 			port = "443"
@@ -86,7 +88,14 @@ func ParseTarget(raw string) map[string]string {
 	target["Host"] = hostname
 	target["Port"] = port
 	target["BaseURL"] = fmt.Sprintf("%v://%v", target["Scheme"], target["Host"])
-	target["URL"] = fmt.Sprintf("%v://%v%v", target["Scheme"], target["Host"], target["Path"])
+	target["RawQuery"] = query
+
+	if target["RawQuery"] != "" {
+		target["URL"] = fmt.Sprintf("%v://%v%v?%v", target["Scheme"], target["Host"], target["Path"], target["RawQuery"])
+	} else {
+		target["URL"] = fmt.Sprintf("%v://%v%v", target["Scheme"], target["Host"], target["Path"])
+	}
+
 	target["Extension"] = filepath.Ext(target["BaseURL"])
 
 	ssrf := database.GetDefaultBurpCollab()
@@ -191,6 +200,20 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 		}
 
 	}
+
+	// only take URL as a input from cli
+	if sign.Type == "fuzz" {
+		var record libs.Record
+		record.Request = req
+		target := sign.Target
+		record.OriginReq.URL = target["URL"]
+		// fmt.Println(record)
+		reqs := ParseFuzzRequest(record, sign)
+		if len(reqs) > 0 {
+			Reqs = append(Reqs, reqs...)
+		}
+	}
+	// fmt.Println(Reqs)
 
 	return Reqs
 }

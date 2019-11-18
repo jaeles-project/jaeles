@@ -159,7 +159,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 			// start to send stuff
 			for _, req := range sign.Requests {
 				realReqs := core.ParseRequest(req, sign)
-
 				if len(realReqs) > 0 {
 					for _, realReq := range realReqs {
 						var realRec libs.Record

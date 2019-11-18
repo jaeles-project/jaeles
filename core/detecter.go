@@ -17,6 +17,7 @@ import (
 /*
 @TODO: Add OOB check from Burp Collab and dnsbin.zhack.ca
 */
+
 // RunDetector is main function for detections
 func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	var extra string
@@ -30,11 +31,29 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	vm.Set("StringCount", func(call otto.FunctionCall) otto.Value {
+		componentName := call.Argument(0).String()
+		analyzeString := call.Argument(1).String()
+		component := GetComponent(record, componentName)
+		validate := StringCount(component, analyzeString)
+		result, _ := vm.ToValue(validate)
+		return result
+	})
+
 	vm.Set("RegexSearch", func(call otto.FunctionCall) otto.Value {
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()
 		component := GetComponent(record, componentName)
 		validate := RegexSearch(component, analyzeString)
+		result, _ := vm.ToValue(validate)
+		return result
+	})
+
+	vm.Set("RegexCount", func(call otto.FunctionCall) otto.Value {
+		componentName := call.Argument(0).String()
+		analyzeString := call.Argument(1).String()
+		component := GetComponent(record, componentName)
+		validate := RegexCount(component, analyzeString)
 		result, _ := vm.ToValue(validate)
 		return result
 	})
@@ -111,6 +130,11 @@ func StringSearch(component string, analyzeString string) bool {
 	return false
 }
 
+// StringCount count string literal in component
+func StringCount(component string, analyzeString string) int {
+	return strings.Count(component, analyzeString)
+}
+
 // RegexSearch search regex string in component
 func RegexSearch(component string, analyzeString string) bool {
 	r, err := regexp.Compile(analyzeString)
@@ -118,6 +142,16 @@ func RegexSearch(component string, analyzeString string) bool {
 		return false
 	}
 	return r.MatchString(component)
+}
+
+// RegexCount count regex string in component
+func RegexCount(component string, analyzeString string) int {
+	r, err := regexp.Compile(analyzeString)
+	if err != nil {
+		return 0
+	}
+	matches := r.FindAllStringIndex("A B C B A", -1)
+	return len(matches)
 }
 
 // PollCollab polling burp collab with secret from DB

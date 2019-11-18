@@ -35,7 +35,6 @@ jaeles scan --retry 3 --verbose -s "signatures/cves/jira-*" -U /tmp/list_of_urls
 jaeles --verbose server -s sqli
 ```
 
-
 ## Showcases
 More showcase [here](https://jaeles-project.github.io/showcases/)
 

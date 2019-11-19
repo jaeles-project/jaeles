@@ -64,6 +64,13 @@ func runConfig(cmd *cobra.Command, args []string) error {
 		core.UpdateSignature(options)
 	}
 
+	// clear all data in database
+	if action == "clear" {
+		database.CleanScans()
+		database.CleanSigns()
+		database.CleanRecords()
+	}
+
 	// clean all the things
 	if action == "clean" {
 		os.RemoveAll(path.Join(options.RootFolder, "sqlite.db"))

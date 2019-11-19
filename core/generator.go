@@ -22,7 +22,23 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 		// replace payloads in detections
 		target := ParseTarget(req.URL)
 		target["payload"] = payload
+		// access variable in generator string too
+		realVariables := ParseVariable(sign)
+		if len(realVariables) > 0 {
+			for _, variable := range realVariables {
+				for k, v := range variable {
+					target[k] = v
+				}
+			}
+		}
+		req.Target = target
+
 		for _, genString := range req.Generators {
+			// just copy exactly request again
+			if genString == "Null()" {
+				reqs = append(reqs, req)
+				continue
+			}
 			// resolve detection this time because we need parse something in the variable
 			req.Detections = ResolveDetection(req.Detections, target)
 			if req.Method == "" {
@@ -143,8 +159,9 @@ func Query(req libs.Request, payload string, arguments []otto.Value) []libs.Requ
 
 	var reqs []libs.Request
 	rawURL := req.URL
-	target := ParseTarget(rawURL)
+	target := req.Target
 	target["payload"] = payload
+	paramName = ResolveVariable(paramName, target)
 	u, _ := url.Parse(rawURL)
 
 	// replace one or create a new one if they're not exist
@@ -287,10 +304,11 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 	}
 
 	var reqs []libs.Request
-	target := ParseTarget(req.URL)
+	target := req.Target
 	target["payload"] = payload
 	u, _ := url.Parse(req.URL)
 	rawPath := u.Path
+	rawQuery := u.RawQuery
 	Paths := strings.Split(rawPath, "/")
 	ext := filepath.Ext(Paths[len(Paths)-1])
 
@@ -310,8 +328,21 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 		newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
 
 		newPaths := Paths
+		// if the path have query before append with it
 		newPaths[len(newPaths)-1] = newValue
-		injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
+		if rawQuery != "" {
+			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
+			if strings.Contains(injectedReq.URL, "?") {
+				injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/") + "&" + rawQuery
+			} else {
+				injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/") + "?" + rawQuery
+			}
+
+			// newPaths[len(newPaths)-1] = newValue + "&" + rawQuery
+		} else {
+			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
+		}
+
 		reqs = append(reqs, injectedReq)
 		// specific position
 	} else if paramName != "*" && len(paramName) == 1 {

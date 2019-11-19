@@ -280,7 +280,7 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 	}
 
 	// join all together to make list of map variable
-	for i := 1; i <= maxLength; i++ {
+	for i := 0; i < maxLength; i++ {
 		variable := make(map[string]string)
 		for k, v := range Variables {
 			variable[k] = v[i]

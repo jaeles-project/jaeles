@@ -180,7 +180,7 @@ func Unzip(src string, dest string) ([]string, error) {
 // ExpandLength make slice to length
 func ExpandLength(list []string, length int) []string {
 	c := []string{}
-	for i := 1; i <= 9; i++ {
+	for i := 1; i <= length; i++ {
 		c = append(c, list[i%len(list)])
 	}
 	return c

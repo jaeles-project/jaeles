@@ -16,6 +16,11 @@ func GetCollab() string {
 	var collabs []models.Collab
 	DB.Find(&collabs)
 	if len(collabs) == 0 {
+		// auto gen a new one using request bin
+		dnsbin := NewDNSBin()
+		if dnsbin != "" {
+			return dnsbin
+		}
 		return ""
 	}
 	rand.Seed(time.Now().Unix())

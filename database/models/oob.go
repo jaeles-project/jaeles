@@ -9,6 +9,7 @@ type OutOfBand struct {
 	ClientIP          string `gorm:"type:varchar(255);"`
 	Time              string `gorm:"type:varchar(255);"`
 	Data              string `gorm:"type:longtext;"`
+	Type              string `gorm:"type:varchar(255);default:'burp'"`
 }
 
 // ReqLog table to store request have OOB payload

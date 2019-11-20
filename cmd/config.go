@@ -32,6 +32,7 @@ func init() {
 	configCmd.Flags().String("user", "", "Username")
 	configCmd.Flags().String("pass", "", "Password")
 	configCmd.Flags().Bool("hh", false, "More helper")
+	configCmd.Flags().Bool("poll", false, "Polling all record in OOB config")
 	// used for cred action
 	configCmd.Flags().String("secret", "", "Secret of Burp Collab")
 	configCmd.Flags().String("collab", "", "List of Burp Collab File")
@@ -46,6 +47,17 @@ func runConfig(cmd *cobra.Command, args []string) error {
 	if helps == true {
 		HelperConfig()
 		os.Exit(1)
+	}
+
+	polling, _ := cmd.Flags().GetBool("poll")
+	// polling all oob
+	if polling == true {
+		secret, _ := cmd.Flags().GetString("secret")
+		collabFile, _ := cmd.Flags().GetString("collab")
+		collabs := core.ReadingFile(collabFile)
+		for _, collab := range collabs {
+			database.ImportCollab(secret, collab)
+		}
 	}
 
 	// DB connect

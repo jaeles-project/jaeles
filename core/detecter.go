@@ -154,7 +154,7 @@ func RegexCount(component string, analyzeString string) int {
 	if err != nil {
 		return 0
 	}
-	matches := r.FindAllStringIndex("A B C B A", -1)
+	matches := r.FindAllStringIndex(component, -1)
 	return len(matches)
 }
 

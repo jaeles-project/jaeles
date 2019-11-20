@@ -55,3 +55,9 @@ func UpdateSignature(options libs.Options) {
 		}
 	}
 }
+
+// // UpdateOutOfBand renew things in Out of band check
+// func UpdateOutOfBand(options libs.Options) {
+// 	// http
+// 	// dns
+// }

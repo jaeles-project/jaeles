@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"path"
-	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 
@@ -28,9 +26,8 @@ func init() {
 		Long:  `Start API Server`,
 		RunE:  runServer,
 	}
-	// serverCmd.Flags().Bool("start", false, "Force continued operation when wildcard found")
-	serverCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ';'")
-	serverCmd.Flags().Int16P("level", "l", 1, "Provide custom header seperate by ';'")
+	serverCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
+	// serverCmd.Flags().Int16P("level", "l", 1, "Provide custom header seperate by ';'")
 
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
@@ -60,24 +57,9 @@ func runServer(cmd *cobra.Command, args []string) error {
 				}
 			}
 			if signName != "" {
-				// get more sign nature
-				if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
-					asbPath, _ := filepath.Abs(signName)
-					baseSelect := filepath.Base(signName)
-					rawSigns := core.GetFileNames(filepath.Dir(asbPath), "yaml")
-					for _, signFile := range rawSigns {
-						baseSign := filepath.Base(signFile)
-						r, err := regexp.Compile(baseSelect)
-						if err != nil {
-							continue
-						}
-						if r.MatchString(baseSign) {
-							Signs = append(Signs, signFile)
-						}
-					}
-				}
+				signs := core.SelectSign(signName)
+				Signs = append(Signs, signs...)
 			} else {
-
 				signName = database.GetDefaultSign()
 			}
 			Signs = append(Signs, database.SelectSign(signName)...)
@@ -97,36 +79,61 @@ func runServer(cmd *cobra.Command, args []string) error {
 					log.Printf("Error loading sign: %v\n", signFile)
 					continue
 				}
-				for _, req := range sign.Requests {
-					core.ParseRequestFromServer(&record, req, sign)
-					// send origin request
-					originRes, err := core.JustSend(options, record.OriginReq)
-					if err == nil {
-						record.OriginRes = originRes
-						if options.Verbose {
-							fmt.Printf("[Sent-Origin] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
+				// parse sign as list or single
+				if sign.Type == "list" || sign.Type == "single" || sign.Type == "" {
+					url := record.OriginReq.URL
+					sign.Target = core.ParseTarget(url)
+					sign.Target = core.MoreVariables(sign.Target, options)
+					for _, req := range sign.Requests {
+						realReqs := core.ParseRequest(req, sign)
+						if len(realReqs) > 0 {
+							for _, realReq := range realReqs {
+								var realRec libs.Record
+								realRec.Request = realReq
+								realRec.Request.Target = sign.Target
+								realRec.OriginReq = record.OriginReq
+								realRec.Sign = sign
+								realRec.ScanID = scanID
+
+								jobs <- realRec
+							}
 						}
 					}
+				} else {
+					// parse fuzz sign
+					for _, req := range sign.Requests {
+						core.ParseRequestFromServer(&record, req, sign)
+						// send origin request
+						originRes, err := core.JustSend(options, record.OriginReq)
+						if err == nil {
+							record.OriginRes = originRes
+							if options.Verbose {
+								fmt.Printf("[Sent-Origin] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
+							}
+						}
 
-					Reqs := core.ParseFuzzRequest(record, sign)
-					if len(Reqs) > 0 {
-						for _, Req := range Reqs {
-							// if options.Debug {
-							// 	fmt.Printf("Path: %v \n", Req.Path)
-							// 	fmt.Printf("URL: %v \n", Req.URL)
-							// 	fmt.Printf("Body: %v \n", Req.Body)
-							// 	fmt.Printf("Headers: %v \n", Req.Headers)
-							// 	fmt.Printf("--------------\n")
-							// }
-							Rec := record
-							Rec.Request = Req
-							Rec.Sign = sign
-							Rec.ScanID = scanID
+						Reqs := core.ParseFuzzRequest(record, sign)
 
-							jobs <- Rec
+						if len(Reqs) > 0 {
+							for _, Req := range Reqs {
+								// if options.Debug {
+								// 	fmt.Printf("Path: %v \n", Req.Path)
+								// 	fmt.Printf("URL: %v \n", Req.URL)
+								// 	fmt.Printf("Body: %v \n", Req.Body)
+								// 	fmt.Printf("Headers: %v \n", Req.Headers)
+								// 	fmt.Printf("--------------\n")
+								// }
+								Rec := record
+								Rec.Request = Req
+								Rec.Sign = sign
+								Rec.ScanID = scanID
+
+								jobs <- Rec
+							}
 						}
 					}
 				}
+
 			}
 
 		}
@@ -144,7 +151,7 @@ func runServer(cmd *cobra.Command, args []string) error {
 				if !funk.IsEmpty(req.Middlewares) {
 					core.MiddleWare(&realRec, options)
 				}
-				// if middle ware return a response skip sending the request
+				// if middleware return a response skip sending the request
 				if realRec.Response.StatusCode == 0 {
 					res, err := core.JustSend(options, req)
 					if err != nil {

@@ -6,8 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/jaeles-project/jaeles/database"
@@ -31,9 +29,9 @@ func init() {
 	}
 
 	scanCmd.Flags().StringP("url", "u", "", "URL of target")
-	scanCmd.Flags().String("ssrf", "", "Fill your BurpCollab")
+	scanCmd.Flags().String("ssrf", "", "Fill your BurpCollab or any Out of Band host")
 	scanCmd.Flags().StringP("urls", "U", "", "URLs file of target")
-	scanCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ';'")
+	scanCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
 	RootCmd.AddCommand(scanCmd)
 
 }
@@ -60,7 +58,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	ssrf, _ := cmd.Flags().GetString("ssrf")
 	if ssrf != "" {
 		if options.Verbose {
-			fmt.Printf("%v SSRF set: %v \n", info, ssrf)
+			libs.InforF("SSRF set: %v ", ssrf)
 		}
 		database.ImportBurpCollab(ssrf)
 	}
@@ -83,33 +81,12 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	signName, _ := cmd.Flags().GetString("sign")
-	// Get exactly signature
-	if strings.HasSuffix(signName, ".yaml") {
-		if core.FileExists(signName) {
-			signs = append(signs, signName)
-		}
-	}
-	// get more sign nature
-	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
-		asbPath, _ := filepath.Abs(signName)
-		baseSelect := filepath.Base(signName)
-		rawSigns := core.GetFileNames(filepath.Dir(asbPath), "yaml")
-		for _, signFile := range rawSigns {
-			baseSign := filepath.Base(signFile)
-			r, err := regexp.Compile(baseSelect)
-			if err != nil {
-				continue
-			}
-			if r.MatchString(baseSign) {
-				signs = append(signs, signFile)
-			}
-		}
-	}
+	signs = core.SelectSign(signName)
 
 	// search signature through Signatures table
 	Signs := database.SelectSign(signName)
 	signs = append(signs, Signs...)
-	fmt.Printf("%v Signatures Loaded: %v \n", info, len(signs))
+	libs.InforF("Signatures Loaded: %v", len(signs))
 
 	// create new scan or group with old one
 	var scanID string
@@ -118,7 +95,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	} else {
 		scanID = options.ScanID
 	}
-	fmt.Printf("%v Start Scan with ID: %v \n", info, scanID)
+	libs.InforF("Start Scan with ID: %v", scanID)
 
 	if len(signs) == 0 {
 		fmt.Println("[Error] No signature loaded")

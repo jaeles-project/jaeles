@@ -12,21 +12,31 @@ import (
 func ImportBurpCollab(burpcollab string) string {
 	var conObj models.Configuration
 	DB.Where(models.Configuration{Name: "BurpCollab"}).Assign(models.Configuration{Value: burpcollab}).FirstOrCreate(&conObj)
-	ImportBurpCollabResponse(burpcollab)
+	ImportBurpCollabResponse(burpcollab, "")
 	return burpcollab
 }
 
+// GetDefaultBurpCollab update default sign
+func GetDefaultBurpCollab() string {
+	var conObj models.Configuration
+	DB.Where("name = ?", "BurpCollab").First(&conObj)
+	return conObj.Value
+}
+
 // ImportBurpCollabResponse used to init some default config
-func ImportBurpCollabResponse(burpcollab string) string {
-	url := fmt.Sprintf("http://%v", burpcollab)
-	client := resty.New()
-	resp, err := client.R().Get(url)
-	if err != nil {
-		return ""
+func ImportBurpCollabResponse(burpcollab string, data string) string {
+	burpcollabres := data
+	if burpcollabres == "" {
+		url := fmt.Sprintf("http://%v?original=true", burpcollab)
+		client := resty.New()
+		resp, err := client.R().Get(url)
+		if err != nil {
+			return ""
+		}
+		burpcollabres := string(resp.Body())
+		burpcollabres = strings.Replace(burpcollabres, "<html><body>", "", -1)
+		burpcollabres = strings.Replace(burpcollabres, "</body></html>", "", -1)
 	}
-	burpcollabres := string(resp.Body())
-	burpcollabres = strings.Replace(burpcollabres, "<html><body>", "", -1)
-	burpcollabres = strings.Replace(burpcollabres, "</body></html>", "", -1)
 
 	var conObj models.Configuration
 	DB.Where(models.Configuration{Name: "BurpCollabResponse"}).Assign(models.Configuration{Value: burpcollabres}).FirstOrCreate(&conObj)
@@ -37,13 +47,6 @@ func ImportBurpCollabResponse(burpcollab string) string {
 func GetDefaultBurpRes() string {
 	var conObj models.Configuration
 	DB.Where("name = ?", "BurpCollabResponse").First(&conObj)
-	return conObj.Value
-}
-
-// GetDefaultBurpCollab update default sign
-func GetDefaultBurpCollab() string {
-	var conObj models.Configuration
-	DB.Where("name = ?", "BurpCollab").First(&conObj)
 	return conObj.Value
 }
 

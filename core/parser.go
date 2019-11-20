@@ -344,7 +344,9 @@ func ParsePayloads(sign libs.Signature) []string {
 			}
 		}
 	} else {
-		realPayloads = payloads
+		for _, payload := range payloads {
+			realPayloads = append(realPayloads, ResolveVariable(payload, sign.Target))
+		}
 	}
 	return realPayloads
 }

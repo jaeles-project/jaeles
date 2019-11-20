@@ -9,9 +9,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jaeles-project/jaeles/database"
 )
 
 // ReadingFile Reading file and reutrn content as string
@@ -184,4 +187,62 @@ func ExpandLength(list []string, length int) []string {
 		c = append(c, list[i%len(list)])
 	}
 	return c
+}
+
+// SelectSign select signature by multiple selector
+func SelectSign(signName string) []string {
+	var Signs []string
+
+	// return default sign if doesn't set anything
+	if signName == "" {
+		Signs = database.SelectSign(signName)
+	}
+
+	if strings.Contains(signName, ",") {
+		rawSigns := strings.Split(signName, ",")
+		for _, rawSign := range rawSigns {
+			signs := SingleSign(strings.TrimSpace(rawSign))
+			if len(signs) > 0 {
+				Signs = append(Signs, signs...)
+			}
+		}
+	} else {
+		signs := SingleSign(strings.TrimSpace(signName))
+		if len(signs) > 0 {
+			Signs = append(Signs, signs...)
+		}
+	}
+
+	return Signs
+}
+
+// SingleSign select signature by single selector
+func SingleSign(signName string) []string {
+	var Signs []string
+	if strings.HasSuffix(signName, ".yaml") {
+		if FileExists(signName) {
+			Signs = append(Signs, signName)
+		}
+	}
+	// get more sign nature
+	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
+		asbPath, _ := filepath.Abs(signName)
+		baseSelect := filepath.Base(signName)
+		rawSigns := GetFileNames(filepath.Dir(asbPath), "yaml")
+		for _, signFile := range rawSigns {
+			baseSign := filepath.Base(signFile)
+			if len(baseSign) == 1 && baseSign == "*" {
+				Signs = append(Signs, signFile)
+				continue
+			}
+			r, err := regexp.Compile(baseSelect)
+			if err != nil {
+				continue
+			}
+			if r.MatchString(baseSign) {
+				Signs = append(Signs, signFile)
+			}
+		}
+	}
+	return Signs
 }

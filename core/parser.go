@@ -229,6 +229,12 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 			if strings.Trim(value, " ") == "" {
 				continue
 			}
+
+			// variable as a file
+			if strings.Contains(value, "/") {
+				rawVariables[key] = ReadingFile(value)
+			}
+
 			/*
 				- variable: [google.com,example.com]
 			*/
@@ -248,19 +254,16 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 				rawVariables[key] = strings.Split(value, "\n")
 				continue
 			}
-
-			// variable as a file
-			rawVariables[key] = ReadingFile(value)
 		}
 	}
 
 	if len(rawVariables) == 1 {
 		for k, v := range rawVariables {
-			variable := make(map[string]string)
 			for _, value := range v {
+				variable := make(map[string]string)
 				variable[k] = value
+				realVariables = append(realVariables, variable)
 			}
-			realVariables = append(realVariables, variable)
 		}
 		return realVariables
 	}

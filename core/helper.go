@@ -15,11 +15,15 @@ import (
 	"time"
 
 	"github.com/jaeles-project/jaeles/database"
+	"github.com/mitchellh/go-homedir"
 )
 
 // ReadingFile Reading file and reutrn content as string
 func ReadingFile(filename string) []string {
 	var result []string
+	if strings.Contains(filename, "~") {
+		filename, _ = homedir.Expand(filename)
+	}
 	file, err := os.Open(filename)
 	defer file.Close()
 	if err != nil {

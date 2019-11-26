@@ -24,6 +24,12 @@ func WarningF(format string, args ...interface{}) {
 	fmt.Printf("%s %s\n", good, fmt.Sprintf(format, args...))
 }
 
+// DebugF print debug message
+func DebugF(format string, args ...interface{}) {
+	good := color.GreenString("DEBUG")
+	fmt.Printf("[%s] %s\n", good, fmt.Sprintf(format, args...))
+}
+
 // ErrorF print good message
 func ErrorF(format string, args ...interface{}) {
 	good := color.RedString("[-]")

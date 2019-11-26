@@ -3,6 +3,7 @@ package core
 import (
 	"crypto/sha1"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -41,21 +42,77 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	}
 	req.Headers = newHeader
 
+	// if options.Debug {
+	// 	libs.DebugF("[Processing] for %v", url)
+	// }
+
 	// disable log when retry
 	logger := logrus.New()
 	if !options.Debug {
 		logger.Out = ioutil.Discard
 	}
 	client := resty.New().SetLogger(logger)
+	// localAddress, _ := net.ResolveTCPAddr("tcp", "127.0.0.1")
+	// client := resty.NewWithLocalAddr(localAddress)
+
+	client.SetLogger(logger)
 
 	// setting for client
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	client.SetDisableWarn(true)
+	// client.SetDebug(true)
 	client.SetHeaders(headers)
-
 	// redirect policy
+	// var res libs.Response
 	if req.Redirect == false {
-		client.SetRedirectPolicy(resty.NoRedirectPolicy())
+		// client.SetRedirectPolicy(resty.NoRedirectPolicy())
+		client.SetRedirectPolicy(resty.RedirectPolicyFunc(func(req *http.Request, via []*http.Request) error {
+			// keep the header the same
+			// client.SetHeaders(headers)
+
+			res.StatusCode = req.Response.StatusCode
+			res.Status = req.Response.Status
+			resp := req.Response
+			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatal(err)
+			}
+			bodyString := string(bodyBytes)
+			resLength := len(bodyString)
+			// format the headers
+			var resHeaders []map[string]string
+			for k, v := range resp.Header {
+				element := make(map[string]string)
+				element[k] = strings.Join(v[:], "")
+				resLength += len(fmt.Sprintf("%s: %s\n", k, strings.Join(v[:], "")))
+				resHeaders = append(resHeaders, element)
+			}
+
+			// respones time in second
+			resTime := float64(0.0)
+			resHeaders = append(resHeaders,
+				map[string]string{"Total Length": strconv.Itoa(resLength)},
+				map[string]string{"Response Time": fmt.Sprintf("%f", resTime)},
+			)
+
+			// set some variable
+			res.Headers = resHeaders
+			res.StatusCode = resp.StatusCode
+			res.Status = fmt.Sprintf("%v %v", resp.Status, resp.Proto)
+			res.Body = bodyString
+			res.ResponseTime = resTime
+			res.Length = resLength
+			// beautify
+			res.Beautify = BeautifyResponse(res)
+			return errors.New("auto redirect is disabled")
+		}))
+
+		client.AddRetryCondition(
+			func(r *resty.Response, err error) bool {
+				return false
+			},
+		)
+
 	} else {
 		client.SetRedirectPolicy(resty.RedirectPolicyFunc(func(req *http.Request, via []*http.Request) error {
 			// keep the header the same
@@ -68,6 +125,8 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		client.SetRetryCount(options.Retry)
 	}
 	client.SetTimeout(time.Duration(options.Timeout) * time.Second)
+	client.SetRetryWaitTime(time.Duration(options.Timeout/2) * time.Second)
+	client.SetRetryMaxWaitTime(time.Duration(options.Timeout) * time.Second)
 	if proxy != "" {
 		client.SetProxy(proxy)
 	}
@@ -107,10 +166,21 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		break
 	}
 
+	// in case we want to get redirect stuff
+	if res.StatusCode != 0 {
+		return res, nil
+	}
+
 	if err != nil || resp == nil {
 		return libs.Response{}, err
 	}
 
+	if options.Debug {
+		libs.DebugF("[Sent] for %v", url)
+
+	}
+
+	client.SetCloseConnection(true)
 	return ParseResponse(*resp), nil
 }
 

@@ -134,7 +134,8 @@ func JoinURL(base string, child string) string {
 // ParseRequest parse request part in YAML signature file
 func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 	var Reqs []libs.Request
-	if sign.Type == "list" && len(sign.Variables) > 0 {
+
+	if sign.Type == "list" || len(sign.Variables) > 0 {
 		realVariables := ParseVariable(sign)
 		// Replace template with variable
 		for _, variable := range realVariables {
@@ -213,8 +214,6 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 			Reqs = append(Reqs, reqs...)
 		}
 	}
-	// fmt.Println(Reqs)
-
 	return Reqs
 }
 

@@ -110,111 +110,110 @@ func runScan(cmd *cobra.Command, args []string) error {
 		fmt.Printf("\n")
 	}
 
-	// run background detector
-	go func() {
-		for {
-			core.Background(options)
-		}
-	}()
-
-	// gen request for sending
-	var recQueue []libs.Record
-	for _, signFile := range signs {
-		for _, url := range urls {
-			sign, err := core.ParseSign(signFile)
-			if err != nil {
-				log.Fatalf("Error parsing YAML sign %v", signFile)
-			}
-
-			sign.Target = core.ParseTarget(url)
-			sign.Target = core.MoreVariables(sign.Target, options)
-			var originReq libs.Request
-			if sign.Origin.Method != "" {
-				originReq = core.ParseRequest(sign.Origin, sign)[0]
-			}
-
-			// start to send stuff
-			for _, req := range sign.Requests {
-				realReqs := core.ParseRequest(req, sign)
-				if len(realReqs) > 0 {
-					for _, realReq := range realReqs {
-						var realRec libs.Record
-						realRec.Request = realReq
-						realRec.Request.Target = sign.Target
-						realRec.OriginReq = originReq
-						realRec.Sign = sign
-						realRec.ScanID = scanID
-
-						recQueue = append(recQueue, realRec)
-					}
-				}
-			}
-		}
-	}
-
-	if len(recQueue) == 0 {
-		libs.ErrorF("No Request Generated")
-		os.Exit(1)
-	}
-
-	/* Start sending request here */
 	var wg sync.WaitGroup
-	jobs := make(chan libs.Record, options.Concurrency)
-	for i := 0; i < options.Concurrency; i++ {
-		wg.Add(1)
+	job := make(chan string, len(urls))
+
+	// only reading signature once
+	var realSigns []libs.Signature
+	for _, signFile := range signs {
+		if options.Debug {
+			libs.InforF("Processing for %v", signFile)
+		}
+		sign, err := core.ParseSign(signFile)
+		if err != nil {
+			log.Fatalf("Error parsing YAML sign %v", signFile)
+		}
+		realSigns = append(realSigns, sign)
+	}
+
+	// run background detector
+	if options.NoBackGround {
 		go func() {
-			defer wg.Done()
-			for realRec := range jobs {
-				originRes, err := core.JustSend(options, realRec.OriginReq)
-				if err == nil {
-					// continue
-					realRec.OriginRes = originRes
-					if options.Verbose && (realRec.OriginReq.Method != "") {
-						fmt.Printf("[Sent-Origin] %v %v \n", realRec.OriginReq.Method, realRec.OriginReq.URL)
-					}
-				}
-
-				// run middleware here
-				req := realRec.Request
-				if !funk.IsEmpty(req.Middlewares) {
-					core.MiddleWare(&realRec, options)
-				}
-
-				// if middleware return the response skip sending it
-				if realRec.Response.StatusCode == 0 {
-					res, err := core.JustSend(options, req)
-					if err != nil {
-						continue
-					}
-					realRec.Request = req
-					realRec.Response = res
-				}
-				// print some log
-				if options.Verbose && realRec.Request.Method != "" {
-					fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
-				}
-				if options.Debug {
-					if realRec.Request.MiddlewareOutput != "" {
-						fmt.Println(realRec.Request.MiddlewareOutput)
-					}
-				}
-				// resolve detection this time because we need parse something in the variable
-				target := core.ParseTarget(realRec.Request.URL)
-				target = core.MoreVariables(target, options)
-				realRec.Request.Detections = core.ResolveDetection(realRec.Request.Detections, target)
-				// start to run detection
-				core.Analyze(options, &realRec)
-
+			for {
+				core.Background(options)
 			}
 		}()
 	}
 
-	// job
+	/* Start main stuff here */
+	for i := 0; i < options.Concurrency; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for url := range job {
+				// prepare request with signature
+				for _, sign := range realSigns {
+					sign.Target = core.ParseTarget(url)
+					sign.Target = core.MoreVariables(sign.Target, options)
+					var originReq libs.Request
+					var originRes libs.Response
+					if sign.Origin.Method != "" {
+						originReq = core.ParseRequest(sign.Origin, sign)[0]
+						originRes, err = core.JustSend(options, originReq)
+						if err == nil {
+							if options.Verbose && (originReq.Method != "") {
+								fmt.Printf("[Sent-Origin] %v %v \n", originReq.Method, originReq.URL)
+							}
+						}
+					}
+
+					// start to send stuff
+					for _, req := range sign.Requests {
+						realReqs := core.ParseRequest(req, sign)
+						if len(realReqs) > 0 {
+							for _, realReq := range realReqs {
+								var realRec libs.Record
+								realRec.Request = realReq
+								realRec.Request.Target = sign.Target
+								realRec.OriginReq = originReq
+								realRec.OriginRes = originRes
+								realRec.Sign = sign
+								realRec.ScanID = scanID
+
+								// run middleware here
+								req := realRec.Request
+								if !funk.IsEmpty(req.Middlewares) {
+									core.MiddleWare(&realRec, options)
+								}
+
+								// if middleware return the response skip sending it
+								if realRec.Response.StatusCode == 0 {
+									res, err := core.JustSend(options, req)
+									if err != nil {
+										continue
+									}
+									realRec.Request = req
+									realRec.Response = res
+								}
+								// print some log
+								if options.Verbose && realRec.Request.Method != "" {
+									fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
+								}
+								if options.Debug {
+									if realRec.Request.MiddlewareOutput != "" {
+										fmt.Println(realRec.Request.MiddlewareOutput)
+									}
+								}
+								// resolve detection this time because we need parse something in the variable
+								target := core.ParseTarget(realRec.Request.URL)
+								target = core.MoreVariables(target, options)
+								realRec.Request.Detections = core.ResolveDetection(realRec.Request.Detections, target)
+								// start to run detection
+								core.Analyze(options, &realRec)
+							}
+						}
+					}
+
+				}
+			}
+		}()
+	}
+
 	go func() {
-		for _, rec := range recQueue {
-			jobs <- rec
+		for _, url := range urls {
+			job <- url
 		}
-		close(jobs)
+		close(job)
 	}()
 	wg.Wait()
 

@@ -110,7 +110,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 		fmt.Printf("\n")
 	}
 
-	var sg sync.WaitGroup
 	var wg sync.WaitGroup
 	records := make(chan libs.Record)
 
@@ -118,7 +117,10 @@ func runScan(cmd *cobra.Command, args []string) error {
 		URL  string
 		Sign libs.Signature
 	}
+	// var jobs []map[string]libs.Signature
 	var jobs []Job
+	// only reading signature once
+	// var realSigns []libs.Signature
 	for _, url := range urls {
 		for _, signFile := range signs {
 			sign, err := core.ParseSign(signFile)
@@ -131,10 +133,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if options.Debug {
-		libs.DebugF("Number of jobs: %v", len(jobs))
-	}
-
 	// run background detector
 	if options.NoBackGround {
 		go func() {
@@ -145,13 +143,12 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	/* Start main stuff here */
-	sg.Add(1)
 	go func() {
-		defer sg.Done()
 		// prepare request with signature
 		for _, job := range jobs {
 			sign := job.Sign
 			url := job.URL
+			// for _, sign := range realSigns {
 			sign.Target = core.ParseTarget(url)
 			sign.Target = core.MoreVariables(sign.Target, options)
 			var originReq libs.Request
@@ -165,6 +162,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 					}
 				}
 			}
+
 			// start to send stuff
 			for _, req := range sign.Requests {
 				realReqs := core.ParseRequest(req, sign)
@@ -189,47 +187,41 @@ func runScan(cmd *cobra.Command, args []string) error {
 	for i := 0; i < options.Concurrency; i++ {
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
-			for realRec := range records {
-				// run middleware here
-				req := realRec.Request
-				if !funk.IsEmpty(req.Middlewares) {
-					core.MiddleWare(&realRec, options)
-				}
-
-				// if middleware return the response skip sending it
-				if realRec.Response.StatusCode == 0 {
-					res, err := core.JustSend(options, req)
-					if err != nil {
-						continue
-					}
-					realRec.Request = req
-					realRec.Response = res
-				}
-				// print some log
-				if options.Verbose && realRec.Request.Method != "" {
-					fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
-				}
-				if options.Debug {
-					if realRec.Request.MiddlewareOutput != "" {
-						fmt.Println(realRec.Request.MiddlewareOutput)
-					}
-				}
-				// resolve detection this time because we need parse something in the variable
-				target := core.ParseTarget(realRec.Request.URL)
-				target = core.MoreVariables(target, options)
-				realRec.Request.Detections = core.ResolveDetection(realRec.Request.Detections, target)
-				// start to run detection
-				core.Analyze(options, &realRec)
+			realRec := <-records
+			// run middleware here
+			req := realRec.Request
+			if !funk.IsEmpty(req.Middlewares) {
+				core.MiddleWare(&realRec, options)
 			}
 
+			// if middleware return the response skip sending it
+			if realRec.Response.StatusCode == 0 {
+				res, _ := core.JustSend(options, req)
+				realRec.Request = req
+				realRec.Response = res
+			}
+			// print some log
+			if options.Verbose && realRec.Request.Method != "" {
+				fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
+			}
+			if options.Debug {
+				if realRec.Request.MiddlewareOutput != "" {
+					fmt.Println(realRec.Request.MiddlewareOutput)
+				}
+			}
+			// resolve detection this time because we need parse something in the variable
+			target := core.ParseTarget(realRec.Request.URL)
+			target = core.MoreVariables(target, options)
+			realRec.Request.Detections = core.ResolveDetection(realRec.Request.Detections, target)
+			// start to run detection
+			core.Analyze(options, &realRec)
+
+			wg.Done()
 		}()
 
 	}
 
-	sg.Wait()
 	wg.Wait()
-	close(records)
 
 	return nil
 }

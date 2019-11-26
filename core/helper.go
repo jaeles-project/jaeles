@@ -231,6 +231,9 @@ func SingleSign(signName string) []string {
 	// get more sign nature
 	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
 		asbPath, _ := filepath.Abs(signName)
+		if strings.Contains(asbPath, "~") {
+			asbPath, _ = homedir.Expand(asbPath)
+		}
 		baseSelect := filepath.Base(signName)
 		rawSigns := GetFileNames(filepath.Dir(asbPath), "yaml")
 		for _, signFile := range rawSigns {

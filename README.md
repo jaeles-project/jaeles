@@ -31,6 +31,7 @@ jaeles scan -u http://example.com
 jaeles scan -s signatures/common/phpdebug.yaml -U /tmp/list_of_urls.txt
 
 jaeles scan --retry 3 --verbose -s "signatures/cves/jira-*" -U /tmp/list_of_urls.txt
+jaeles scan --retry 3 --verbose -s "signatures/fuzz/.*" -U /tmp/list_of_urls.txt
 
 jaeles --verbose server -s sqli
 ```

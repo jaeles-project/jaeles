@@ -49,9 +49,14 @@ Detect Jira SSRF CVE-2019-8451
 
 Plugin can be found [here](https://github.com/jaeles-project/jaeles-plugins/blob/master/jaeles-burp.py) and Video Guide [here](https://youtu.be/1lxsYhfTq3M)
 
+## Supporting me
+
+[![Backers](https://opencollective.com/jaeles-project/backers.svg?width=890)](https://opencollective.com/jaeles-project#backers)
+
 ## Contribute
 
 If you have some new idea about this project, issue, feedback or found some valuable tool feel free to open an issue for just DM me via @j3ssiejjj.
+Feel free to submit new signature to this [repo](https://github.com/jaeles-project/jaeles-signatures).
 
 ### Credits
 

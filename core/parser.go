@@ -65,6 +65,9 @@ func ParseTarget(raw string) map[string]string {
 	var hostname string
 	var query string
 	port := u.Port()
+	// var domain string
+	domain := u.Hostname()
+
 	query = u.RawQuery
 	if u.Port() == "" {
 		if strings.Contains(u.Scheme, "https") {
@@ -85,17 +88,21 @@ func ParseTarget(raw string) map[string]string {
 
 	target["Scheme"] = u.Scheme
 	target["Path"] = u.Path
+	target["Domain"] = domain
 	target["Host"] = hostname
 	target["Port"] = port
-	target["BaseURL"] = fmt.Sprintf("%v://%v", target["Scheme"], target["Host"])
 	target["RawQuery"] = query
 
-	if target["RawQuery"] != "" {
+	if (target["RawQuery"] != "") && (port == "80" || port == "443") {
 		target["URL"] = fmt.Sprintf("%v://%v%v?%v", target["Scheme"], target["Host"], target["Path"], target["RawQuery"])
+	} else if port != "80" && port != "443" {
+		target["URL"] = fmt.Sprintf("%v://%v:%v%v?%v", target["Scheme"], target["Domain"], target["Port"], target["Path"], target["RawQuery"])
 	} else {
 		target["URL"] = fmt.Sprintf("%v://%v%v", target["Scheme"], target["Host"], target["Path"])
 	}
 
+	uu, _ := url.Parse(raw)
+	target["BaseURL"] = fmt.Sprintf("%v://%v", uu.Scheme, uu.Host)
 	target["Extension"] = filepath.Ext(target["BaseURL"])
 
 	ssrf := database.GetDefaultBurpCollab()

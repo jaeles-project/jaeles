@@ -118,7 +118,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 		URL  string
 		Sign libs.Signature
 	}
-	jobs := make(chan Job, options.Concurrency)
+	jobs := make(chan Job, options.Concurrency*len(urls)*len(signs))
 	// only reading signature once
 	for _, url := range urls {
 		for _, signFile := range signs {
@@ -174,6 +174,9 @@ func runScan(cmd *cobra.Command, args []string) error {
 					// start to send stuff
 					for _, req := range sign.Requests {
 						realReqs := core.ParseRequest(req, sign)
+						if options.Debug {
+							libs.DebugF("Request Generated %v ", len(realReqs))
+						}
 						if len(realReqs) > 0 {
 							for _, realReq := range realReqs {
 								var realRec libs.Record

@@ -269,8 +269,8 @@ func GetHeaders(req libs.Request) map[string]string {
 	}
 
 	rand.Seed(time.Now().Unix())
-	// append user agent in case you didn't set
-	if headers["User-Agent"] == "" && req.UseTemplateHeader {
+	// append user agent in case you didn't set user-agent
+	if headers["User-Agent"] == "" {
 		rand.Seed(time.Now().Unix())
 		headers["User-Agent"] = UserAgens[rand.Intn(len(UserAgens))]
 	}

@@ -54,6 +54,16 @@ Plugin can be found [here](https://github.com/jaeles-project/jaeles-plugins/blob
 
 [![Backers](https://opencollective.com/jaeles-project/backers.svg?width=890)](https://opencollective.com/jaeles-project#backers)
 
+### Planned Features
+
+* Adding more signatures.
+* Adding more input sources.
+* Adding more APIs to get access to more properties of the request.
+* Adding proxy plugins to directly receive input from browser of http client.
+* Adding passive signature for passive checking each request.
+* Adding more action on Web UI.
+* Integrate with many other tools.
+
 ## Contribute
 
 If you have some new idea about this project, issue, feedback or found some valuable tool feel free to open an issue for just DM me via @j3ssiejjj.
@@ -61,9 +71,12 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 
 ### Credits
 
+* Special thanks to [chaitin](https://github.com/chaitin) team for sharing ideas to me for build the architecture.
+
 * React components is powered by [Carbon](https://www.carbondesignsystem.com/) and [carbon-tutorial](https://github.com/carbon-design-system/carbon-tutorial).
 
 * Awesomes artworks are powered by [Freepik](http://freepik.com) at [flaticon.com](http://flaticon.com).
+
 
 ## License
 

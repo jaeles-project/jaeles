@@ -71,7 +71,7 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 
 ### Credits
 
-* Special thanks to [chaitin](https://github.com/chaitin) team for sharing ideas to me for build the architecture.
+* Special thanks to [chaitin](https://github.com/chaitin/xray) team for sharing ideas to me for build the architecture.
 
 * React components is powered by [Carbon](https://www.carbondesignsystem.com/) and [carbon-tutorial](https://github.com/carbon-design-system/carbon-tutorial).
 

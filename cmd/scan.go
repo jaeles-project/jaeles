@@ -119,7 +119,10 @@ func runScan(cmd *cobra.Command, args []string) error {
 		Sign libs.Signature
 	}
 	jobs := make(chan Job, options.Concurrency*len(urls)*len(signs))
+	var wg sync.WaitGroup
+
 	// only reading signature once
+	wg.Add(1)
 	for _, url := range urls {
 		for _, signFile := range signs {
 			sign, err := core.ParseSign(signFile)
@@ -133,6 +136,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 			jobs <- realjob
 		}
 	}
+	wg.Done()
 	if options.Debug {
 		libs.DebugF("New jobs: %v ", len(jobs))
 	}
@@ -147,7 +151,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// /* Start main stuff here */
-	var wg sync.WaitGroup
 	for i := 0; i < options.Concurrency; i++ {
 		wg.Add(1)
 		go func() {

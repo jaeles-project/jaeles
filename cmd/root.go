@@ -48,7 +48,8 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&options.ScanID, "scanID", "", "Scan ID")
 
 	RootCmd.PersistentFlags().StringVar(&options.Proxy, "proxy", "", "proxy")
-	RootCmd.PersistentFlags().IntVar(&options.Timeout, "timeout", 20, "timeout")
+	RootCmd.PersistentFlags().IntVar(&options.Timeout, "timeout", 20, "HTTP timeout")
+	RootCmd.PersistentFlags().IntVar(&options.Delay, "delay", 100, "Milliseconds delay for polling new job")
 	RootCmd.PersistentFlags().IntVar(&options.Retry, "retry", 2, "retry")
 
 	RootCmd.PersistentFlags().BoolVar(&options.SaveRaw, "save-raw", false, "save raw request")

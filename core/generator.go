@@ -19,10 +19,9 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 	realPayloads := ParsePayloads(sign)
 
 	for _, payload := range realPayloads {
-		// replace payloads in detections
+		// prepare something so we can access variable in generator string too
 		target := ParseTarget(req.URL)
 		target["payload"] = payload
-		// access variable in generator string too
 		realVariables := ParseVariable(sign)
 		if len(realVariables) > 0 {
 			for _, variable := range realVariables {
@@ -39,7 +38,7 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 				reqs = append(reqs, req)
 				continue
 			}
-			// resolve detection this time because we need parse something in the variable
+			// resolve detection this time because we may need parse something in the variable and original
 			req.Detections = ResolveDetection(req.Detections, target)
 			if req.Method == "" {
 				req.Method = "GET"

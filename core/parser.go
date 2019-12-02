@@ -212,94 +212,15 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 	// only take URL as a input from cli
 	if sign.Type == "fuzz" {
 		var record libs.Record
-		record.Request = req
 		target := sign.Target
 		record.OriginReq.URL = target["URL"]
-		// fmt.Println(record)
+		record.Request = req
 		reqs := ParseFuzzRequest(record, sign)
 		if len(reqs) > 0 {
 			Reqs = append(Reqs, reqs...)
 		}
 	}
 	return Reqs
-}
-
-// ParseVariable parse variable in YAML signature file
-func ParseVariable(sign libs.Signature) []map[string]string {
-	var realVariables []map[string]string
-	rawVariables := make(map[string][]string)
-	// reading variable
-	for _, variable := range sign.Variables {
-		for key, value := range variable {
-			// strip out blank line
-			if strings.Trim(value, " ") == "" {
-				continue
-			}
-
-			// variable as a file
-			if strings.Contains(value, "/") {
-				rawVariables[key] = ReadingFile(value)
-			}
-
-			/*
-				- variable: [google.com,example.com]
-			*/
-			// variable as a list
-			if strings.HasPrefix(value, "[") && strings.Contains(value, ",") {
-				rawVar := strings.Trim(value[1:len(value)-1], " ")
-				rawVariables[key] = strings.Split(rawVar, ",")
-				continue
-			}
-			/*
-				- variable: |
-					google.com
-					example.com
-			*/
-			if strings.Contains(value, "\n") {
-				value = strings.Trim(value, "\n\n")
-				rawVariables[key] = strings.Split(value, "\n")
-				continue
-			}
-		}
-	}
-
-	if len(rawVariables) == 1 {
-		for k, v := range rawVariables {
-			for _, value := range v {
-				variable := make(map[string]string)
-				variable[k] = value
-				realVariables = append(realVariables, variable)
-			}
-		}
-		return realVariables
-	}
-
-	// select max number of list
-	var maxLength int
-	for _, v := range rawVariables {
-		if maxLength < len(v) {
-			maxLength = len(v)
-		}
-	}
-
-	// make all variable to same length
-	Variables := make(map[string][]string)
-	for k, v := range rawVariables {
-		Variables[k] = ExpandLength(v, maxLength)
-	}
-
-	// join all together to make list of map variable
-	for i := 0; i < maxLength; i++ {
-		for j := 0; j < maxLength; j++ {
-			variable := make(map[string]string)
-			for k, v := range Variables {
-				variable[k] = v[j]
-			}
-			realVariables = append(realVariables, variable)
-		}
-	}
-
-	return realVariables
 }
 
 // ParseFuzzRequest parse request recive in API server
@@ -317,45 +238,36 @@ func ParseFuzzRequest(record libs.Record, sign libs.Signature) []libs.Request {
 
 // ParsePayloads parse payload to replace
 func ParsePayloads(sign libs.Signature) []string {
-	payloads := []string{}
-	payloads = append(payloads, sign.Payloads...)
-	if len(sign.PayloadLists) > 0 {
-		for _, payloadFile := range sign.PayloadLists {
-			realPayloads := ReadingFile(payloadFile)
-			if len(realPayloads) > 0 {
-				payloads = append(payloads, realPayloads...)
-			}
-		}
-	} else {
-		payloads = append(payloads, "")
-	}
-
-	for index, value := range payloads {
-		// strip out blank line
+	rawPayloads := []string{}
+	rawPayloads = append(rawPayloads, sign.Payloads...)
+	// strip out blank line
+	for index, value := range rawPayloads {
 		if strings.Trim(value, " ") == "" {
-			payloads = append(payloads[:index], payloads[index+1:]...)
+			rawPayloads = append(rawPayloads[:index], rawPayloads[index+1:]...)
 		}
 	}
 
-	// replace payload with variables
 	var realPayloads []string
+	// check if use variables or not
 	if len(sign.Variables) > 0 {
 		realVariables := ParseVariable(sign)
+		// replace payload with variables
 		if len(realVariables) > 0 {
 			for _, variable := range realVariables {
-				target := make(map[string]string)
-				// replace here
-				for k, v := range variable {
-					target[k] = v
+				for _, payload := range rawPayloads {
+					target := make(map[string]string)
+					// replace here
+					for k, v := range variable {
+						target[k] = v
+					}
+					payload := ResolveVariable(payload, target)
+					realPayloads = append(realPayloads, payload)
 				}
-				for _, payload := range payloads {
-					realPayloads = append(realPayloads, ResolveVariable(payload, target))
-				}
-
 			}
 		}
 	} else {
-		for _, payload := range payloads {
+		// just append the payload
+		for _, payload := range rawPayloads {
 			realPayloads = append(realPayloads, ResolveVariable(payload, sign.Target))
 		}
 	}

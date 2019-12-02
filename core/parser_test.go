@@ -5,14 +5,14 @@ import (
 	"testing"
 )
 
-func TestParseURL(t *testing.T) {
-	raw := `http://example.com:19999/`
-	target := ParseTarget(raw)
-	fmt.Println(target)
-	if len(target) == 0 {
-		t.Errorf("Error parsing Burp")
-	}
-}
+// func TestParseURL(t *testing.T) {
+// 	raw := `http://example.com:19999/`
+// 	target := ParseTarget(raw)
+// 	fmt.Println(target)
+// 	if len(target) == 0 {
+// 		t.Errorf("Error parsing Burp")
+// 	}
+// }
 
 func TestParseBurpRequest(t *testing.T) {
 	raw := `POST /search.php?test=query HTTP/1.1

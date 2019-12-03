@@ -15,27 +15,24 @@ import (
 // }
 
 func TestParseBurpRequest(t *testing.T) {
-	raw := `POST /search.php?test=query HTTP/1.1
-Host: {{.Host}}
-Content-Length: 25
-Cache-Control: max-age=0
-Origin: http://{{.Host}}
-Upgrade-Insecure-Requests: 1
-Content-Type: application/x-www-form-urlencoded
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3927.0 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3
-Referer: http://{{.Host}}/
+	raw := `GET /test HTTP/1.1
+Host: cors-test.appspot.com
+Connection: close
+Accept: */*
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3983.0 Safari/537.36
+Sec-Fetch-Site: cross-site
+Sec-Fetch-Mode: cors
+Referer: https://a.appspot.com/
 Accept-Encoding: gzip, deflate
 Accept-Language: en-US,en;q=0.9
-Connection: close
 
-searchFor=123&goButton=go`
+`
 
 	req := ParseBurpRequest(raw)
 	fmt.Println(req.URL)
 	fmt.Println(req.Host)
 	fmt.Println(req.Path)
-	if req.Method != "POST" {
+	if req.Method == "" {
 		t.Errorf("Error parsing Burp")
 	}
 }

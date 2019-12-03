@@ -175,11 +175,6 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		return libs.Response{}, err
 	}
 
-	if options.Debug {
-		libs.DebugF("[Sent] for %v", url)
-
-	}
-
 	client.SetCloseConnection(true)
 	return ParseResponse(*resp), nil
 }

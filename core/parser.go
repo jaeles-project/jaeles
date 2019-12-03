@@ -206,15 +206,24 @@ func ParseRequest(req libs.Request, sign libs.Signature) []libs.Request {
 			Req.Middlewares = ResolveDetection(req.Middlewares, target)
 			Reqs = append(Reqs, Req)
 		}
-
 	}
 
 	// only take URL as a input from cli
 	if sign.Type == "fuzz" {
-		var record libs.Record
 		target := sign.Target
+		var record libs.Record
+		var Req libs.Request
+		// incase we have -r options
+		if req.Raw != "" {
+			rawReq := ResolveVariable(req.Raw, target)
+			Req = ParseBurpRequest(rawReq)
+			Req.Generators = req.Generators
+			Req.Detections = req.Detections
+		} else {
+			Req = req
+		}
 		record.OriginReq.URL = target["URL"]
-		record.Request = req
+		record.Request = Req
 		reqs := ParseFuzzRequest(record, sign)
 		if len(reqs) > 0 {
 			Reqs = append(Reqs, reqs...)

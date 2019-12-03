@@ -38,13 +38,17 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 				reqs = append(reqs, req)
 				continue
 			}
-			// resolve detection this time because we may need parse something in the variable and original
-			req.Detections = ResolveDetection(req.Detections, target)
+
 			if req.Method == "" {
 				req.Method = "GET"
 			}
 			injectedReqs := RunGenerator(req, payload, genString)
-			reqs = append(reqs, injectedReqs...)
+
+			for _, injectedReq := range injectedReqs {
+				// resolve detection this time because we may need parse something in the variable and original
+				injectedReq.Detections = ResolveDetection(req.Detections, injectedReq.Target)
+				reqs = append(reqs, injectedReq)
+			}
 		}
 	}
 
@@ -142,6 +146,7 @@ func Method(req libs.Request, arguments []otto.Value) []libs.Request {
 	for _, method := range methods {
 		injectedReq := req
 		injectedReq.Method = method
+		injectedReq.Target["original"] = req.Method
 		reqs = append(reqs, injectedReq)
 	}
 
@@ -175,6 +180,7 @@ func Query(req libs.Request, payload string, arguments []otto.Value) []libs.Requ
 		uu.RawQuery = query.Encode()
 
 		injectedReq.URL = uu.String()
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 		return reqs
 	}
@@ -193,6 +199,7 @@ func Query(req libs.Request, payload string, arguments []otto.Value) []libs.Requ
 		uu.RawQuery = query.Encode()
 
 		injectedReq.URL = uu.String()
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 	}
 	// return rawURL
@@ -231,6 +238,7 @@ func Body(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 						jsonBody, _ := gabs.ParseJSON([]byte(rawBody))
 						jsonBody.Set(newValue, key)
 						injectedReq.Body = jsonBody.String()
+						injectedReq.Target = target
 						reqs = append(reqs, injectedReq)
 
 					} else {
@@ -243,6 +251,7 @@ func Body(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 								jsonBody, _ := gabs.ParseJSON([]byte(rawBody))
 								jsonBody.Set(newValue, key)
 								injectedReq.Body = jsonBody.String()
+								injectedReq.Target = target
 								reqs = append(reqs, injectedReq)
 							} else {
 								// depth 3
@@ -254,6 +263,7 @@ func Body(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 										jsonBody, _ := gabs.ParseJSON([]byte(rawBody))
 										jsonBody.Set(newValue, key)
 										injectedReq.Body = jsonBody.String()
+										injectedReq.Target = target
 										reqs = append(reqs, injectedReq)
 									}
 								}
@@ -275,12 +285,14 @@ func Body(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 						newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
 						newParams[index] = fmt.Sprintf("%v=%v", k[0], newValue)
 						injectedReq.Body = strings.Join(newParams[:], "&")
+						injectedReq.Target = target
 						reqs = append(reqs, injectedReq)
 					} else if len(k) == 1 {
 						target["original"] = k[0]
 						newValue := Encoder(req.Encoding, ResolveVariable(injectedString, target))
 						newParams[index] = fmt.Sprintf("%v=%v", k[0], newValue)
 						injectedReq.Body = strings.Join(newParams[:], "&")
+						injectedReq.Target = target
 						reqs = append(reqs, injectedReq)
 					}
 				}
@@ -319,6 +331,7 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 		newPaths := Paths
 		newPaths[len(newPaths)-1] = strings.Replace(Paths[len(Paths)-1], target["original"], newValue, -1)
 		injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 		// only replace the last path
 	} else if paramName == "last" || (paramName == "ext" && ext == "") {
@@ -341,7 +354,7 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 		} else {
 			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
 		}
-
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 		// specific position
 	} else if paramName != "*" && len(paramName) == 1 {
@@ -354,6 +367,7 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 			newPaths := Paths
 			newPaths[position] = newValue
 			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
+			injectedReq.Target = target
 			reqs = append(reqs, injectedReq)
 		}
 	} else if paramName == "*" || strings.Contains(paramName, ",") {
@@ -384,6 +398,7 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 			newPaths := Paths
 			newPaths[injectPos] = newValue
 			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
+			injectedReq.Target = target
 			reqs = append(reqs, injectedReq)
 		}
 
@@ -456,6 +471,7 @@ func Cookie(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 			}
 			injectedReq := req
 			injectedReq.Headers = newHeaders
+			injectedReq.Target = target
 			reqs = append(reqs, injectedReq)
 			return reqs
 		}
@@ -495,6 +511,7 @@ func Cookie(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 		}
 		injectedReq := req
 		injectedReq.Headers = newHeaders
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 
 	} else {
@@ -514,6 +531,7 @@ func Cookie(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 		newHeaders := req.Headers
 		newHeaders = append(newHeaders, head)
 		injectedReq.Headers = newHeaders
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 	}
 
@@ -540,7 +558,6 @@ func Header(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 			isExistHeader = false
 		}
 	}
-
 	if isExistHeader == false {
 		newHeaders := req.Headers
 		target["original"] = ""
@@ -550,6 +567,7 @@ func Header(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 		}
 		newHeaders = append(newHeaders, head)
 		injectedReq.Headers = newHeaders
+		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 	} else {
 		var newHeaders []map[string]string
@@ -568,6 +586,7 @@ func Header(req libs.Request, payload string, arguments []otto.Value) []libs.Req
 				}
 			}
 		}
+		injectedReq.Target = target
 		injectedReq.Headers = newHeaders
 		reqs = append(reqs, injectedReq)
 	}

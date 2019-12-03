@@ -33,6 +33,7 @@ func init() {
 	scanCmd.Flags().String("ssrf", "", "Fill your BurpCollab or any Out of Band host")
 	scanCmd.Flags().StringP("urls", "U", "", "URLs file of target")
 	scanCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
+	scanCmd.Flags().StringP("raw", "r", "", "Raw request from Burp for origin")
 	RootCmd.AddCommand(scanCmd)
 
 }
@@ -144,6 +145,15 @@ func runScan(cmd *cobra.Command, args []string) error {
 		libs.DebugF("New jobs: %v ", len(jobs))
 	}
 
+	// get origin request from a file
+	raw, _ := cmd.Flags().GetString("raw")
+	var OriginRaw libs.Request
+	var RawRequest string
+	if raw != "" {
+		RawRequest = core.GetFileContent(raw)
+		OriginRaw = core.ParseBurpRequest(RawRequest)
+	}
+
 	// run background detector
 	if !options.NoBackGround {
 		go func() {
@@ -166,10 +176,18 @@ func runScan(cmd *cobra.Command, args []string) error {
 						url := job.URL
 						sign.Target = core.ParseTarget(url)
 						sign.Target = core.MoreVariables(sign.Target, options)
+						if OriginRaw.Raw != "" {
+							sign.Origin = OriginRaw
+						}
 						var originReq libs.Request
 						var originRes libs.Response
 						if sign.Origin.Method != "" {
-							originReq = core.ParseRequest(sign.Origin, sign)[0]
+							if sign.Origin.Raw == "" {
+								originReq = core.ParseRequest(sign.Origin, sign)[0]
+							} else {
+								originReq = sign.Origin
+							}
+
 							originRes, err = core.JustSend(options, originReq)
 							if err == nil {
 								if options.Verbose && (originReq.Method != "") {
@@ -180,6 +198,9 @@ func runScan(cmd *cobra.Command, args []string) error {
 
 						// start to send stuff
 						for _, req := range sign.Requests {
+							if RawRequest != "" {
+								req.Raw = RawRequest
+							}
 							realReqs := core.ParseRequest(req, sign)
 							if options.Debug {
 								libs.DebugF("Request Generated %v ", len(realReqs))

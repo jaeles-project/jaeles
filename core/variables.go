@@ -1,8 +1,10 @@
 package core
 
 import (
+	"encoding/base64"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -151,6 +153,46 @@ func RunVariables(variableString string) []string {
 		return otto.Value{}
 	})
 
+	vm.Set("SplitLines", func(call otto.FunctionCall) otto.Value {
+		data := call.Argument(0).String()
+		extra = append(extra, SplitLines(data)...)
+		return otto.Value{}
+	})
+
+	vm.Set("Base64Encode", func(call otto.FunctionCall) otto.Value {
+		data := call.Argument(0).String()
+		extra = append(extra, Base64Encode(data))
+		return otto.Value{}
+	})
+
+	vm.Set("Base64EncodeByLines", func(call otto.FunctionCall) otto.Value {
+		data := SplitLines(call.Argument(0).String())
+		if len(data) == 0 {
+			return otto.Value{}
+		}
+		for _, line := range data {
+			extra = append(extra, Base64Encode(line))
+		}
+		return otto.Value{}
+	})
+
+	vm.Set("URLEncode", func(call otto.FunctionCall) otto.Value {
+		data := call.Argument(0).String()
+		extra = append(extra, URLEncode(data))
+		return otto.Value{}
+	})
+
+	vm.Set("URLEncodeByLines", func(call otto.FunctionCall) otto.Value {
+		data := SplitLines(call.Argument(0).String())
+		if len(data) == 0 {
+			return otto.Value{}
+		}
+		for _, line := range data {
+			extra = append(extra, URLEncode(line))
+		}
+		return otto.Value{}
+	})
+
 	vm.Run(variableString)
 	return extra
 }
@@ -189,4 +231,23 @@ func InputCmd(Cmd string) string {
 	}
 	out, _ := exec.Command(command[0], command[1:]...).CombinedOutput()
 	return strings.TrimSpace(string(out))
+}
+
+// SplitLines just split new Line
+func SplitLines(raw string) []string {
+	var result []string
+	if strings.Contains(raw, "\n") {
+		result = strings.Split(raw, "\n")
+	}
+	return result
+}
+
+// Base64Encode just Base64 Encode
+func Base64Encode(raw string) string {
+	return base64.StdEncoding.EncodeToString([]byte(raw))
+}
+
+// URLEncode just URL Encode
+func URLEncode(raw string) string {
+	return url.QueryEscape(raw)
 }

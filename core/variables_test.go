@@ -59,3 +59,25 @@ func TestMultipleVariables(t *testing.T) {
 		t.Errorf("Error RandomString")
 	}
 }
+
+func TestEncoding(t *testing.T) {
+	varString := `URLEncode(" das da")`
+	data := RunVariables(varString)
+	fmt.Println(data)
+	if len(data) <= 0 {
+		t.Errorf("Error RandomString")
+	}
+	varString = `Base64Encode("das da c")`
+	data = RunVariables(varString)
+	fmt.Println(data)
+	if len(data) <= 0 {
+		t.Errorf("Error RandomString")
+	}
+
+	varString = `Base64EncodeByLines('das\nda\nc')`
+	data = RunVariables(varString)
+	fmt.Println(data)
+	if len(data) <= 0 {
+		t.Errorf("Error RandomString")
+	}
+}

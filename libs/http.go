@@ -18,6 +18,7 @@ type Record struct {
 // Request all information about request
 type Request struct {
 	Scheme            string
+	Repeat            int
 	Host              string
 	Port              string
 	Path              string

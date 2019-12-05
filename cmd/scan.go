@@ -126,15 +126,12 @@ func runScan(cmd *cobra.Command, args []string) error {
 
 	// only reading signature once
 	wg.Add(1)
-	for _, url := range urls {
-		for _, signFile := range signs {
-			sign, err := core.ParseSign(signFile)
-			if err != nil {
-				log.Fatalf("Error parsing YAML sign %v", signFile)
-			}
-			if options.Debug {
-				libs.DebugF("[Proccessing] %v %v ", url, signFile)
-			}
+	for _, signFile := range signs {
+		sign, err := core.ParseSign(signFile)
+		if err != nil {
+			log.Fatalf("Error parsing YAML sign %v", signFile)
+		}
+		for _, url := range urls {
 			realjob := Job{url, sign}
 			jobs <- realjob
 		}
@@ -202,6 +199,11 @@ func runScan(cmd *cobra.Command, args []string) error {
 								req.Raw = RawRequest
 							}
 							realReqs := core.ParseRequest(req, sign)
+							if req.Repeat > 0 {
+								for i := 0; i < req.Repeat; i++ {
+									realReqs = append(realReqs, realReqs...)
+								}
+							}
 							if options.Debug {
 								libs.DebugF("Request Generated %v ", len(realReqs))
 							}

@@ -40,6 +40,30 @@ func GetFileContent(filename string) string {
 // ReadingFile Reading file and return content as []string
 func ReadingFile(filename string) []string {
 	var result []string
+	if strings.HasPrefix(filename, "~") {
+		filename, _ = homedir.Expand(filename)
+	}
+	file, err := os.Open(filename)
+	defer file.Close()
+	if err != nil {
+		return result
+	}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		val := scanner.Text()
+		result = append(result, val)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return result
+	}
+	return result
+}
+
+// ReadingFileUnique Reading file and return content as []string
+func ReadingFileUnique(filename string) []string {
+	var result []string
 	if strings.Contains(filename, "~") {
 		filename, _ = homedir.Expand(filename)
 	}
@@ -162,7 +186,6 @@ func Unzip(src string, dest string) ([]string, error) {
 		// Store filename/path for returning and using later on
 		fpath := filepath.Join(dest, f.Name)
 
-		// Check for ZipSlip. More Info: http://bit.ly/2MsjAWE
 		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
 			return filenames, fmt.Errorf("%s: illegal file path", fpath)
 		}
@@ -241,6 +264,10 @@ func SelectSign(signName string) []string {
 
 // SingleSign select signature by single selector
 func SingleSign(signName string) []string {
+	if strings.HasPrefix(signName, "~") {
+		signName, _ = homedir.Expand(signName)
+	}
+
 	var Signs []string
 	if strings.HasSuffix(signName, ".yaml") {
 		if FileExists(signName) {
@@ -250,9 +277,6 @@ func SingleSign(signName string) []string {
 	// get more sign nature
 	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
 		asbPath, _ := filepath.Abs(signName)
-		if strings.Contains(asbPath, "~") {
-			asbPath, _ = homedir.Expand(asbPath)
-		}
 		baseSelect := filepath.Base(signName)
 		rawSigns := GetFileNames(filepath.Dir(asbPath), "yaml")
 		for _, signFile := range rawSigns {

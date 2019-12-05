@@ -86,6 +86,11 @@ func runServer(cmd *cobra.Command, args []string) error {
 					sign.Target = core.MoreVariables(sign.Target, options)
 					for _, req := range sign.Requests {
 						realReqs := core.ParseRequest(req, sign)
+						if req.Repeat > 0 {
+							for i := 0; i < req.Repeat; i++ {
+								realReqs = append(realReqs, realReqs...)
+							}
+						}
 						if len(realReqs) > 0 {
 							for _, realReq := range realReqs {
 								var realRec libs.Record
@@ -113,6 +118,11 @@ func runServer(cmd *cobra.Command, args []string) error {
 						}
 
 						Reqs := core.ParseFuzzRequest(record, sign)
+						if record.Request.Repeat > 0 {
+							for i := 0; i < record.Request.Repeat; i++ {
+								Reqs = append(Reqs, Reqs...)
+							}
+						}
 
 						if len(Reqs) > 0 {
 							for _, Req := range Reqs {

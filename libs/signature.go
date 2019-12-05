@@ -1,5 +1,6 @@
 package libs
 
+// Signature base signature struct
 type Signature struct {
 	ID   string
 	Type string

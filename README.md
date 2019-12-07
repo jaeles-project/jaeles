@@ -21,6 +21,8 @@ Please visit the [Official Documention](https://jaeles-project.github.io/) for m
 
 Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature.
 
+[My introduction slide about Jaeles](https://speakerdeck.com/j3ssie/jaeles-the-swiss-army-knife-for-automated-web-application-testing)
+
 ## Usage
 More usage [here](https://jaeles-project.github.io/usage/)
 
@@ -37,6 +39,7 @@ jaeles --verbose server -s sqli
 ```
 
 ## Showcases
+
 More showcase [here](https://jaeles-project.github.io/showcases/)
 
 [![asciicast](https://asciinema.org/a/281205.svg)](https://asciinema.org/a/281205)

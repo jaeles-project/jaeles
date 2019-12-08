@@ -80,6 +80,9 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 
 * Awesomes artworks are powered by [Freepik](http://freepik.com) at [flaticon.com](http://flaticon.com).
 
+## In distributions
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/jaeles.svg)](https://repology.org/project/jaeles/versions)
 
 ## License
 

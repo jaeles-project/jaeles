@@ -21,8 +21,6 @@ Please visit the [Official Documention](https://jaeles-project.github.io/) for m
 
 Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature.
 
-[My introduction slide about Jaeles](https://speakerdeck.com/j3ssie/jaeles-the-swiss-army-knife-for-automated-web-application-testing)
-
 ## Usage
 More usage [here](https://jaeles-project.github.io/usage/)
 
@@ -79,6 +77,11 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 * React components is powered by [Carbon](https://www.carbondesignsystem.com/) and [carbon-tutorial](https://github.com/carbon-design-system/carbon-tutorial).
 
 * Awesomes artworks are powered by [Freepik](http://freepik.com) at [flaticon.com](http://flaticon.com).
+
+## Mentions
+[![Rawsec's CyberSecurity Inventory](https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg)](https://inventory.rawsec.ml/tools.html#Jaeles)
+
+[My introduction slide about Jaeles](https://speakerdeck.com/j3ssie/jaeles-the-swiss-army-knife-for-automated-web-application-testing)
 
 ## In distributions
 

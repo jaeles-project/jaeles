@@ -29,7 +29,6 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 			if strings.Contains(value, "(") && strings.Contains(value, ")") {
 				rawVariables[key] = RunVariables(value)
 			}
-
 			/*
 				- variable: [google.com,example.com]
 			*/
@@ -71,6 +70,32 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 		}
 	}
 
+	if len(rawVariables) == 2 {
+		tmpVar := make(map[string][]string)
+		secondVar := make(map[string][]string)
+		var maxKey string
+		for k, Variables := range rawVariables {
+			if len(Variables) == maxLength {
+				maxKey = k
+				tmpVar[k] = Variables
+			} else {
+				secondVar[k] = Variables
+			}
+		}
+
+		for index := 0; index < maxLength; index++ {
+			for k, v := range secondVar {
+				for _, value := range v {
+					variable := make(map[string]string)
+					variable[maxKey] = tmpVar[maxKey][index]
+					variable[k] = value
+					realVariables = append(realVariables, variable)
+				}
+			}
+		}
+		return realVariables
+	}
+
 	// make all variable to same length
 	Variables := make(map[string][]string)
 	for k, v := range rawVariables {
@@ -88,7 +113,22 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 		}
 	}
 
-	return realVariables
+	seen := make(map[string]bool)
+	// just unique the variables
+	var uniqVariables []map[string]string
+	for index := 0; index < len(realVariables); index++ {
+		for k, v := range realVariables[index] {
+			val := fmt.Sprintf("%v%v", k, v)
+			if _, ok := seen[val]; !ok {
+				fmt.Println(k, v)
+				seen[val] = true
+				uniqVariables = append(uniqVariables, realVariables[index])
+			}
+
+		}
+	}
+
+	return uniqVariables
 }
 
 // RunVariables is main function for detections

@@ -165,6 +165,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			Put(url)
 		break
 	}
+	client.SetCloseConnection(true)
 
 	// in case we want to get redirect stuff
 	if res.StatusCode != 0 {
@@ -175,7 +176,6 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		return libs.Response{}, err
 	}
 
-	client.SetCloseConnection(true)
 	return ParseResponse(*resp), nil
 }
 

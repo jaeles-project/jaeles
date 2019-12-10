@@ -59,7 +59,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
 	RootCmd.PersistentFlags().IntVar(&options.Refresh, "refresh", 10, "Refresh")
 
-	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "concurrency")
+	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 10, "concurrency")
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
 }
 

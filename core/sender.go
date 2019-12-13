@@ -42,19 +42,12 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	}
 	req.Headers = newHeader
 
-	// if options.Debug {
-	// 	libs.DebugF("[Processing] for %v", url)
-	// }
-
 	// disable log when retry
 	logger := logrus.New()
 	if !options.Debug {
 		logger.Out = ioutil.Discard
 	}
 	client := resty.New().SetLogger(logger)
-	// localAddress, _ := net.ResolveTCPAddr("tcp", "127.0.0.1")
-	// client := resty.NewWithLocalAddr(localAddress)
-
 	client.SetLogger(logger)
 
 	// setting for client

@@ -3,7 +3,7 @@
   <img alt="Jaeles" src="https://image.flaticon.com/icons/svg/1432/1432425.svg" height="140" />
   <p align="center">
     <a href=""><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
-    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.1.1-red.svg"></a>
+    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.2-red.svg"></a>
     <a href="https://inventory.rawsec.ml/tools.html#Jaeles"><img src="https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg" alt="Rawsec&#39;s CyberSecurity Inventory"></a>
   </p>
 </p>
@@ -52,10 +52,6 @@ Detect Jira SSRF CVE-2019-8451
 
 Plugin can be found [here](https://github.com/jaeles-project/jaeles-plugins/blob/master/jaeles-burp.py) and Video Guide [here](https://youtu.be/1lxsYhfTq3M)
 
-## Supporting me
-
-[![Backers](https://opencollective.com/jaeles-project/backers.svg?width=890)](https://opencollective.com/jaeles-project#backers)
-
 ### Planned Features
 
 * Adding more signatures.
@@ -80,7 +76,6 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 * Awesomes artworks are powered by [Freepik](http://freepik.com) at [flaticon.com](http://flaticon.com).
 
 ## Mentions
-[![Rawsec's CyberSecurity Inventory](https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg)](https://inventory.rawsec.ml/tools.html#Jaeles)
 
 [My introduction slide about Jaeles](https://speakerdeck.com/j3ssie/jaeles-the-swiss-army-knife-for-automated-web-application-testing)
 

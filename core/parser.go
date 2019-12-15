@@ -129,11 +129,11 @@ func MoreVariables(target map[string]string, options libs.Options) map[string]st
 func JoinURL(base string, child string) string {
 	u, err := url.Parse(child)
 	if err != nil {
-		log.Fatal(err)
+		return ""
 	}
 	result, err := url.Parse(base)
 	if err != nil {
-		log.Fatal(err)
+		return ""
 	}
 	return result.ResolveReference(u).String()
 }

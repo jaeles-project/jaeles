@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-resty/resty"
 	"github.com/jaeles-project/jaeles/database/models"
+	"github.com/parnurzeal/gorequest"
 )
 
 // ImportBurpCollab used to init some default config
@@ -28,12 +28,7 @@ func ImportBurpCollabResponse(burpcollab string, data string) string {
 	burpcollabres := data
 	if burpcollabres == "" {
 		url := fmt.Sprintf("http://%v?original=true", burpcollab)
-		client := resty.New()
-		resp, err := client.R().Get(url)
-		if err != nil {
-			return ""
-		}
-		burpcollabres := string(resp.Body())
+		_, burpcollabres, _ := gorequest.New().Get(url).End()
 		burpcollabres = strings.Replace(burpcollabres, "<html><body>", "", -1)
 		burpcollabres = strings.Replace(burpcollabres, "</body></html>", "", -1)
 	}

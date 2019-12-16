@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -123,13 +122,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// run background detector
-	if !options.NoBackGround {
-		go func() {
-			for {
-				core.Background(options)
-			}
-		}()
-	}
+	// if !options.NoBackGround {
+	// 	go func() {
+	// 		for {
+	// 			core.Background(options)
+	// 		}
+	// 	}()
+	// }
 
 	type Job struct {
 		URL  string
@@ -158,24 +157,19 @@ func runScan(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	var rg sync.WaitGroup
 	// jobs to send request
-	rg.Add(1)
 	for _, signFile := range signs {
-		rg.Add(1)
 		sign, err := core.ParseSign(signFile)
 		if err != nil {
-			log.Fatalf("Error parsing YAML sign %v", signFile)
+			libs.ErrorF("Error parsing YAML sign %v", signFile)
+			continue
 		}
 		for _, url := range urls {
-			realjob := Job{url, sign}
-			jobs <- realjob
-		}
-		rg.Done()
-	}
-	rg.Done()
+			jobs <- Job{url, sign}
 
-	rg.Wait()
+		}
+	}
+
 	close(jobs)
 	wg.Wait()
 	return nil

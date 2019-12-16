@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -85,10 +84,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			res.Status = req.Response.Status
 			res.StatusCode = req.Response.StatusCode
 			resp := req.Response
-			bodyBytes, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				log.Fatal(err)
-			}
+			bodyBytes, _ := ioutil.ReadAll(resp.Body)
 			bodyString := string(bodyBytes)
 
 			// bodyString := string(bodyBytes)
@@ -297,7 +293,7 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if _, err := os.Stat(path.Dir(p)); os.IsNotExist(err) {
 		err = os.MkdirAll(path.Dir(p), 0750)
 		if err != nil {
-			log.Fatalf("Error Write content to: %v", p)
+			libs.ErrorF("Error Write content to: %v", p)
 		}
 	}
 

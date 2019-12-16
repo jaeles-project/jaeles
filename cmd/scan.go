@@ -122,13 +122,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// run background detector
-	// if !options.NoBackGround {
-	// 	go func() {
-	// 		for {
-	// 			core.Background(options)
-	// 		}
-	// 	}()
-	// }
+	if !options.NoBackGround {
+		go func() {
+			for {
+				core.Background(options)
+			}
+		}()
+	}
 
 	type Job struct {
 		URL  string

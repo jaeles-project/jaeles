@@ -110,11 +110,8 @@ func runScan(cmd *cobra.Command, args []string) error {
 			fmt.Printf("%v ", filepath.Base(signName))
 		}
 		fmt.Printf("\n")
+		libs.InforF("Input Loaded: %v", len(urls))
 	}
-
-	// if options.Verbose {
-	// 	libs.InforF("Input: %v | New jobs: %v", len(urls), len(jobs))
-	// }
 
 	// get origin request from a file
 	raw, _ := cmd.Flags().GetString("raw")
@@ -155,18 +152,17 @@ func runScan(cmd *cobra.Command, args []string) error {
 				if RawRequest != "" {
 					sign.RawRequest = RawRequest
 				}
-				// rg.Add(1)
-				// go func() {
 				runJob(url, sign, options)
-				// rg.Done()
-				// }()
 			}
 			wg.Done()
 		}()
 	}
 
+	var rg sync.WaitGroup
 	// jobs to send request
+	rg.Add(1)
 	for _, signFile := range signs {
+		rg.Add(1)
 		sign, err := core.ParseSign(signFile)
 		if err != nil {
 			log.Fatalf("Error parsing YAML sign %v", signFile)
@@ -175,8 +171,11 @@ func runScan(cmd *cobra.Command, args []string) error {
 			realjob := Job{url, sign}
 			jobs <- realjob
 		}
+		rg.Done()
 	}
+	rg.Done()
 
+	rg.Wait()
 	close(jobs)
 	wg.Wait()
 	return nil

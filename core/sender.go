@@ -65,7 +65,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		client.AppendHeader(k, v)
 	}
 	if body != "" {
-		client.SendString(body)
+		client.Send(body)
 	}
 
 	// handle Redirect
@@ -181,7 +181,6 @@ func ParseResponse(resp gorequest.Response, resBody string, resTime float64) (re
 		resHeaders = append(resHeaders, element)
 	}
 	// respones time in second
-	// resTime := float64(resp.Time()) / float64(time.Second)
 	resHeaders = append(resHeaders,
 		map[string]string{"Total Length": strconv.Itoa(resLength)},
 		map[string]string{"Response Time": fmt.Sprintf("%f", resTime)},

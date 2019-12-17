@@ -115,9 +115,6 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			return errors.New("auto redirect is disabled")
 		})
 	}
-	if options.Retry > 0 {
-		client.Retry(3, time.Duration(options.Timeout/2)*time.Second, http.StatusBadRequest, http.StatusInternalServerError)
-	}
 	// really sending stuff
 	resp, resBody, errs := client.End()
 	resTime := time.Since(timeStart).Seconds()
@@ -125,7 +122,12 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	if len(errs) > 0 && res.StatusCode != 0 {
 		return res, nil
 	} else if len(errs) > 0 {
-		libs.ErrorF("Error sending %v", errs)
+		if options.Verbose {
+			libs.ErrorF("Error sending: %v %v", url, errs)
+		}
+		if options.Retry > 0 {
+			client.Retry(3, time.Duration(options.Timeout/2)*time.Second, http.StatusBadRequest, http.StatusInternalServerError)
+		}
 		return libs.Response{}, errs[0]
 	}
 

@@ -22,8 +22,8 @@ func init() {
 	// byeCmd represents the bye command
 	var scanCmd = &cobra.Command{
 		Use:   "scan",
-		Short: "Do the Scan",
-		Long:  `Scan list of URLs based on signatures`,
+		Short: "Scan list of URLs based on signatures",
+		Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing - %v by %v`, libs.VERSION, libs.AUTHOR),
 		RunE:  runScan,
 	}
 
@@ -239,7 +239,7 @@ func runJob(url string, sign libs.Signature, options libs.Options) {
 				// record <- realRec
 				if options.Debug {
 					if realRec.Request.MiddlewareOutput != "" {
-						fmt.Println(realRec.Request.MiddlewareOutput)
+						libs.DebugF(realRec.Request.MiddlewareOutput)
 					}
 				}
 

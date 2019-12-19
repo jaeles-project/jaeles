@@ -76,6 +76,13 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 					req.Header[attr] = val
 				}
 			}
+
+			for k, v := range headers {
+				client.AppendHeader(k, v)
+			}
+			if body != "" {
+				client.Send(body)
+			}
 			return nil
 		})
 	} else {
@@ -137,7 +144,6 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 
 // Analyze run analyze with each detections
 func Analyze(options libs.Options, rec *libs.Record) {
-
 	if options.Debug {
 		libs.DebugF(strings.Join(rec.Request.Detections, " "))
 	}

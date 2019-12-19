@@ -22,13 +22,11 @@ func init() {
 	// byeCmd represents the bye command
 	var serverCmd = &cobra.Command{
 		Use:   "server",
-		Short: "Run server",
-		Long:  `Start API Server`,
+		Short: "Start API server",
+		Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing - %v by %v`, libs.VERSION, libs.AUTHOR),
 		RunE:  runServer,
 	}
 	serverCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
-	// serverCmd.Flags().Int16P("level", "l", 1, "Provide custom header seperate by ';'")
-
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
 	RootCmd.AddCommand(serverCmd)

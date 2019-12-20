@@ -294,7 +294,7 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	parts := []string{options.Output}
 	u, _ := url.Parse(rec.Request.URL)
 	parts = append(parts, u.Hostname())
-	parts = append(parts, fmt.Sprintf("%x", checksum))
+	parts = append(parts, fmt.Sprintf("%v-%x", rec.Sign.ID, checksum))
 
 	p := path.Join(parts...)
 	if _, err := os.Stat(path.Dir(p)); os.IsNotExist(err) {
@@ -303,7 +303,6 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 			libs.ErrorF("Error Write content to: %v", p)
 		}
 	}
-
 	WriteToFile(p, content)
 	return p
 }

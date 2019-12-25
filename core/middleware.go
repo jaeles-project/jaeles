@@ -61,6 +61,7 @@ func MiddleWare(rec *libs.Record, options libs.Options) {
 	})
 
 	for _, middleString := range rec.Request.Middlewares {
+		libs.DebugF(middleString)
 		vm.Run(middleString)
 	}
 }

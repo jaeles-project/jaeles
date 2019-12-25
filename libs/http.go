@@ -6,17 +6,17 @@ type Record struct {
 	OriginRes   Response
 	Request     Request
 	Response    Response
-	timeout     int
 	Proxy       string
 	Sign        Signature
 	RawOutput   string
 	ExtraOutput string
 	ScanID      string
-	// Issues    map[string]string
 }
 
 // Request all information about request
 type Request struct {
+	Engine            string
+	Timeout           int
 	Scheme            string
 	Repeat            int
 	Host              string

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/Jeffail/gabs"
-	"github.com/go-resty/resty"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/parnurzeal/gorequest"
 )
 
 // Background main function to call other background task
@@ -29,12 +29,11 @@ func PollingLog() {
 		// sending part
 		secret := url.QueryEscape(database.GetSecretbyCollab(obj.Secret))
 		url := fmt.Sprintf("http://polling.burpcollaborator.net/burpresults?biid=%v", secret)
-		client := resty.New()
-		resp, err := client.R().Get(url)
-		if err != nil {
+		request := gorequest.New()
+		_, response, errs := request.Get(url).End()
+		if len(errs) > 0 {
 			continue
 		}
-		response := string(resp.Body())
 		jsonParsed, _ := gabs.ParseJSON([]byte(response))
 		exists := jsonParsed.Exists("responses")
 		if exists == false {

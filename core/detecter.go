@@ -116,6 +116,9 @@ func GetComponent(record libs.Record, component string) string {
 	case "request":
 		return record.Request.Beautify
 	case "response":
+		if record.Response.Beautify == "" {
+			return record.Response.Body
+		}
 		return record.Response.Beautify
 	case "resbody":
 		return record.Response.Body

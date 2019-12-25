@@ -227,7 +227,7 @@ func runJob(url string, sign libs.Signature, options libs.Options) {
 				}
 
 				// if middleware return the response skip sending it
-				if realRec.Response.StatusCode == 0 {
+				if realRec.Response.StatusCode == 0 && realRec.Request.MiddlewareOutput == "" {
 					res, _ := core.JustSend(options, req)
 					realRec.Request = req
 					realRec.Response = res

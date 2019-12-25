@@ -43,18 +43,14 @@ func MiddleWare(rec *libs.Record, options libs.Options) {
 	vm.Set("InvokeCmd", func(call otto.FunctionCall) otto.Value {
 		rawCmd := call.Argument(0).String()
 		result := InvokeCmd(&rec.Request, rawCmd)
-		if options.Verbose {
-			fmt.Println(result)
-		}
+		libs.DebugF(result)
 		return otto.Value{}
 	})
 
 	vm.Set("TurboIntruder", func(call otto.FunctionCall) otto.Value {
 		if rec.Request.Raw != "" {
 			result := TurboIntruder(rec)
-			if options.Verbose {
-				fmt.Println(result)
-			}
+			libs.DebugF(result)
 		}
 
 		return otto.Value{}

@@ -46,11 +46,18 @@ func Analyze(options libs.Options, rec *libs.Record) {
 // StoreOutput store vulnerable request to a file
 func StoreOutput(rec libs.Record, options libs.Options) string {
 	// store output to a file
+	if rec.Request.URL == "" {
+		rec.Request.URL = rec.Request.Target["URL"]
+	}
 	content := fmt.Sprintf("[%v] - %v\n\n", rec.Sign.ID, rec.Request.URL)
 	if rec.Request.MiddlewareOutput != "" {
+		content += strings.Join(rec.Request.Middlewares, "\n")
+		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += rec.Request.MiddlewareOutput
 	}
 	if rec.ExtraOutput != "" {
+		content += strings.Join(rec.Request.Middlewares, "\n")
+		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += rec.ExtraOutput
 	}
 	content += rec.Request.Beautify
@@ -63,8 +70,12 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	checksum := h.Sum(nil)
 
 	parts := []string{options.Output}
-	u, _ := url.Parse(rec.Request.URL)
-	parts = append(parts, u.Hostname())
+	if rec.Request.URL == "" {
+		parts = append(parts, rec.Request.Target["Domain"])
+	} else {
+		u, _ := url.Parse(rec.Request.URL)
+		parts = append(parts, u.Hostname())
+	}
 	parts = append(parts, fmt.Sprintf("%v-%x", rec.Sign.ID, checksum))
 
 	p := path.Join(parts...)

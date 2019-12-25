@@ -42,7 +42,7 @@ func MiddleWare(rec *libs.Record, options libs.Options) {
 
 	vm.Set("InvokeCmd", func(call otto.FunctionCall) otto.Value {
 		rawCmd := call.Argument(0).String()
-		result := InvokeCmd(&rec.Request, rawCmd)
+		result := InvokeCmd(rec, rawCmd)
 		libs.DebugF(result)
 		return otto.Value{}
 	})
@@ -86,16 +86,16 @@ func Host2IP(rawURL string) map[string]string {
 }
 
 // InvokeCmd execute external command
-func InvokeCmd(req *libs.Request, rawCmd string) string {
-	target := ParseTarget(req.URL)
-	realCommand := Encoder(req.Encoding, ResolveVariable(rawCmd, target))
+func InvokeCmd(rec *libs.Record, rawCmd string) string {
+	target := ParseTarget(rec.Request.URL)
+	realCommand := Encoder(rec.Request.Encoding, ResolveVariable(rawCmd, target))
 	command := []string{
 		"bash",
 		"-c",
 		realCommand,
 	}
 	out, _ := exec.Command(command[0], command[1:]...).CombinedOutput()
-	req.MiddlewareOutput = string(out)
+	rec.Request.MiddlewareOutput = string(out)
 	return realCommand
 }
 

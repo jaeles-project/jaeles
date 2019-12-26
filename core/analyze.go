@@ -60,9 +60,11 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += rec.ExtraOutput
 	}
-	content += rec.Request.Beautify
-	content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
-	content += rec.Response.Beautify
+	if rec.ExtraOutput == "" && rec.Request.MiddlewareOutput == "" {
+		content += rec.Request.Beautify
+		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
+		content += rec.Response.Beautify
+	}
 
 	// hash the content
 	h := sha1.New()

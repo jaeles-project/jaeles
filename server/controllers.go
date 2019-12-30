@@ -12,12 +12,14 @@ import (
 	"github.com/jaeles-project/jaeles/core"
 )
 
+// RequestData struct for recive request from burp
 type RequestData struct {
 	RawReq string `json:"req"`
 	RawRes string `json:"res"`
 	URL    string `json:"url"`
 }
 
+// SetBurpCollab setup Burp
 func SetBurpCollab(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  "200",

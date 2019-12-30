@@ -8,12 +8,14 @@ import (
 	"github.com/jaeles-project/jaeles/libs"
 )
 
+// CleanRecords clean all record
 func CleanRecords() {
 	var rec []models.Record
 	DB.Find(&rec)
 	DB.Unscoped().Delete(&rec)
 }
 
+// ImportRecord import record to db
 func ImportRecord(rec libs.Record) {
 	rawOutput, _ := filepath.Abs(rec.RawOutput)
 	ReqRaw := base64.StdEncoding.EncodeToString([]byte(rec.Request.Beautify))

@@ -6,7 +6,7 @@ import (
 	"path"
 	"time"
 
-	jwt "github.com/appleboy/gin-jwt"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"

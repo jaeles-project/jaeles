@@ -149,8 +149,8 @@ func TurboIntruder(rec *libs.Record) string {
 		rec.Response.Beautify = result[2]
 		verbose := fmt.Sprintf("[TurboIntruder] %v %v %v %v", rec.Request.URL, reqPath, rec.Response.StatusCode, rec.Response.ResponseTime)
 		return verbose
-	} else {
-		verbose := fmt.Sprintf("[TurboIntruder] Error sending request from: %v", reqPath)
-		return verbose
 	}
+
+	verbose := fmt.Sprintf("[TurboIntruder] Error sending request from: %v", reqPath)
+	return verbose
 }

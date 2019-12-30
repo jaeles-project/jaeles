@@ -1,5 +1,6 @@
 package models
 
+// Record define record table in db
 type Record struct {
 	Model
 	ReqURL    string `gorm:"type:longtext;"`

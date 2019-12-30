@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/robertkrimen/otto"
 	"github.com/thoas/go-funk"
@@ -383,7 +383,7 @@ func Path(req libs.Request, payload string, arguments []otto.Value) []libs.Reque
 			}
 		} else {
 			// all paths
-			for index, _ := range Paths {
+			for index := range Paths {
 				injectPositions = append(injectPositions, index)
 			}
 		}

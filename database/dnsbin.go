@@ -3,6 +3,7 @@ package database
 // Use to gen bunch of DNS on  dns.requestbin.net
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/url"
 	"os"
@@ -11,8 +12,8 @@ import (
 	"time"
 
 	"github.com/Jeffail/gabs"
-	"github.com/go-resty/resty"
 	"github.com/gorilla/websocket"
+	"github.com/parnurzeal/gorequest"
 )
 
 // NewDNSBin create new dnsbin
@@ -62,13 +63,14 @@ func NewReqBin() string {
 	var reqbin string
 	url := fmt.Sprintf("https://bin-api.pipedream.com/api/v2/http_endpoints")
 	prefix := strconv.FormatInt(time.Now().Unix(), 10)
-	client := resty.New()
+	// client := resty.New()
+	client := gorequest.New().TLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	client.Post(url)
 	body := fmt.Sprintf(`{"name":"%v","pvt":false}`, prefix)
-	resp, err := client.R().
-		SetBody([]byte(body)).
-		Post(url)
+	client.Send(body)
+	_, resBody, _ := client.End()
 
-	message := string(resp.Body())
+	message := resBody
 	// {"status":0,"message":"success","data":{"api_key":"enw9yvvawe47","name":"Untitled","pvt":false,"created_at":"2019-11-20T10:56:29.962Z"}}
 	jsonParsed, err := gabs.ParseJSON([]byte(message))
 	if err != nil {

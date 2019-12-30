@@ -424,7 +424,6 @@ func ParseRequestFromServer(record *libs.Record, req libs.Request, sign libs.Sig
 	record.Request.Detections = req.Detections
 }
 
-/* Resolve template part */
 // ResolveDetection resolve detection part in YAML signature file
 func ResolveDetection(detections []string, target map[string]string) []string {
 	var realDetections []string

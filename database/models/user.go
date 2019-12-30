@@ -1,5 +1,6 @@
 package models
 
+// User define user table in db
 type User struct {
 	Model
 	Username string `gorm:"type:varchar(255);"`

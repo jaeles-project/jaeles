@@ -68,10 +68,10 @@ func ReadingFileUnique(filename string) []string {
 		filename, _ = homedir.Expand(filename)
 	}
 	file, err := os.Open(filename)
-	defer file.Close()
 	if err != nil {
 		return result
 	}
+	defer file.Close()
 
 	unique := true
 	seen := make(map[string]bool)

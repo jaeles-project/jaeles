@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/parnurzeal/gorequest"
@@ -186,19 +186,19 @@ func PollCollab(record libs.Record, analyzeString string) (string, bool) {
 			return data, strings.Contains(data, analyzeString)
 		}
 		return "", false
-	} else {
-		// jsonParsed.Path("responses").Children()
-		for _, element := range jsonParsed.Path("responses").Children() {
-			protocol := element.Path("protocol").Data().(string)
-			// import this to DB so we don't miss in other detect
-			database.ImportOutOfBand(fmt.Sprintf("%v", element))
-			if protocol == "http" {
-				interactionString := element.Path("interactionString").Data().(string)
-				return element.String(), strings.Contains(analyzeString, interactionString)
-			} else if protocol == "dns" {
-				interactionString := element.Path("interactionString").Data().(string)
-				return element.String(), strings.Contains(analyzeString, interactionString)
-			}
+	}
+
+	// jsonParsed.Path("responses").Children()
+	for _, element := range jsonParsed.Path("responses").Children() {
+		protocol := element.Path("protocol").Data().(string)
+		// import this to DB so we don't miss in other detect
+		database.ImportOutOfBand(fmt.Sprintf("%v", element))
+		if protocol == "http" {
+			interactionString := element.Path("interactionString").Data().(string)
+			return element.String(), strings.Contains(analyzeString, interactionString)
+		} else if protocol == "dns" {
+			interactionString := element.Path("interactionString").Data().(string)
+			return element.String(), strings.Contains(analyzeString, interactionString)
 		}
 	}
 

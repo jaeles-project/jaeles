@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/parnurzeal/gorequest"

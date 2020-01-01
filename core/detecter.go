@@ -14,10 +14,6 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
-/*
-@TODO: Add OOB check from Burp Collab and dnsbin.zhack.ca
-*/
-
 // RunDetector is main function for detections
 func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	var extra string

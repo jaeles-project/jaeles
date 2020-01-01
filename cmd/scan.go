@@ -144,6 +144,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 				// job := <-jobs
 				sign := job.Sign
 				url := job.URL
+
 				// get origin from -r req.txt options
 				if OriginRaw.Raw != "" {
 					sign.Origin = OriginRaw
@@ -184,7 +185,7 @@ func runJob(url string, sign libs.Signature, options libs.Options) {
 	var err error
 	if sign.Origin.Method != "" {
 		if sign.Origin.Raw == "" {
-			originReq = core.ParseRequest(sign.Origin, sign)[0]
+			originReq = core.ParseRequest(sign.Origin, sign, options)[0]
 		} else {
 			originReq = sign.Origin
 		}
@@ -202,11 +203,13 @@ func runJob(url string, sign libs.Signature, options libs.Options) {
 		if sign.RawRequest != "" {
 			req.Raw = sign.RawRequest
 		}
-		realReqs := core.ParseRequest(req, sign)
+		realReqs := core.ParseRequest(req, sign, options)
 		if req.Repeat > 0 {
-			for i := 0; i < req.Repeat; i++ {
-				realReqs = append(realReqs, realReqs...)
+			realReqsWithRepeat := realReqs
+			for i := 0; i < req.Repeat-1; i++ {
+				realReqsWithRepeat = append(realReqsWithRepeat, realReqs...)
 			}
+			realReqs = realReqsWithRepeat
 		}
 
 		if len(realReqs) > 0 {

@@ -16,6 +16,7 @@ require (
 	github.com/gin-gonic/gin v1.5.0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.1
+	github.com/jasonlvhit/gocron v0.0.0-20191228163020-98b59b546dee // indirect
 	github.com/jinzhu/gorm v1.9.11
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
@@ -23,6 +24,8 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
+	github.com/robfig/cron v1.2.0 // indirect
+	github.com/robfig/cron/v3 v3.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1

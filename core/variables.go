@@ -70,7 +70,17 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 		}
 	}
 
+	// @TODO: Need to improve this
 	if len(rawVariables) == 2 {
+		if maxLength == 1 {
+			variable := make(map[string]string)
+			for k, Variables := range rawVariables {
+				variable[k] = Variables[0]
+			}
+			realVariables = append(realVariables, variable)
+			return realVariables
+		}
+
 		tmpVar := make(map[string][]string)
 		secondVar := make(map[string][]string)
 		var maxKey string

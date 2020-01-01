@@ -3,6 +3,8 @@ package database
 import (
 	"github.com/jaeles-project/jaeles/database/models"
 	"github.com/jinzhu/gorm"
+
+	// load driver
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 

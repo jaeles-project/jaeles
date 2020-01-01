@@ -83,7 +83,7 @@ func runServer(cmd *cobra.Command, args []string) error {
 					sign.Target = core.ParseTarget(url)
 					sign.Target = core.MoreVariables(sign.Target, options)
 					for _, req := range sign.Requests {
-						realReqs := core.ParseRequest(req, sign)
+						realReqs := core.ParseRequest(req, sign, options)
 						if req.Repeat > 0 {
 							for i := 0; i < req.Repeat; i++ {
 								realReqs = append(realReqs, realReqs...)

@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -35,7 +34,7 @@ func NewDNSBin() string {
 		for {
 			_, message, err := c.ReadMessage()
 			if err != nil {
-				os.Exit(1)
+				return
 			}
 			jsonParsed, err := gabs.ParseJSON([]byte(message))
 			if err != nil {

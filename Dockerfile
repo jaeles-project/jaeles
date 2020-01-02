@@ -5,6 +5,7 @@ RUN apt-get update -y; apt-get install golang git -y; go get -u github.com/jaele
 WORKDIR /root/go/bin/
 
 VOLUME /root/go/bin/out
+VOLUME /root/.jaeles/ 
 
 EXPOSE 5000
 

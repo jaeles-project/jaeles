@@ -8,4 +8,4 @@ VOLUME /root/go/bin/out
 
 EXPOSE 5000
 
-CMD [ "/root/go/bin/jaeles", "server" ]
+CMD [ "/root/go/bin/jaeles", "server", "--host", "0.0.0.0" ]

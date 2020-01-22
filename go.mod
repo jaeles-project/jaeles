@@ -3,7 +3,6 @@ module github.com/jaeles-project/jaeles
 go 1.13
 
 require (
-	github.com/Jeffail/gabs v1.4.0
 	github.com/Jeffail/gabs/v2 v2.3.0
 	github.com/Shopify/yaml v2.1.0+incompatible
 	github.com/appleboy/gin-jwt/v2 v2.6.3

@@ -2,6 +2,7 @@
 .goreleaser.yml
 .idea
 .vscode
+Makefile
 dist
 out
 passive-*

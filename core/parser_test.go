@@ -2,17 +2,38 @@ package core
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
-// func TestParseURL(t *testing.T) {
-// 	raw := `http://example.com:19999/`
-// 	target := ParseTarget(raw)
-// 	fmt.Println(target)
-// 	if len(target) == 0 {
-// 		t.Errorf("Error parsing Burp")
-// 	}
-// }
+func TestAltResolveVariable(t *testing.T) {
+	format := `https://brutelogic.com.br/tests/sinks.html?name=[[.custom]]xvlb`
+	target := make(map[string]string)
+	target["custom"] = "zzz"
+	result := AltResolveVariable(format, target)
+	fmt.Println(result)
+	if result != "2sam1" {
+		t.Errorf("Error resolve variable")
+	}
+}
+
+func TestResolveVariable(t *testing.T) {
+	// format := `2{{constructor.constructor('alert(1)')()}}{{.sam}}`
+	format := `2 {{constructor('alert(1)')()}} {{.var}}`
+	target := make(map[string]string)
+	target["var"] = "sam"
+	result := ResolveVariable(format, target)
+	fmt.Println(result)
+
+	format = `2{{constructor.constructor('alert(1)')()}}{{.sam}}`
+	format = `2 {{"{{"}}constructor('alert(1)')()}} {{.var}}`
+	result = ResolveVariable(format, target)
+
+	fmt.Println(result)
+	if !strings.HasSuffix(result, "sam") {
+		t.Errorf("Error resolve variable")
+	}
+}
 
 func TestParseBurpRequest(t *testing.T) {
 	raw := `GET /test HTTP/1.1

@@ -3,7 +3,7 @@
   <img alt="Jaeles" src="https://image.flaticon.com/icons/svg/1432/1432425.svg" height="140" />
   <p align="center">
     <a href=""><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
-    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.2-red.svg"></a>
+    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.3.0-blue.svg"></a>
     <a href="https://inventory.rawsec.ml/tools.html#Jaeles"><img src="https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg" alt="Rawsec&#39;s CyberSecurity Inventory"></a>
   </p>
 </p>
@@ -13,28 +13,32 @@
 ![Architecture](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/jaeles-architecture.png?raw=true)
 
 ## Installation
+Download [precompiled version here](https://github.com/jaeles-project/jaeles/releases).
 
-```
-go get -u github.com/jaeles-project/jaeles
+If you have a Go environment, make sure you have **Go >= 1.13** with Go Modules enable and run the following command.
+
+```shell
+GO111MODULE=on go get -u github.com/jaeles-project/jaeles
 ```
 
 Please visit the [Official Documention](https://jaeles-project.github.io/) for more details.
 
-Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature.
+Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature and passive signature.
 
 ## Usage
+
 More usage [here](https://jaeles-project.github.io/usage/)
 
 Example commands.
-```
+
+```shell
 jaeles scan -u http://example.com
 
 jaeles scan -s signatures/common/phpdebug.yaml -U /tmp/list_of_urls.txt
 
-jaeles scan --retry 3 --verbose -s "signatures/cves/jira-*" -U /tmp/list_of_urls.txt
-jaeles scan --retry 3 --verbose -s "signatures/fuzz/.*" -U /tmp/list_of_urls.txt
+jaeles scan -v --passive --verbose -s "signatures/cves/jira-*" -U /tmp/list_of_urls.txt -o /tmp/vuls
 
-jaeles --verbose server -s sqli
+jaeles server --verbose -s sqli
 ```
 
 ## Showcases
@@ -52,13 +56,18 @@ Detect Jira SSRF CVE-2019-8451
 
 Plugin can be found [here](https://github.com/jaeles-project/jaeles-plugins/blob/master/jaeles-burp.py) and Video Guide [here](https://youtu.be/1lxsYhfTq3M)
 
+## Mentions
+
+[My introduction slide about Jaeles](https://speakerdeck.com/j3ssie/jaeles-the-swiss-army-knife-for-automated-web-application-testing)
+
+
 ### Planned Features
 
 * Adding more signatures.
 * Adding more input sources.
 * Adding more APIs to get access to more properties of the request.
 * Adding proxy plugins to directly receive input from browser of http client.
-* Adding passive signature for passive checking each request.
+* ~~Adding passive signature for passive checking each request.~~
 * Adding more action on Web UI.
 * Integrate with many other tools.
 
@@ -75,10 +84,6 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 
 * Awesomes artworks are powered by [Freepik](http://freepik.com) at [flaticon.com](http://flaticon.com).
 
-## Mentions
-
-[My introduction slide about Jaeles](https://speakerdeck.com/j3ssie/jaeles-the-swiss-army-knife-for-automated-web-application-testing)
-
 ## In distributions
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/jaeles.svg)](https://repology.org/project/jaeles/versions)
@@ -88,7 +93,7 @@ Feel free to submit new signature to this [repo](https://github.com/jaeles-proje
 ### Code Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/jaeles-project/jaeles/graphs/contributors"><img src="https://opencollective.com/jaeles-project/contributors.svg?width=890&button=false" /></a>
+<a href="https://github.com/jaeles-project/jaeles/graphs/contributors"><img src="https://opencollective.com/jaeles-project/contributors.svg?width=890" /></a>
 
 ### Financial Contributors
 

@@ -1,4 +1,4 @@
-package core
+package sender
 
 import (
 	"crypto/tls"
@@ -45,10 +45,9 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	// setting for client
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	client.SetDisableWarn(true)
-	// client.SetDebug(true)
 	client.SetHeaders(headers)
+
 	// redirect policy
-	// var res libs.Response
 	if req.Redirect == false {
 		// client.SetRedirectPolicy(resty.NoRedirectPolicy())
 		client.SetRedirectPolicy(resty.RedirectPolicyFunc(func(req *http.Request, via []*http.Request) error {
@@ -110,6 +109,10 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		client.SetRetryCount(options.Retry)
 	}
 	client.SetTimeout(time.Duration(options.Timeout) * time.Second)
+	if req.Timeout > 0 {
+		client.SetTimeout(time.Duration(req.Timeout) * time.Second)
+	}
+
 	client.SetRetryWaitTime(time.Duration(options.Timeout/2) * time.Second)
 	client.SetRetryMaxWaitTime(time.Duration(options.Timeout) * time.Second)
 	if proxy != "" {
@@ -148,6 +151,11 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		resp, err = client.R().
 			SetBody([]byte(body)).
 			Put(url)
+		break
+	case "DELETE":
+		resp, err = client.R().
+			SetBody([]byte(body)).
+			Delete(url)
 		break
 	}
 

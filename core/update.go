@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 	"gopkg.in/src-d/go-git.v4"
 )
 
@@ -13,9 +14,9 @@ import (
 func UpdatePlugins(options libs.Options) {
 	pluginPath := path.Join(options.RootFolder, "plugins")
 	url := libs.UIREPO
-	libs.GoodF("Cloning Plugins from: %v", url)
-	if FolderExists(pluginPath) {
-		libs.InforF("Remove: %v", pluginPath)
+	utils.GoodF("Cloning Plugins from: %v", url)
+	if utils.FolderExists(pluginPath) {
+		utils.InforF("Remove: %v", pluginPath)
 		os.RemoveAll(pluginPath)
 	}
 	r, err := git.PlainClone(pluginPath, false, &git.CloneOptions{
@@ -34,12 +35,15 @@ func UpdatePlugins(options libs.Options) {
 }
 
 // UpdateSignature update latest UI from UI repo
-func UpdateSignature(options libs.Options) {
+func UpdateSignature(options libs.Options, customRepo string) {
 	signPath := path.Join(options.RootFolder, "base-signatures")
 	url := libs.SIGNREPO
-	libs.GoodF("Cloning Signature from: %v", url)
-	if FolderExists(signPath) {
-		libs.InforF("Remove: %v", signPath)
+	if customRepo != "" {
+		url = customRepo
+	}
+	utils.GoodF("Cloning Signature from: %v", url)
+	if utils.FolderExists(signPath) {
+		utils.InforF("Remove: %v", signPath)
 		os.RemoveAll(signPath)
 	}
 	r, err := git.PlainClone(signPath, false, &git.CloneOptions{
@@ -53,6 +57,12 @@ func UpdateSignature(options libs.Options) {
 		if err != nil {
 			libs.ErrorF("Error to clone Signature repo")
 		}
+	}
+
+	// move passive signatures to default passive
+	passivePath := path.Join(signPath, "passives")
+	if utils.FolderExists(passivePath) {
+		utils.MoveFolder(passivePath, options.PassiveFolder)
 	}
 }
 

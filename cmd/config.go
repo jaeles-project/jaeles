@@ -9,6 +9,7 @@ import (
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -36,6 +37,7 @@ func init() {
 	// used for cred action
 	configCmd.Flags().String("secret", "", "Secret of Burp Collab")
 	configCmd.Flags().String("collab", "", "List of Burp Collab File")
+	configCmd.Flags().String("repo", "", "Signature Repo")
 
 	RootCmd.AddCommand(configCmd)
 
@@ -54,81 +56,63 @@ func runConfig(cmd *cobra.Command, args []string) error {
 	if polling == true {
 		secret, _ := cmd.Flags().GetString("secret")
 		collabFile, _ := cmd.Flags().GetString("collab")
-		collabs := core.ReadingFile(collabFile)
+		collabs := utils.ReadingLines(collabFile)
 		for _, collab := range collabs {
 			database.ImportCollab(secret, collab)
 		}
 	}
 
-	// DB connect
-	dbPath := path.Join(options.RootFolder, "sqlite.db")
-	db, err := database.InitDB(dbPath)
-	if err != nil {
-		panic("err open databases")
-	}
-	defer db.Close()
-
 	action, _ := cmd.Flags().GetString("action")
-
-	// update plugins and signatures
-	if action == "update" {
+	switch action {
+	case "update":
 		core.UpdatePlugins(options)
-		core.UpdateSignature(options)
-	}
-
-	// clear all data in database
-	if action == "clear" {
+		repo, _ := cmd.Flags().GetString("repo")
+		core.UpdateSignature(options, repo)
+		break
+	case "clear":
 		database.CleanScans()
 		database.CleanSigns()
 		database.CleanRecords()
-	}
-
-	// clean all the things
-	if action == "clean" {
+		break
+	case "clean":
 		os.RemoveAll(path.Join(options.RootFolder, "sqlite.db"))
 		os.RemoveAll(path.Join(options.RootFolder, "config.yaml"))
 		os.RemoveAll(path.Join(options.RootFolder, "burp.json"))
-	}
-
-	// create or update user
-	if action == "cred" {
-		// Create new user
+		break
+	case "cred":
 		username, _ := cmd.Flags().GetString("user")
 		password, _ := cmd.Flags().GetString("pass")
 		database.CreateUser(username, password)
 		libs.GoodF("Create new credentials %v:%v \n", username, password)
-	}
-
-	// load oob
-	if action == "oob" {
+		break
+	case "oob":
 		secret, _ := cmd.Flags().GetString("secret")
 		collabFile, _ := cmd.Flags().GetString("collab")
-		collabs := core.ReadingFile(collabFile)
+		collabs := utils.ReadingLines(collabFile)
 		for _, collab := range collabs {
 			database.ImportCollab(secret, collab)
 		}
-	}
-
-	// reload signature
-	if action == "reload" {
+		break
+	case "reload":
 		database.CleanSigns()
 		// select folder to load signature
 		SignFolder, _ := filepath.Abs(path.Join(options.RootFolder, "base-signatures"))
 		signFolder, _ := cmd.Flags().GetString("signFolder")
-		if signFolder != "" && core.FolderExists(signFolder) {
+		if signFolder != "" && utils.FolderExists(signFolder) {
 			SignFolder = signFolder
 		}
 
-		allSigns := core.GetFileNames(SignFolder, ".yaml")
+		allSigns := utils.GetFileNames(SignFolder, ".yaml")
 		if allSigns != nil {
 			libs.InforF("Load Signature from: %v", SignFolder)
 			for _, signFile := range allSigns {
 				database.ImportSign(signFile)
 			}
 		}
+		break
 	}
 
-	libs.GoodF("Done the config")
+	utils.GoodF("Done the config")
 	return nil
 }
 

@@ -11,18 +11,20 @@ import (
 	"strings"
 
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 	"github.com/thoas/go-funk"
 
 	"github.com/robertkrimen/otto"
 )
 
-// @NOTE: This middleware allow execute command on your machine
-// So make sure you trusted authenticaed user because he can create a signature.
+// @NOTE: Middleware allow execute command on your machine
+// So make sure you read the signature before you run it
 
 // MiddleWare is main function for middleware
 func MiddleWare(rec *libs.Record, options libs.Options) {
 	// func MiddleWare(req *libs.Request) {
 	vm := otto.New()
+	var middlewareOutput string
 
 	vm.Set("Host2IP", func(call otto.FunctionCall) otto.Value {
 		var realHeaders []map[string]string
@@ -43,22 +45,26 @@ func MiddleWare(rec *libs.Record, options libs.Options) {
 	vm.Set("InvokeCmd", func(call otto.FunctionCall) otto.Value {
 		rawCmd := call.Argument(0).String()
 		result := InvokeCmd(rec, rawCmd)
-		libs.DebugF(result)
+		middlewareOutput += result
+		utils.DebugF(result)
 		return otto.Value{}
 	})
 
 	vm.Set("TurboIntruder", func(call otto.FunctionCall) otto.Value {
 		if rec.Request.Raw != "" {
 			result := TurboIntruder(rec)
-			libs.DebugF(result)
+			utils.DebugF(result)
 		}
-
 		return otto.Value{}
 	})
 
 	for _, middleString := range rec.Request.Middlewares {
 		libs.DebugF(middleString)
 		vm.Run(middleString)
+	}
+
+	if middlewareOutput != "" {
+		rec.Request.MiddlewareOutput = middlewareOutput
 	}
 }
 
@@ -89,6 +95,7 @@ func Host2IP(rawURL string) map[string]string {
 func InvokeCmd(rec *libs.Record, rawCmd string) string {
 	target := ParseTarget(rec.Request.URL)
 	realCommand := Encoder(rec.Request.Encoding, ResolveVariable(rawCmd, target))
+	utils.DebugF("Execute Command: %v", realCommand)
 	command := []string{
 		"bash",
 		"-c",
@@ -96,7 +103,7 @@ func InvokeCmd(rec *libs.Record, rawCmd string) string {
 	}
 	out, _ := exec.Command(command[0], command[1:]...).CombinedOutput()
 	rec.Request.MiddlewareOutput = string(out)
-	return realCommand
+	return string(out)
 }
 
 // TurboIntruder execute Turbo Intruder CLI
@@ -114,8 +121,8 @@ func TurboIntruder(rec *libs.Record) string {
 	}
 	// write request to a file
 	rawReq := ResolveVariable(req.Raw, req.Target)
-	reqPath := path.Join(logReqPath, GenHash(rawReq))
-	WriteToFile(reqPath, rawReq)
+	reqPath := path.Join(logReqPath, utils.GenHash(rawReq))
+	utils.WriteToFile(reqPath, rawReq)
 
 	// call the command and parse some info
 	turboCmd := fmt.Sprintf(`java -jar %v %v %v %v foo`, turboPath, scriptPath, reqPath, url)

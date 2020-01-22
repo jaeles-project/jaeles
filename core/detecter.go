@@ -2,8 +2,10 @@ package core
 
 import (
 	"fmt"
+	"github.com/jaeles-project/jaeles/utils"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Jeffail/gabs/v2"
@@ -18,6 +20,7 @@ import (
 func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	var extra string
 	vm := otto.New()
+
 	vm.Set("StringSearch", func(call otto.FunctionCall) otto.Value {
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()
@@ -41,7 +44,11 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		analyzeString := call.Argument(1).String()
 		component := GetComponent(record, componentName)
 		validate := RegexSearch(component, analyzeString)
-		result, _ := vm.ToValue(validate)
+		result, err := vm.ToValue(validate)
+		if err != nil {
+			utils.ErrorF("Error Regex: %v", analyzeString)
+			result, _ = vm.ToValue(false)
+		}
 		return result
 	})
 
@@ -59,7 +66,7 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		result, _ := vm.ToValue(statusCode)
 		return result
 	})
-	vm.Set("ResponeTime", func(call otto.FunctionCall) otto.Value {
+	vm.Set("ResponseTime", func(call otto.FunctionCall) otto.Value {
 		responseTime := record.Response.ResponseTime
 		result, _ := vm.ToValue(responseTime)
 		return result
@@ -70,13 +77,18 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	vm.Set("HasPopUp", func(call otto.FunctionCall) otto.Value {
+		result, _ := vm.ToValue(record.Response.HasPopUp)
+		return result
+	})
+
 	// Origin field
 	vm.Set("OriginStatusCode", func(call otto.FunctionCall) otto.Value {
 		statusCode := record.OriginRes.StatusCode
 		result, _ := vm.ToValue(statusCode)
 		return result
 	})
-	vm.Set("OriginResponeTime", func(call otto.FunctionCall) otto.Value {
+	vm.Set("OriginResponseTime", func(call otto.FunctionCall) otto.Value {
 		responseTime := record.OriginRes.ResponseTime
 		result, _ := vm.ToValue(responseTime)
 		return result
@@ -94,9 +106,40 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	// StringGrep select a string from component
+	// e.g: StringGrep("component", "right", "left")
+	vm.Set("StringSelect", func(call otto.FunctionCall) otto.Value {
+		componentName := call.Argument(0).String()
+		left := call.Argument(2).String()
+		right := call.Argument(3).String()
+		component := GetComponent(record, componentName)
+		value := Between(component, left, right)
+		result, _ := vm.ToValue(value)
+		return result
+	})
+
+	//  - RegexGrep("component", "regex")
+	//  - RegexGrep("component", "regex", "position")
+	vm.Set("RegexGrep", func(call otto.FunctionCall) otto.Value {
+		value := RegexGrep(record, call.ArgumentList)
+		result, _ := vm.ToValue(value)
+		return result
+	})
+
+	vm.Set("ValueOf", func(call otto.FunctionCall) otto.Value {
+		valueName := call.Argument(0).String()
+		if record.Request.Target[valueName] != "" {
+			value := record.Request.Target[valueName]
+			result, _ := vm.ToValue(value)
+			return result
+		}
+		result, _ := vm.ToValue(false)
+		return result
+	})
+
 	result, _ := vm.Run(detectionString)
 	analyzeResult, err := result.Export()
-	if err != nil {
+	if err != nil || analyzeResult == nil {
 		return "", false
 	}
 	return extra, analyzeResult.(bool)
@@ -105,9 +148,9 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 // GetComponent get component to run detection
 func GetComponent(record libs.Record, component string) string {
 	switch strings.ToLower(component) {
-	case "orequest":
+	case "oRequest":
 		return record.OriginReq.Beautify
-	case "oresponse":
+	case "oResponse":
 		return record.OriginRes.Beautify
 	case "request":
 		return record.Request.Beautify
@@ -116,7 +159,15 @@ func GetComponent(record libs.Record, component string) string {
 			return record.Response.Body
 		}
 		return record.Response.Beautify
-	case "resbody":
+	case "resHeaders":
+		beautifyHeader := fmt.Sprintf("%v \n", record.Response.Status)
+		for _, header := range record.Response.Headers {
+			for key, value := range header {
+				beautifyHeader += fmt.Sprintf("%v: %v\n", key, value)
+			}
+		}
+		return beautifyHeader
+	case "resBody":
 		return record.Response.Body
 	case "middleware":
 		return record.Request.MiddlewareOutput
@@ -155,6 +206,37 @@ func RegexCount(component string, analyzeString string) int {
 	}
 	matches := r.FindAllStringIndex(component, -1)
 	return len(matches)
+}
+
+// RegexGrep grep regex string from component
+func RegexGrep(realRec libs.Record, arguments []otto.Value) string {
+	componentName := arguments[0].String()
+	component := GetComponent(realRec, componentName)
+
+	regexString := arguments[1].String()
+	var position int
+	var err error
+	if len(arguments) > 2 {
+		position, err = strconv.Atoi(arguments[2].String())
+		if err != nil {
+			position = 0
+		}
+	}
+
+	var value string
+	r, rerr := regexp.Compile(regexString)
+	if rerr != nil {
+		return ""
+	}
+	matches := r.FindStringSubmatch(component)
+	if len(matches) > 0 {
+		if position <= len(matches) {
+			value = matches[position]
+		} else {
+			value = matches[0]
+		}
+	}
+	return value
 }
 
 // PollCollab polling burp collab with secret from DB

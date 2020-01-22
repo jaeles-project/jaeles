@@ -17,8 +17,8 @@ type Record struct {
 type Request struct {
 	Engine            string
 	Timeout           int
-	Scheme            string
 	Repeat            int
+	Scheme            string
 	Host              string
 	Port              string
 	Path              string
@@ -27,12 +27,15 @@ type Request struct {
 	Redirect          bool
 	UseTemplateHeader bool
 	Headers           []map[string]string
+	Values            []map[string]string
 	Body              string
 	Beautify          string
 	MiddlewareOutput  string
 	Raw               string
-	Detections        []string
+	Conditions        []string
 	Middlewares       []string
+	Conclusions       []string
+	Detections        []string
 	Generators        []string
 	Encoding          string
 	Target            map[string]string
@@ -40,6 +43,7 @@ type Request struct {
 
 // Response all information about response
 type Response struct {
+	HasPopUp     bool
 	StatusCode   int
 	Status       string
 	Headers      []map[string]string

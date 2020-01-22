@@ -22,7 +22,7 @@ import (
 func TestGeneratorMethod(t *testing.T) {
 	var req libs.Request
 	req.Method = "GET"
-	reqs := RunGenerator(req, "", `Method("PUT")`)
+	reqs := RunGenerator(req, `Method("PUT")`)
 	for _, r := range reqs {
 		if r.Method != "PUT" {
 			t.Errorf("Error generate Path")

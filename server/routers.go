@@ -7,9 +7,9 @@ import (
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
-	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
@@ -45,11 +45,11 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 
 	allowOrigin := "*"
 	secret := "something you have to change"
-	if options.JWTSecret != "" {
-		secret = options.JWTSecret
+	if options.Server.JWTSecret != "" {
+		secret = options.Server.JWTSecret
 	}
-	if options.Cors != "" {
-		allowOrigin = options.Cors
+	if options.Server.Cors != "" {
+		allowOrigin = options.Server.Cors
 	}
 
 	r.Use(cors.New(cors.Config{
@@ -92,7 +92,7 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 
 			// compare hashed password
 			realPassword := database.SelectUser(username)
-			if core.GenHash(password) == realPassword {
+			if utils.GenHash(password) == realPassword {
 				return &User{
 					UserName: username,
 					// only have one role for now
@@ -151,7 +151,7 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 		auth.GET("/record/:rid/", GetRecord)
 	}
 
-	if err := http.ListenAndServe(options.Bind, r); err != nil {
+	if err := http.ListenAndServe(options.Server.Bind, r); err != nil {
 		log.Fatal(err)
 	}
 

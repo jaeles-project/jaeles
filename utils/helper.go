@@ -1,4 +1,4 @@
-package core
+package utils
 
 import (
 	"archive/zip"
@@ -15,9 +15,45 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jaeles-project/jaeles/database"
 	"github.com/mitchellh/go-homedir"
 )
+
+// StrToInt string to int
+func StrToInt(data string) int {
+	i, err := strconv.Atoi(data)
+	if err != nil {
+		return 0
+	}
+	return i
+}
+
+// GetOSEnv get enviroment variable
+func GetOSEnv(name string) string {
+	varibale, ok := os.LookupEnv(name)
+	if !ok {
+		return name
+	}
+	return varibale
+}
+
+// MakeDir just make a folder
+func MakeDir(folder string) {
+	os.MkdirAll(folder, 0750)
+}
+
+// GetCurrentDay get current day
+func GetCurrentDay() string {
+	currentTime := time.Now()
+	return fmt.Sprintf("%v", currentTime.Format("2006-01-02_3:4:5"))
+}
+
+// NormalizePath the path
+func NormalizePath(path string) string {
+	if strings.HasPrefix(path, "~") {
+		path, _ = homedir.Expand(path)
+	}
+	return path
+}
 
 // GetFileContent Reading file and return content of it
 func GetFileContent(filename string) string {
@@ -37,8 +73,8 @@ func GetFileContent(filename string) string {
 	return string(b)
 }
 
-// ReadingFile Reading file and return content as []string
-func ReadingFile(filename string) []string {
+// ReadingLines Reading file and return content as []string
+func ReadingLines(filename string) []string {
 	var result []string
 	if strings.HasPrefix(filename, "~") {
 		filename, _ = homedir.Expand(filename)
@@ -68,10 +104,10 @@ func ReadingFileUnique(filename string) []string {
 		filename, _ = homedir.Expand(filename)
 	}
 	file, err := os.Open(filename)
+	defer file.Close()
 	if err != nil {
 		return result
 	}
-	defer file.Close()
 
 	unique := true
 	seen := make(map[string]bool)
@@ -107,11 +143,27 @@ func WriteToFile(filename string, data string) (string, error) {
 	}
 	defer file.Close()
 
-	_, err = io.WriteString(file, data)
+	_, err = io.WriteString(file, data+"\n")
 	if err != nil {
 		return "", err
 	}
 	return filename, file.Sync()
+}
+
+// AppendToContent append string to a file
+func AppendToContent(filename string, data string) (string, error) {
+	// If the file doesn't exist, create it, or append to the file
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return "", err
+	}
+	if _, err := f.Write([]byte(data + "\n")); err != nil {
+		return "", err
+	}
+	if err := f.Close(); err != nil {
+		return "", err
+	}
+	return filename, nil
 }
 
 // FileExists check if file is exist or not
@@ -125,6 +177,7 @@ func FileExists(filename string) bool {
 
 // FolderExists check if file is exist or not
 func FolderExists(foldername string) bool {
+	foldername = NormalizePath(foldername)
 	if _, err := os.Stat(foldername); os.IsNotExist(err) {
 		return false
 	}
@@ -235,64 +288,21 @@ func ExpandLength(list []string, length int) []string {
 	return c
 }
 
-// SelectSign select signature by multiple selector
-func SelectSign(signName string) []string {
-	var Signs []string
-
-	// return default sign if doesn't set anything
-	if signName == "" {
-		Signs = database.SelectSign(signName)
+// StartWithNum check if string start with number
+func StartWithNum(raw string) bool {
+	r, err := regexp.Compile("^[0-9].*")
+	if err != nil {
+		return false
 	}
-
-	if strings.Contains(signName, ",") {
-		rawSigns := strings.Split(signName, ",")
-		for _, rawSign := range rawSigns {
-			signs := SingleSign(strings.TrimSpace(rawSign))
-			if len(signs) > 0 {
-				Signs = append(Signs, signs...)
-			}
-		}
-	} else {
-		signs := SingleSign(strings.TrimSpace(signName))
-		if len(signs) > 0 {
-			Signs = append(Signs, signs...)
-		}
-	}
-
-	return Signs
+	return r.MatchString(raw)
 }
 
-// SingleSign select signature by single selector
-func SingleSign(signName string) []string {
-	if strings.HasPrefix(signName, "~") {
-		signName, _ = homedir.Expand(signName)
-	}
+// StripName strip a file name
+func StripName(raw string) string {
+	return strings.Replace(raw, "/", "_", -1)
+}
 
-	var Signs []string
-	if strings.HasSuffix(signName, ".yaml") {
-		if FileExists(signName) {
-			Signs = append(Signs, signName)
-		}
-	}
-	// get more sign nature
-	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
-		asbPath, _ := filepath.Abs(signName)
-		baseSelect := filepath.Base(signName)
-		rawSigns := GetFileNames(filepath.Dir(asbPath), "yaml")
-		for _, signFile := range rawSigns {
-			baseSign := filepath.Base(signFile)
-			if len(baseSign) == 1 && baseSign == "*" {
-				Signs = append(Signs, signFile)
-				continue
-			}
-			r, err := regexp.Compile(baseSelect)
-			if err != nil {
-				continue
-			}
-			if r.MatchString(baseSign) {
-				Signs = append(Signs, signFile)
-			}
-		}
-	}
-	return Signs
+// MoveFolder move folder
+func MoveFolder(src string, dest string) {
+	os.Rename(NormalizePath(src), NormalizePath(dest))
 }

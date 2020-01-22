@@ -1,7 +1,11 @@
 .DS_STORE
 .goreleaser.yml
+.idea
+.vscode
 dist
 out
+passive*
 old-out
 http-out
 test-sign
+test-scripts

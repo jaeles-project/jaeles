@@ -7,7 +7,7 @@ import (
 
 	"github.com/jaeles-project/jaeles/libs"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/jaeles-project/jaeles/database/models"
 )
 

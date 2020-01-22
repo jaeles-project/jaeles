@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/jaeles-project/jaeles/utils"
 	"net/url"
 	"time"
 
@@ -13,13 +14,11 @@ import (
 
 // Background main function to call other background task
 func Background(options libs.Options) {
-	if options.Debug {
-		libs.InforF("Checking backround task")
-	}
+	utils.DebugF("Checking backround task")
 	time.Sleep(time.Duration(options.Refresh) * time.Second)
 	PollingLog()
 	PickupLog(options)
-	// @TODO: Add passive signature for analyze each request
+	// @TODO: Add passive signature for analyzer each request
 }
 
 // PollingLog polling all request with their

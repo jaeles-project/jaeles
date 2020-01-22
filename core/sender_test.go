@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/jaeles-project/jaeles/sender"
 	"strings"
 	"testing"
 
@@ -20,7 +21,7 @@ func TestReallySending(t *testing.T) {
 
 	var opt libs.Options
 	// opt.Proxy = "http://127.0.0.1:8080"
-	res, err := JustSend(opt, req)
+	res, err := sender.JustSend(opt, req)
 	if err != nil {
 		t.Errorf("Error sending request")
 	}
@@ -31,7 +32,7 @@ func TestReallySending(t *testing.T) {
 	}
 	// sending with POST data
 	req.Body = "example1=23"
-	res, err = JustSend(opt, req)
+	res, err = sender.JustSend(opt, req)
 	if err != nil {
 		t.Errorf("Error sending request")
 	}
@@ -41,7 +42,7 @@ func TestReallySending(t *testing.T) {
 	}
 
 	req.Body = `{"example1": "3333"}`
-	res, err = JustSend(opt, req)
+	res, err = sender.JustSend(opt, req)
 	if err != nil {
 		t.Errorf("Error sending request")
 	}

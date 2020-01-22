@@ -3,6 +3,7 @@ package core
 import (
 	"crypto/sha1"
 	"fmt"
+	"github.com/jaeles-project/jaeles/sender"
 	"net/url"
 	"os"
 	"path"
@@ -11,22 +12,21 @@ import (
 	"github.com/fatih/color"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 )
 
-// Analyze run analyze with each detections
-func Analyze(options libs.Options, rec *libs.Record) {
-	if options.Debug {
-		libs.DebugF(strings.Join(rec.Request.Detections, " "))
-	}
+// Analyze run analyzer with each detections
+func Analyze(options libs.Options, record *libs.Record) {
 	/* Analyze part */
-	if rec.Request.Beautify == "" {
-		rec.Request.Beautify = BeautifyRequest(rec.Request)
+	if record.Request.Beautify == "" {
+		record.Request.Beautify = sender.BeautifyRequest(record.Request)
 	}
 
-	for _, analyze := range rec.Request.Detections {
-		extra, result := RunDetector(*rec, analyze)
+	for _, analyze := range record.Request.Detections {
+		utils.DebugF("[Detection] %v", analyze)
+		extra, result := RunDetector(*record, analyze)
 		if extra != "" {
-			rec.ExtraOutput = extra
+			record.ExtraOutput = extra
 		}
 		if result == true {
 			if options.Verbose {
@@ -34,11 +34,11 @@ func Analyze(options libs.Options, rec *libs.Record) {
 			}
 			var outputName string
 			if options.NoOutput == false {
-				outputName = StoreOutput(*rec, options)
-				rec.RawOutput = outputName
-				database.ImportRecord(*rec)
+				outputName = StoreOutput(*record, options)
+				record.RawOutput = outputName
+				database.ImportRecord(*record)
 			}
-			color.Green("[Vulnerable][%v] %v %v", rec.Sign.Info.Risk, rec.Request.URL, outputName)
+			color.Green("[Vulnerable][%v] %v %v", record.Sign.Info.Risk, record.Request.URL, outputName)
 		}
 	}
 }
@@ -84,9 +84,9 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if _, err := os.Stat(path.Dir(p)); os.IsNotExist(err) {
 		err = os.MkdirAll(path.Dir(p), 0750)
 		if err != nil {
-			libs.ErrorF("Error Write content to: %v", p)
+			utils.ErrorF("Error Write content to: %v", p)
 		}
 	}
-	WriteToFile(p, content)
+	utils.WriteToFile(p, content)
 	return p
 }

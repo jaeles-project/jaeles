@@ -2,16 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jaeles-project/jaeles/sender"
 	"os"
-	"path"
 	"path/filepath"
 	"sync"
 
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 	"github.com/thoas/go-funk"
 
-	"github.com/fatih/color"
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/spf13/cobra"
 )
@@ -37,16 +37,9 @@ func init() {
 }
 
 func runScan(cmd *cobra.Command, args []string) error {
-	// DB connect
-	dbPath := path.Join(options.RootFolder, "sqlite.db")
-	db, err := database.InitDB(dbPath)
-	if err != nil {
-		panic("err open databases")
-	}
-	defer db.Close()
-	signs := []string{}
-	urls := []string{}
-	info := color.HiBlueString("[*]")
+	var err error
+	var signs []string
+	var urls []string
 
 	// create output folder
 	err = os.MkdirAll(options.Output, 0750)
@@ -58,7 +51,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	ssrf, _ := cmd.Flags().GetString("ssrf")
 	if ssrf != "" {
 		if options.Verbose {
-			libs.InforF("SSRF set: %v ", ssrf)
+			utils.InforF("SSRF set: %v ", ssrf)
 		}
 		database.ImportBurpCollab(ssrf)
 	}
@@ -70,13 +63,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 		urls = append(urls, urlInput)
 	}
 	if urlFile != "" {
-		URLs := core.ReadingFile(urlFile)
+		URLs := utils.ReadingLines(urlFile)
 		for _, url := range URLs {
 			urls = append(urls, url)
 		}
 	}
 	if len(urls) == 0 {
-		libs.ErrorF("No Input found")
+		utils.ErrorF("No Input found")
 		os.Exit(1)
 	}
 
@@ -86,7 +79,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	// search signature through Signatures table
 	Signs := database.SelectSign(signName)
 	signs = append(signs, Signs...)
-	libs.InforF("Signatures Loaded: %v", len(signs))
+	utils.InforF("Signatures Loaded: %v", len(signs))
 
 	// create new scan or group with old one
 	var scanID string
@@ -95,7 +88,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	} else {
 		scanID = options.ScanID
 	}
-	libs.InforF("Start Scan with ID: %v", scanID)
+	utils.InforF("Start Scan with ID: %v", scanID)
 	options.ScanID = scanID
 
 	if len(signs) == 0 {
@@ -104,12 +97,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	if options.Verbose {
-		fmt.Printf("%v Signature Loaded: ", info)
+		signInfo := fmt.Sprintf("Signature Loaded: ")
 		for _, signName := range signs {
-			fmt.Printf("%v ", filepath.Base(signName))
+			signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
 		}
-		fmt.Printf("\n")
-		libs.InforF("Input Loaded: %v", len(urls))
+		// fmt.Printf("\n")
+		utils.InforF(signInfo)
+		utils.InforF("Input Loaded: %v", len(urls))
 	}
 
 	// get origin request from a file
@@ -117,7 +111,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	var OriginRaw libs.Request
 	var RawRequest string
 	if raw != "" {
-		RawRequest = core.GetFileContent(raw)
+		RawRequest = utils.GetFileContent(raw)
 		OriginRaw = core.ParseBurpRequest(RawRequest)
 	}
 
@@ -141,7 +135,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 		wg.Add(1)
 		go func() {
 			for job := range jobs {
-				// job := <-jobs
 				sign := job.Sign
 				url := job.URL
 
@@ -152,6 +145,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 				if RawRequest != "" {
 					sign.RawRequest = RawRequest
 				}
+				// really run the job
 				runJob(url, sign, options)
 			}
 			wg.Done()
@@ -162,12 +156,11 @@ func runScan(cmd *cobra.Command, args []string) error {
 	for _, signFile := range signs {
 		sign, err := core.ParseSign(signFile)
 		if err != nil {
-			libs.ErrorF("Error parsing YAML sign %v", signFile)
+			utils.ErrorF("Error parsing YAML sign %v", signFile)
 			continue
 		}
 		for _, url := range urls {
 			jobs <- Job{url, sign}
-
 		}
 	}
 
@@ -177,83 +170,161 @@ func runScan(cmd *cobra.Command, args []string) error {
 }
 
 func runJob(url string, sign libs.Signature, options libs.Options) {
-	sign.Target = core.ParseTarget(url)
-	sign.Target = core.MoreVariables(sign.Target, options)
-
-	var originReq libs.Request
-	var originRes libs.Response
+	// var signatures []libs.Signature
+	var originRec libs.Record
 	var err error
+
+	// prepare initial signature and variables
+	Target := core.ParseTarget(url)
+	Target = core.MoreVariables(Target, options)
+
+	// sending original
 	if sign.Origin.Method != "" {
+		var originReq libs.Request
+		var originRes libs.Response
 		if sign.Origin.Raw == "" {
 			originReq = core.ParseRequest(sign.Origin, sign, options)[0]
 		} else {
 			originReq = sign.Origin
 		}
-
-		originRes, err = core.JustSend(options, originReq)
+		originRes, err = sender.JustSend(options, originReq)
 		if err == nil {
 			if options.Verbose && (originReq.Method != "") {
 				fmt.Printf("[Sent-Origin] %v %v \n", originReq.Method, originReq.URL)
 			}
 		}
+		originRec.Request = originReq
+		originRec.Response = originRes
 	}
 
+	globalVariables := core.ParseVariable(sign)
+	if len(globalVariables) > 0 {
+		for _, globalVariable := range globalVariables {
+			sign.Target = Target
+			for k, v := range globalVariable {
+				sign.Target[k] = v
+			}
+			singleJob(originRec, sign)
+		}
+	} else {
+		sign.Target = Target
+		singleJob(originRec, sign)
+	}
+
+}
+
+func singleJob(originRec libs.Record, sign libs.Signature) {
 	// start to send stuff
 	for _, req := range sign.Requests {
+		// receive request from "-r req.txt"
 		if sign.RawRequest != "" {
 			req.Raw = sign.RawRequest
 		}
+		// gen bunch of request to send
 		realReqs := core.ParseRequest(req, sign, options)
-		if req.Repeat > 0 {
-			realReqsWithRepeat := realReqs
-			for i := 0; i < req.Repeat-1; i++ {
-				realReqsWithRepeat = append(realReqsWithRepeat, realReqs...)
+		// sending things
+		sendRequest(realReqs, sign, originRec)
+	}
+}
+
+// sending request generated
+func sendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Record) {
+	if len(realReqs) == 0 {
+		return
+	}
+
+	for _, realReq := range realReqs {
+		var realRec libs.Record
+		// set some stuff
+		realRec.OriginReq = originRec.Request
+		realRec.OriginRes = originRec.Response
+		realRec.Request = realReq
+		realRec.Request.Target = sign.Target
+		realRec.Sign = sign
+		realRec.ScanID = options.ScanID
+
+		// replace things second time here with values section
+		core.AltResolveRequest(&realRec.Request)
+
+		// check conditions
+		if len(realRec.Request.Conditions) > 0 {
+			validate := checkConditions(realRec)
+			if !validate {
+				return
 			}
-			realReqs = realReqsWithRepeat
 		}
 
-		if len(realReqs) > 0 {
-			for _, realReq := range realReqs {
-				var realRec libs.Record
-				// set some stuff
-				realRec.Request = realReq
-				realRec.Request.Target = sign.Target
-				realRec.OriginReq = originReq
-				realRec.OriginRes = originRes
-				realRec.Sign = sign
-				realRec.ScanID = options.ScanID
+		// run middleware here
+		if !funk.IsEmpty(realRec.Request.Middlewares) {
+			core.MiddleWare(&realRec, options)
+		}
 
-				// run middleware here
-				req := realRec.Request
-				if !funk.IsEmpty(req.Middlewares) {
-					core.MiddleWare(&realRec, options)
-				}
-
-				// if middleware return the response skip sending it
-				if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" {
-					res, _ := core.JustSend(options, req)
-					realRec.Request = req
-					realRec.Response = res
-				}
-				// print some log
-				if options.Verbose && realRec.Request.Method != "" {
-					fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
-				}
-				// record <- realRec
-				if options.Debug {
-					if realRec.Request.MiddlewareOutput != "" {
-						libs.DebugF(realRec.Request.MiddlewareOutput)
-					}
-				}
-
-				// resolve detection this time because we need parse something in the variable
-				target := core.ParseTarget(realRec.Request.URL)
-				target = core.MoreVariables(target, options)
-				realRec.Request.Detections = core.ResolveDetection(realRec.Request.Detections, target)
-				// start to run detection
-				core.Analyze(options, &realRec)
+		req := realRec.Request
+		// if middleware return the response skip sending it
+		if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" && realRec.Request.MiddlewareOutput == "" {
+			var res libs.Response
+			// sending with real browser
+			if req.Engine == "chrome" {
+				res, _ = sender.SendWithChrome(options, req)
+			} else {
+				res, _ = sender.JustSend(options, req)
 			}
+			realRec.Request = req
+			realRec.Response = res
+		}
+
+		doAnalyze(realRec, &sign)
+	}
+
+}
+
+func doAnalyze(realRec libs.Record, sign *libs.Signature) {
+	// print some log
+	if options.Verbose && realRec.Request.Method != "" {
+		if realRec.Response.StatusCode != 0 {
+			fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
+		}
+
+		// middleware part
+		if realRec.Request.MiddlewareOutput != "" {
+			libs.DebugF(realRec.Request.MiddlewareOutput)
 		}
 	}
 
+	// print some log
+	if options.Verbose && realRec.Request.Method != "" {
+		if realRec.Response.StatusCode != 0 {
+			fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
+		}
+		// middleware part
+		if realRec.Request.MiddlewareOutput != "" {
+			libs.DebugF(realRec.Request.MiddlewareOutput)
+		}
+	}
+
+	// set new values for next request here
+	core.RunConclusions(realRec, sign)
+	// really do analyzer
+	core.Analyze(options, &realRec)
+	// do passive scan
+
+	if options.EnablePassive {
+		core.PassiveAnalyze(options, realRec)
+		//	go func() {
+		//		utils.DebugF("Passive Analyze")
+		//		core.PassiveAnalyze(options, realRec)
+		//	}()
+	}
+}
+
+// check conditions before sending request
+func checkConditions(record libs.Record) bool {
+	for _, conditionString := range record.Request.Conditions {
+		utils.DebugF("[conditionString] %v", conditionString)
+		_, check := core.RunDetector(record, conditionString)
+		if !check {
+			return false
+		}
+	}
+	return true
 }

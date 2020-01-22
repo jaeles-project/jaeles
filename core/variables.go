@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/jaeles-project/jaeles/libs"
+	"github.com/jaeles-project/jaeles/utils"
 	"github.com/robertkrimen/otto"
 )
 
@@ -109,7 +110,7 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 	// make all variable to same length
 	Variables := make(map[string][]string)
 	for k, v := range rawVariables {
-		Variables[k] = ExpandLength(v, maxLength)
+		Variables[k] = utils.ExpandLength(v, maxLength)
 	}
 
 	// join all together to make list of map variable
@@ -130,11 +131,10 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 		for k, v := range realVariables[index] {
 			val := fmt.Sprintf("%v%v", k, v)
 			if _, ok := seen[val]; !ok {
-				fmt.Println(k, v)
+				// fmt.Println(k, v)
 				seen[val] = true
 				uniqVariables = append(uniqVariables, realVariables[index])
 			}
-
 		}
 	}
 
@@ -150,9 +150,19 @@ func RunVariables(variableString string) []string {
 
 	vm := otto.New()
 
+	vm.Set("ExecJS", func(call otto.FunctionCall) otto.Value {
+		jscode := call.Argument(0).String()
+		value, err := vm.Run(jscode)
+		if err == nil {
+			data := value.String()
+			extra = append(extra, data)
+		}
+		return otto.Value{}
+	})
+
 	vm.Set("File", func(call otto.FunctionCall) otto.Value {
 		filename := call.Argument(0).String()
-		data := ReadingFile(filename)
+		data := utils.ReadingLines(filename)
 		if len(data) > 0 {
 			extra = append(extra, data...)
 		}

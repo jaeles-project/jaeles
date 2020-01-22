@@ -4,7 +4,7 @@
 .vscode
 dist
 out
-passive*
+passive-*
 old-out
 http-out
 test-sign

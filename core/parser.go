@@ -446,11 +446,10 @@ func ParseRequestFromServer(record *libs.Record, req libs.Request, sign libs.Sig
 	record.Request.Middlewares = req.Middlewares
 	record.Request.Redirect = req.Redirect
 
-	// resolve some template
+	// resolve template
 	target := ParseTarget(record.Request.URL)
 	record.Request.URL = ResolveVariable(record.Request.Path, target)
 	record.Request.Body = ResolveVariable(record.Request.Body, target)
 	record.Request.Headers = ResolveHeader(record.Request.Headers, target)
-	// record.Request.Detections = ResolveDetection(req.Detections, target)
-	record.Request.Detections = req.Detections
+	record.Request.Detections = ResolveDetection(req.Detections, target)
 }

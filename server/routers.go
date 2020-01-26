@@ -34,7 +34,9 @@ type User struct {
 // InitRouter start point of api server
 func InitRouter(options libs.Options, result chan libs.Record) {
 	// turn off Gin debug mode
-	gin.SetMode(gin.ReleaseMode)
+	if !options.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
@@ -62,7 +64,7 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 
 	// the jwt middleware
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm:       "test zone",
+		Realm:       "jaeles server",
 		Key:         []byte(secret),
 		Timeout:     time.Hour * 360,
 		MaxRefresh:  time.Hour * 720,
@@ -141,7 +143,7 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
 		auth.GET("/ping", Ping)
-		auth.POST("/parse", ReciveRequest(result))
+		auth.POST("/parse", ReceiveRequest(result))
 		auth.POST("/config/sign", UpdateDefaultSign)
 		auth.GET("/stats/vuln", GetStats)
 		auth.GET("/stats/sign", GetSignSummary)

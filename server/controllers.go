@@ -77,18 +77,18 @@ func ParseRaw(c *gin.Context) {
 	})
 }
 
-// ReciveRequest is handler to got  request from Burp
-func ReciveRequest(result chan libs.Record) gin.HandlerFunc {
+// ReceiveRequest is handler to got  request from Burp
+func ReceiveRequest(result chan libs.Record) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cCp := c.Copy()
 		var reqData RequestData
 		err := cCp.ShouldBindJSON(&reqData)
-
 		if err != nil {
 			c.JSON(200, gin.H{
 				"status":  "500",
 				"message": "Error parsing JSON data",
 			})
+			return
 		}
 		var record libs.Record
 		// core data
@@ -103,14 +103,13 @@ func ReciveRequest(result chan libs.Record) gin.HandlerFunc {
 				"status":  "500",
 				"message": "Error parsing request",
 			})
+			return
 		}
 		record.OriginReq = core.ParseBurpRequest(string(req))
 		if URL != "" {
 			record.OriginReq.URL = URL
 		}
-
-		info := color.HiBlueString("[*]")
-		fmt.Printf("%v Recive Request: %v %v \n", info, record.OriginReq.Method, record.OriginReq.URL)
+		//fmt.Printf("[Recive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
 
 		/* Response part */
 		if rawRes != "" {

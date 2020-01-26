@@ -24,7 +24,7 @@ func init() {
 		RunE:  runConfig,
 	}
 	configCmd.Flags().Bool("clean", false, "Force continued operation when wildcard found")
-	configCmd.Flags().Int16P("level", "l", 1, "Provide custom header seperate by ';'")
+	//configCmd.Flags().Int16P("level", "l", 1, "Provide custom header seperate by ';'")
 	configCmd.Flags().StringP("action", "a", "select", "Action")
 	configCmd.Flags().StringP("sign", "s", "", "Select signature")
 	// load signature

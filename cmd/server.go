@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jaeles-project/jaeles/sender"
-	"log"
-	"strings"
+	"path"
+	"path/filepath"
 	"sync"
 
 	"github.com/jaeles-project/jaeles/core"
@@ -14,7 +13,6 @@ import (
 	"github.com/jaeles-project/jaeles/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/thoas/go-funk"
 )
 
 var serverCmd *cobra.Command
@@ -35,19 +33,28 @@ func init() {
 }
 
 func runServer(cmd *cobra.Command, args []string) error {
+	// prepare DB stuff
+	if options.Server.Username != "" {
+		database.CreateUser(options.Server.Username, options.Server.Password)
+	}
+	// reload signature
+	SignFolder, _ := filepath.Abs(path.Join(options.RootFolder, "base-signatures"))
+	allSigns := utils.GetFileNames(SignFolder, ".yaml")
+	if allSigns != nil {
+		for _, signFile := range allSigns {
+			database.ImportSign(signFile)
+		}
+	}
+	database.InitConfigSign()
+
 	result := make(chan libs.Record)
-	jobs := make(chan libs.Record, options.Concurrency)
+	jobs := make(chan libs.Job)
 
 	go func() {
 		for {
 			Signs := []string{}
 			signName, _ := cmd.Flags().GetString("sign")
 			// Get exactly signature
-			if strings.HasSuffix(signName, ".yaml") {
-				if utils.FileExists(signName) {
-					Signs = append(Signs, signName)
-				}
-			}
 			if signName != "" {
 				signs := core.SelectSign(signName)
 				Signs = append(Signs, signs...)
@@ -55,87 +62,84 @@ func runServer(cmd *cobra.Command, args []string) error {
 				signName = database.GetDefaultSign()
 			}
 			Signs = append(Signs, database.SelectSign(signName)...)
-			utils.InforF("Signatures Loaded: %v", len(Signs))
+			signInfo := ""
+			for _, signName := range Signs {
+				signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
+			}
+			utils.InforF("Number of Signatures Loaded: %v", len(Signs))
+			utils.InforF("Signatures Loaded : %v", signInfo)
 
 			// create new scan or group with old one
-			var scanID string
 			if options.ScanID == "" {
-				scanID = database.NewScan(options, "scan", Signs)
-			} else {
-				scanID = options.ScanID
+				options.ScanID = database.NewScan(options, "scan", Signs)
 			}
+
 			record := <-result
+			utils.InforF("[Receive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
+
 			for _, signFile := range Signs {
 				sign, err := core.ParseSign(signFile)
 				if err != nil {
-					log.Printf("Error loading sign: %v\n", signFile)
+					utils.ErrorF("Error loading sign: %v\n", signFile)
 					continue
 				}
 				// parse sign as list or single
-				if sign.Type == "list" || sign.Type == "single" || sign.Type == "" {
+				if sign.Type != "fuzz" {
 					url := record.OriginReq.URL
-					sign.Target = core.ParseTarget(url)
-					sign.Target = core.MoreVariables(sign.Target, options)
-					for _, req := range sign.Requests {
-						realReqs := core.ParseRequest(req, sign, options)
-						if req.Repeat > 0 {
-							for i := 0; i < req.Repeat; i++ {
-								realReqs = append(realReqs, realReqs...)
-							}
-						}
-						if len(realReqs) > 0 {
-							for _, realReq := range realReqs {
-								var realRec libs.Record
-								realRec.Request = realReq
-								realRec.Request.Target = sign.Target
-								realRec.OriginReq = record.OriginReq
-								realRec.Sign = sign
-								realRec.ScanID = scanID
+					jobs <- libs.Job{URL: url, Sign: sign}
 
-								jobs <- realRec
-							}
-						}
-					}
 				} else {
-					// parse fuzz sign
+
+					fuzzSign := sign
+					fuzzSign.Requests = []libs.Request{}
 					for _, req := range sign.Requests {
 						core.ParseRequestFromServer(&record, req, sign)
-						// send origin request
-						originRes, err := sender.JustSend(options, record.OriginReq)
-						if err == nil {
-							record.OriginRes = originRes
-							if options.Verbose {
-								fmt.Printf("[Sent-Origin] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
-							}
-						}
+						// append all requests in sign with request from api
+						req.Method = record.Request.Method
+						req.URL = record.Request.URL
+						req.Headers = record.Request.Headers
+						req.Body = record.Request.Body
+						fuzzSign.Requests = append(fuzzSign.Requests, req)
 
-						Reqs := core.ParseFuzzRequest(record, sign)
-						if record.Request.Repeat > 0 {
-							for i := 0; i < record.Request.Repeat; i++ {
-								Reqs = append(Reqs, Reqs...)
-							}
-						}
-
-						if len(Reqs) > 0 {
-							for _, Req := range Reqs {
-								// if options.Debug {
-								// 	fmt.Printf("Path: %v \n", Req.Path)
-								// 	fmt.Printf("URL: %v \n", Req.URL)
-								// 	fmt.Printf("Body: %v \n", Req.Body)
-								// 	fmt.Printf("Headers: %v \n", Req.Headers)
-								// 	fmt.Printf("--------------\n")
-								// }
-								Rec := record
-								Rec.Request = Req
-								Rec.Sign = sign
-								Rec.ScanID = scanID
-
-								jobs <- Rec
-							}
-						}
 					}
-				}
+					url := record.OriginReq.URL
+					jobs <- libs.Job{URL: url, Sign: fuzzSign}
 
+					// parse fuzz sign
+					//for _, req := range sign.Requests {
+					//	core.ParseRequestFromServer(&record, req, sign)
+					//
+					//	// send origin request
+					//	originRes, err := sender.JustSend(options, record.OriginReq)
+					//
+					//	if err == nil {
+					//		record.OriginRes = originRes
+					//		if options.Verbose {
+					//			fmt.Printf("[Sent-Origin] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
+					//		}
+					//	}
+					//	Reqs := core.ParseFuzzRequest(record, sign)
+					//
+					//	if record.Request.Repeat > 0 {
+					//		for i := 0; i < record.Request.Repeat; i++ {
+					//			Reqs = append(Reqs, Reqs...)
+					//		}
+					//	}
+					//
+					//	if len(Reqs) > 0 {
+					//		for _, Req := range Reqs {
+					//
+					//			Rec := record
+					//			Rec.Request = Req
+					//			Rec.Sign = sign
+					//			Rec.ScanID = scanID
+					//
+					//			//jobs <- Rec
+					//		}
+					//	}
+					//}
+
+				}
 			}
 
 		}
@@ -147,25 +151,40 @@ func runServer(cmd *cobra.Command, args []string) error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for realRec := range jobs {
-				// run middleware here
-				req := realRec.Request
-				if !funk.IsEmpty(req.Middlewares) {
-					core.MiddleWare(&realRec, options)
-				}
-				// if middleware return a response skip sending the request
-				if realRec.Response.StatusCode == 0 {
-					res, err := sender.JustSend(options, req)
-					if err != nil {
-						continue
-					}
-					realRec.Response = res
-				}
+			for job := range jobs {
+				sign := job.Sign
+				url := job.URL
+				RunJob(url, sign, options)
 
-				if options.Verbose {
-					fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
-				}
-				core.Analyze(options, &realRec)
+				//
+				//// get origin from -r req.txt options
+				//if OriginRaw.Raw != "" {
+				//	sign.Origin = OriginRaw
+				//}
+				//if RawRequest != "" {
+				//	sign.RawRequest = RawRequest
+				//}
+				// really run the job
+
+				//
+				//// run middleware here
+				//req := realRec.Request
+				//if !funk.IsEmpty(req.Middlewares) {
+				//	core.MiddleWare(&realRec, options)
+				//}
+				//// if middleware return a response skip sending the request
+				//if realRec.Response.StatusCode == 0 {
+				//	res, err := sender.JustSend(options, req)
+				//	if err != nil {
+				//		continue
+				//	}
+				//	realRec.Response = res
+				//}
+				//
+				//if options.Verbose {
+				//	fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
+				//}
+				//core.Analyze(options, &realRec)
 			}
 		}()
 	}
@@ -177,7 +196,6 @@ func runServer(cmd *cobra.Command, args []string) error {
 	utils.InforF("Start API server at %v", fmt.Sprintf("http://%v/#/", bind))
 
 	server.InitRouter(options, result)
-
 	// wg.Wait()
 	return nil
 }

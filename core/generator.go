@@ -389,10 +389,10 @@ func Path(req libs.Request, arguments []otto.Value) []libs.Request {
 			newPaths := Paths
 			newPaths[injectPos] = newValue
 			reallyNewPaths := strings.Join(newPaths[:], "/")
-			// in case we miss the first /
-			if !strings.HasPrefix(reallyNewPaths, "/") {
-				reallyNewPaths = "/" + reallyNewPaths
-			}
+			//// in case we miss the first /
+			//if !strings.HasPrefix(reallyNewPaths, "/") {
+			//	reallyNewPaths = "/" + reallyNewPaths
+			//}
 			injectedReq.URL = target["BaseURL"] + reallyNewPaths
 			injectedReq.Target = target
 			reqs = append(reqs, injectedReq)

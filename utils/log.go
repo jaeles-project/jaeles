@@ -27,6 +27,7 @@ func InitLog(options *libs.Options) {
 			ForceFormatting: true,
 		},
 	}
+
 	if options.LogFile != "" {
 		options.LogFile = NormalizePath(options.LogFile)
 		dir := path.Dir(options.LogFile)
@@ -52,13 +53,13 @@ func InitLog(options *libs.Options) {
 		}
 	}
 
-	// defer f.Close()
-	logger.SetOutput(ioutil.Discard)
-
 	if options.Debug == true {
 		logger.SetLevel(logrus.DebugLevel)
 	} else if options.Verbose == true {
+		logger.SetOutput(os.Stdout)
 		logger.SetLevel(logrus.InfoLevel)
+	} else {
+		logger.SetOutput(ioutil.Discard)
 	}
 	if options.LogFile != "" {
 		logger.Info(fmt.Sprintf("Store log file to: %v", options.LogFile))

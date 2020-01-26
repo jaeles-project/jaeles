@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var options = libs.Options{}
@@ -72,7 +71,7 @@ func initConfig() {
 
 	// Init DB
 	var err error
-	DB, err = database.InitDB(options.Server.DBPath)
+	DB, err = database.InitDB(utils.NormalizePath(options.Server.DBPath))
 	if err != nil {
 		fmt.Printf("Can't connect to DB at %v\n", options.Server.DBPath)
 		os.Exit(-1)

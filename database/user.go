@@ -3,6 +3,7 @@ package database
 import (
 	"crypto/sha1"
 	"fmt"
+	"github.com/jaeles-project/jaeles/utils"
 	"strconv"
 	"time"
 
@@ -35,6 +36,8 @@ func CreateUser(username string, password string) {
 			Secret:   GenHash(rawSecret),
 			Token:    GenHash(rawToken),
 		}
+		utils.GoodF("Create new credentials %v:%v", username, password)
+
 		DB.Create(&userObj)
 	}
 }

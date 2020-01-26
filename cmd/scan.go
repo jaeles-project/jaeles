@@ -95,16 +95,12 @@ func runScan(cmd *cobra.Command, args []string) error {
 		fmt.Println("[Error] No signature loaded")
 		os.Exit(1)
 	}
-
-	if options.Verbose {
-		signInfo := fmt.Sprintf("Signature Loaded: ")
-		for _, signName := range signs {
-			signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
-		}
-		// fmt.Printf("\n")
-		utils.InforF(signInfo)
-		utils.InforF("Input Loaded: %v", len(urls))
+	signInfo := fmt.Sprintf("Signature Loaded: ")
+	for _, signName := range signs {
+		signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
 	}
+	utils.InforF(signInfo)
+	utils.InforF("Input Loaded: %v", len(urls))
 
 	// get origin request from a file
 	raw, _ := cmd.Flags().GetString("raw")
@@ -115,6 +111,8 @@ func runScan(cmd *cobra.Command, args []string) error {
 		OriginRaw = core.ParseBurpRequest(RawRequest)
 	}
 
+	// Really start do something
+
 	// run background detector
 	if !options.NoBackGround {
 		go func() {
@@ -124,11 +122,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	type Job struct {
-		URL  string
-		Sign libs.Signature
-	}
-	jobs := make(chan Job)
+	jobs := make(chan libs.Job)
 
 	var wg sync.WaitGroup
 	for i := 0; i < options.Concurrency; i++ {
@@ -146,7 +140,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 					sign.RawRequest = RawRequest
 				}
 				// really run the job
-				runJob(url, sign, options)
+				RunJob(url, sign, options)
 			}
 			wg.Done()
 		}()
@@ -160,7 +154,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 			continue
 		}
 		for _, url := range urls {
-			jobs <- Job{url, sign}
+			jobs <- libs.Job{url, sign}
 		}
 	}
 
@@ -169,7 +163,8 @@ func runScan(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func runJob(url string, sign libs.Signature, options libs.Options) {
+// RunJob really run the job
+func RunJob(url string, sign libs.Signature, options libs.Options) {
 	// var signatures []libs.Signature
 	var originRec libs.Record
 	var err error
@@ -182,11 +177,13 @@ func runJob(url string, sign libs.Signature, options libs.Options) {
 	if sign.Origin.Method != "" {
 		var originReq libs.Request
 		var originRes libs.Response
+
 		if sign.Origin.Raw == "" {
 			originReq = core.ParseRequest(sign.Origin, sign, options)[0]
 		} else {
 			originReq = sign.Origin
 		}
+
 		originRes, err = sender.JustSend(options, originReq)
 		if err == nil {
 			if options.Verbose && (originReq.Method != "") {
@@ -223,12 +220,12 @@ func singleJob(originRec libs.Record, sign libs.Signature) {
 		// gen bunch of request to send
 		realReqs := core.ParseRequest(req, sign, options)
 		// sending things
-		sendRequest(realReqs, sign, originRec)
+		SendRequest(realReqs, sign, originRec)
 	}
 }
 
-// sending request generated
-func sendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Record) {
+// SendRequest sending request generated
+func SendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Record) {
 	if len(realReqs) == 0 {
 		return
 	}
@@ -273,12 +270,12 @@ func sendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Re
 			realRec.Response = res
 		}
 
-		doAnalyze(realRec, &sign)
+		DoAnalyze(realRec, &sign)
 	}
 
 }
 
-func doAnalyze(realRec libs.Record, sign *libs.Signature) {
+func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 	// print some log
 	if options.Verbose && realRec.Request.Method != "" {
 		if realRec.Response.StatusCode != 0 {

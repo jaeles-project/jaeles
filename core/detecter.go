@@ -25,6 +25,8 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()
 		component := GetComponent(record, componentName)
+		fmt.Println(component)
+
 		validate := StringSearch(component, analyzeString)
 		result, _ := vm.ToValue(validate)
 		return result
@@ -148,9 +150,9 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 // GetComponent get component to run detection
 func GetComponent(record libs.Record, component string) string {
 	switch strings.ToLower(component) {
-	case "oRequest":
+	case "orequest":
 		return record.OriginReq.Beautify
-	case "oResponse":
+	case "oresponse":
 		return record.OriginRes.Beautify
 	case "request":
 		return record.Request.Beautify
@@ -159,7 +161,7 @@ func GetComponent(record libs.Record, component string) string {
 			return record.Response.Body
 		}
 		return record.Response.Beautify
-	case "resHeaders":
+	case "resheaders":
 		beautifyHeader := fmt.Sprintf("%v \n", record.Response.Status)
 		for _, header := range record.Response.Headers {
 			for key, value := range header {
@@ -167,7 +169,7 @@ func GetComponent(record libs.Record, component string) string {
 			}
 		}
 		return beautifyHeader
-	case "resBody":
+	case "resbody":
 		return record.Response.Body
 	case "middleware":
 		return record.Request.MiddlewareOutput

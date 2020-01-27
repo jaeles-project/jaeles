@@ -230,7 +230,6 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	// start parse fuzz req
 	// only take URL as a input from cli
 	var record libs.Record
-	// var Req libs.Request
 
 	// parse raw request in case we have -r options as a origin request
 	if req.Raw != "" {

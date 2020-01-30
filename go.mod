@@ -3,10 +3,10 @@ module github.com/jaeles-project/jaeles
 go 1.13
 
 require (
-	github.com/Jeffail/gabs/v2 v2.3.0
+	github.com/Jeffail/gabs/v2 v2.4.0
 	github.com/Shopify/yaml v2.1.0+incompatible
 	github.com/appleboy/gin-jwt/v2 v2.6.3
-	github.com/chromedp/cdproto v0.0.0-20200119225551-e0b5a74c467f
+	github.com/chromedp/cdproto v0.0.0-20200127141643-96201809f07b
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fatih/color v1.9.0
 	github.com/gin-contrib/cors v1.3.0
@@ -27,6 +27,6 @@ require (
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/src-d/go-git.v4 v4.13.1
-	gopkg.in/yaml.v2 v2.2.7
+	gopkg.in/yaml.v2 v2.2.8
 	moul.io/http2curl v1.0.0 // indirect
 )

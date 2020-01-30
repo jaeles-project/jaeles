@@ -4,6 +4,7 @@ import (
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/robertkrimen/otto"
+	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,6 +24,20 @@ func RunConclusions(record libs.Record, sign *libs.Signature) {
 // RunConclude run conclusion script
 func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature) {
 	vm := otto.New()
+
+	// ExecCmd execute command command
+	vm.Set("ExecCmd", func(call otto.FunctionCall) otto.Value {
+		result, _ := vm.ToValue(Execution(call.Argument(0).String()))
+		return result
+	})
+
+	// write something to a file
+	vm.Set("WriteTo", func(call otto.FunctionCall) otto.Value {
+		dest := utils.NormalizePath(call.Argument(0).String())
+		value := call.Argument(1).String()
+		utils.WriteToFile(dest, value)
+		return otto.Value{}
+	})
 
 	vm.Set("StringSearch", func(call otto.FunctionCall) otto.Value {
 		componentName := call.Argument(0).String()
@@ -159,4 +174,19 @@ func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 		}
 	}
 	return valueName, value
+}
+
+// Execution Run a command
+func Execution(cmd string) string {
+	command := []string{
+		"bash",
+		"-c",
+		cmd,
+	}
+	var output string
+	utils.DebugF("[Exec] %v", command)
+	realCmd := exec.Command(command[0], command[1:]...)
+	out, _ := realCmd.CombinedOutput()
+	output = string(out)
+	return output
 }

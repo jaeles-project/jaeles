@@ -21,12 +21,16 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	var extra string
 	vm := otto.New()
 
+	// ExecCmd execute command command
+	vm.Set("ExecCmd", func(call otto.FunctionCall) otto.Value {
+		result, _ := vm.ToValue(Execution(call.Argument(0).String()))
+		return result
+	})
+
 	vm.Set("StringSearch", func(call otto.FunctionCall) otto.Value {
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()
 		component := GetComponent(record, componentName)
-		fmt.Println(component)
-
 		validate := StringSearch(component, analyzeString)
 		result, _ := vm.ToValue(validate)
 		return result
@@ -136,6 +140,20 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 			return result
 		}
 		result, _ := vm.ToValue(false)
+		return result
+	})
+
+	// check if folder, file exist or not
+	vm.Set("Exist", func(call otto.FunctionCall) otto.Value {
+		input := utils.NormalizePath(call.Argument(0).String())
+		var exist bool
+		if utils.FileExists(input) {
+			exist = true
+		}
+		if utils.FolderExists(input) {
+			exist = true
+		}
+		result, _ := vm.ToValue(exist)
 		return result
 	})
 

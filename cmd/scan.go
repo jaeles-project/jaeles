@@ -178,8 +178,8 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 		var originReq libs.Request
 		var originRes libs.Response
 
+		originSign := sign
 		if sign.Origin.Raw == "" {
-			originSign := sign
 			originSign.Target = Target
 			// only send first request
 			originReq = core.ParseRequest(sign.Origin, originSign, options)[0]
@@ -195,6 +195,13 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 		}
 		originRec.Request = originReq
 		originRec.Response = originRes
+		// set some more variables
+		core.RunConclusions(originRec, &originSign)
+		for k, v := range originSign.Target {
+			if Target[k] == "" {
+				Target[k] = v
+			}
+		}
 	}
 
 	globalVariables := core.ParseVariable(sign)

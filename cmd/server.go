@@ -105,40 +105,6 @@ func runServer(cmd *cobra.Command, args []string) error {
 					url := record.OriginReq.URL
 					jobs <- libs.Job{URL: url, Sign: fuzzSign}
 
-					// parse fuzz sign
-					//for _, req := range sign.Requests {
-					//	core.ParseRequestFromServer(&record, req, sign)
-					//
-					//	// send origin request
-					//	originRes, err := sender.JustSend(options, record.OriginReq)
-					//
-					//	if err == nil {
-					//		record.OriginRes = originRes
-					//		if options.Verbose {
-					//			fmt.Printf("[Sent-Origin] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
-					//		}
-					//	}
-					//	Reqs := core.ParseFuzzRequest(record, sign)
-					//
-					//	if record.Request.Repeat > 0 {
-					//		for i := 0; i < record.Request.Repeat; i++ {
-					//			Reqs = append(Reqs, Reqs...)
-					//		}
-					//	}
-					//
-					//	if len(Reqs) > 0 {
-					//		for _, Req := range Reqs {
-					//
-					//			Rec := record
-					//			Rec.Request = Req
-					//			Rec.Sign = sign
-					//			Rec.ScanID = scanID
-					//
-					//			//jobs <- Rec
-					//		}
-					//	}
-					//}
-
 				}
 			}
 
@@ -155,36 +121,6 @@ func runServer(cmd *cobra.Command, args []string) error {
 				sign := job.Sign
 				url := job.URL
 				RunJob(url, sign, options)
-
-				//
-				//// get origin from -r req.txt options
-				//if OriginRaw.Raw != "" {
-				//	sign.Origin = OriginRaw
-				//}
-				//if RawRequest != "" {
-				//	sign.RawRequest = RawRequest
-				//}
-				// really run the job
-
-				//
-				//// run middleware here
-				//req := realRec.Request
-				//if !funk.IsEmpty(req.Middlewares) {
-				//	core.MiddleWare(&realRec, options)
-				//}
-				//// if middleware return a response skip sending the request
-				//if realRec.Response.StatusCode == 0 {
-				//	res, err := sender.JustSend(options, req)
-				//	if err != nil {
-				//		continue
-				//	}
-				//	realRec.Response = res
-				//}
-				//
-				//if options.Verbose {
-				//	fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
-				//}
-				//core.Analyze(options, &realRec)
 			}
 		}()
 	}

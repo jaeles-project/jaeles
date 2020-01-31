@@ -21,6 +21,9 @@ func Analyze(options libs.Options, record *libs.Record) {
 	if record.Request.Beautify == "" {
 		record.Request.Beautify = sender.BeautifyRequest(record.Request)
 	}
+	if len(record.Request.Detections) <= 0 {
+		return
+	}
 
 	for _, analyze := range record.Request.Detections {
 		utils.DebugF("[Detection] %v", analyze)

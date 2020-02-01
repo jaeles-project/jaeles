@@ -62,7 +62,17 @@ func RunGenerator(req libs.Request, genString string) []libs.Request {
 	vm := otto.New()
 
 	vm.Set("Query", func(call otto.FunctionCall) otto.Value {
-		injectedReq := Query(req, call.ArgumentList)
+		var injectedReq []libs.Request
+		if len(reqs) > 0 {
+			for _, req := range reqs {
+				injectedReq = Query(req, call.ArgumentList)
+				reqs = append(reqs, injectedReq...)
+			}
+		} else {
+			injectedReq = Query(req, call.ArgumentList)
+			reqs = append(reqs, injectedReq...)
+		}
+
 		if len(injectedReq) > 0 {
 			reqs = append(reqs, injectedReq...)
 		}
@@ -70,7 +80,17 @@ func RunGenerator(req libs.Request, genString string) []libs.Request {
 	})
 
 	vm.Set("Body", func(call otto.FunctionCall) otto.Value {
-		injectedReq := Body(req, call.ArgumentList)
+		var injectedReq []libs.Request
+		if len(reqs) > 0 {
+			for _, req := range reqs {
+				injectedReq = Body(req, call.ArgumentList)
+				reqs = append(reqs, injectedReq...)
+			}
+		} else {
+			injectedReq = Body(req, call.ArgumentList)
+			reqs = append(reqs, injectedReq...)
+		}
+
 		if len(injectedReq) > 0 {
 			reqs = append(reqs, injectedReq...)
 		}
@@ -78,7 +98,17 @@ func RunGenerator(req libs.Request, genString string) []libs.Request {
 	})
 
 	vm.Set("Path", func(call otto.FunctionCall) otto.Value {
-		injectedReq := Path(req, call.ArgumentList)
+		var injectedReq []libs.Request
+		if len(reqs) > 0 {
+			for _, req := range reqs {
+				injectedReq = Path(req, call.ArgumentList)
+				reqs = append(reqs, injectedReq...)
+			}
+		} else {
+			injectedReq = Path(req, call.ArgumentList)
+			reqs = append(reqs, injectedReq...)
+		}
+
 		if len(injectedReq) > 0 {
 			reqs = append(reqs, injectedReq...)
 		}
@@ -86,7 +116,17 @@ func RunGenerator(req libs.Request, genString string) []libs.Request {
 	})
 
 	vm.Set("Header", func(call otto.FunctionCall) otto.Value {
-		injectedReq := Header(req, call.ArgumentList)
+		var injectedReq []libs.Request
+		if len(reqs) > 0 {
+			for _, req := range reqs {
+				injectedReq = Header(req, call.ArgumentList)
+				reqs = append(reqs, injectedReq...)
+			}
+		} else {
+			injectedReq = Header(req, call.ArgumentList)
+			reqs = append(reqs, injectedReq...)
+		}
+
 		if len(injectedReq) > 0 {
 			reqs = append(reqs, injectedReq...)
 		}
@@ -94,7 +134,16 @@ func RunGenerator(req libs.Request, genString string) []libs.Request {
 	})
 
 	vm.Set("Cookie", func(call otto.FunctionCall) otto.Value {
-		injectedReq := Cookie(req, call.ArgumentList)
+		var injectedReq []libs.Request
+		if len(reqs) > 0 {
+			for _, req := range reqs {
+				injectedReq = Cookie(req, call.ArgumentList)
+				reqs = append(reqs, injectedReq...)
+			}
+		} else {
+			injectedReq = Cookie(req, call.ArgumentList)
+			reqs = append(reqs, injectedReq...)
+		}
 		if len(injectedReq) > 0 {
 			reqs = append(reqs, injectedReq...)
 		}

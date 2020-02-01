@@ -172,6 +172,33 @@ func JoinURL(base string, child string) string {
 	return result.ResolveReference(u).String()
 }
 
+// ParseOrigin parse origin request
+func ParseOrigin(req libs.Request, sign libs.Signature, options libs.Options) libs.Request {
+	target := sign.Target
+	// resolve some parts with global variables first
+	req.Target = target
+	req.URL = ResolveVariable(req.URL, target)
+	// @NOTE: backward compatible
+	if req.URL == "" && req.Path != "" {
+		req.URL = ResolveVariable(req.Path, target)
+	}
+	req.Body = ResolveVariable(req.Body, target)
+	req.Headers = ResolveHeader(req.Headers, target)
+	req.Middlewares = ResolveDetection(req.Middlewares, target)
+	req.Conclusions = ResolveDetection(req.Conclusions, target)
+
+	// parse raw request
+	if req.Raw != "" {
+		rawReq := ResolveVariable(req.Raw, target)
+		burpReq := ParseBurpRequest(rawReq)
+		burpReq.Detections = ResolveDetection(req.Detections, target)
+		burpReq.Middlewares = ResolveDetection(req.Middlewares, target)
+		burpReq.Conclusions = ResolveDetection(req.Conclusions, target)
+		return burpReq
+	}
+	return req
+}
+
 // ParseRequest parse request part in YAML signature file
 func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) []libs.Request {
 	var Reqs []libs.Request

@@ -181,8 +181,7 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 		originSign := sign
 		if sign.Origin.Raw == "" {
 			originSign.Target = Target
-			// only send first request
-			originReq = core.ParseRequest(sign.Origin, originSign, options)[0]
+			originReq = core.ParseOrigin(originSign.Origin, originSign, options)
 		} else {
 			originReq = sign.Origin
 		}

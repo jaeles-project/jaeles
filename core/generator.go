@@ -377,7 +377,7 @@ func Path(req libs.Request, arguments []otto.Value) []libs.Request {
 		injectedReq.Target = target
 		reqs = append(reqs, injectedReq)
 		// only replace the last path
-	} else if paramName == "last" || (paramName == "ext" && ext == "") {
+	} else if paramName == "last" || (paramName == "-1" && ext == "") {
 		injectedReq := req
 		target["original"] = Paths[len(Paths)-1]
 		newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
@@ -402,13 +402,23 @@ func Path(req libs.Request, arguments []otto.Value) []libs.Request {
 		// specific position
 	} else if paramName != "*" && len(paramName) == 1 {
 		position, err := strconv.ParseInt(paramName, 10, 64)
+		// select reverse
+		if strings.HasPrefix(paramName, "-") {
+			v := int(position) * -1
+			if len(Paths) > v {
+				position = int64(len(Paths) - v)
+			}
+		}
+
 		if err == nil {
+
 			injectedReq := req
 			target["original"] = Paths[position]
 			newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
 
 			newPaths := Paths
 			newPaths[position] = newValue
+
 			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
 			injectedReq.Target = target
 			reqs = append(reqs, injectedReq)

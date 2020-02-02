@@ -79,7 +79,15 @@ func AltResolveRequest(req *libs.Request) {
 	if len(req.Values) > 0 {
 		for _, value := range req.Values {
 			for k, v := range value {
-				target[k] = v
+				// variable as a script
+				if strings.Contains(v, "(") && strings.Contains(v, ")") {
+					newValue := RunVariables(v)
+					if len(newValue) > 0 {
+						target[k] = newValue[0]
+					}
+				} else {
+					target[k] = v
+				}
 			}
 		}
 	}

@@ -59,6 +59,7 @@ func InitLog(options *libs.Options) {
 		logger.SetOutput(os.Stdout)
 		logger.SetLevel(logrus.InfoLevel)
 	} else {
+		logger.SetLevel(logrus.PanicLevel)
 		logger.SetOutput(ioutil.Discard)
 	}
 	if options.LogFile != "" {

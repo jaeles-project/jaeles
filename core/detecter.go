@@ -27,6 +27,20 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	vm.Set("StringGrepCmd", func(call otto.FunctionCall) otto.Value {
+		command := call.Argument(0).String()
+		searchString := call.Argument(0).String()
+		result, _ := vm.ToValue(StringSearch(Execution(command), searchString))
+		return result
+	})
+
+	vm.Set("RegexGrepCmd", func(call otto.FunctionCall) otto.Value {
+		command := call.Argument(0).String()
+		searchString := call.Argument(0).String()
+		result, _ := vm.ToValue(RegexSearch(Execution(command), searchString))
+		return result
+	})
+
 	vm.Set("StringSearch", func(call otto.FunctionCall) otto.Value {
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()

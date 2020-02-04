@@ -178,18 +178,6 @@ func ParseParams(rawParams []string) map[string]string {
 	return params
 }
 
-// JoinURL just joining baseURL with path
-func JoinURL(base string, child string) string {
-	u, err := url.Parse(child)
-	if err != nil {
-		return ""
-	}
-	result, err := url.Parse(base)
-	if err != nil {
-		return ""
-	}
-	return result.ResolveReference(u).String()
-}
 
 // ParseOrigin parse origin request
 func ParseOrigin(req libs.Request, sign libs.Signature, options libs.Options) libs.Request {
@@ -440,7 +428,7 @@ func ParseBurpResponse(rawReq string, rawRes string) (res libs.Response) {
 	return res
 }
 
-// ParseRequestFromServer parse request recive from API server
+// ParseRequestFromServer parse request receive from API server
 func ParseRequestFromServer(record *libs.Record, req libs.Request, sign libs.Signature) {
 	if req.Raw != "" {
 		parsedReq := ParseBurpRequest(req.Raw)

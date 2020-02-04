@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/jaeles-project/jaeles/utils"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -59,7 +60,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			resp := req.Response
 			bodyBytes, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				libs.ErrorF("%v", err)
+				utils.ErrorF("%v", err)
 			}
 			bodyString := string(bodyBytes)
 			resLength := len(bodyString)
@@ -165,7 +166,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	}
 
 	if err != nil || resp == nil {
-		libs.ErrorF("%v %v", url, err)
+		utils.ErrorF("%v %v", url, err)
 		return libs.Response{}, err
 	}
 

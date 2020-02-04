@@ -3,6 +3,7 @@ package sender
 import (
 	"context"
 	"fmt"
+	"github.com/jaeles-project/jaeles/utils"
 	"log"
 	"time"
 
@@ -56,7 +57,7 @@ func SendWithChrome(options libs.Options, req libs.Request) (libs.Response, erro
 	chromedp.ListenTarget(chromeContext, func(event interface{}) {
 		if _, ok := event.(*page.EventJavascriptDialogOpening); ok {
 			// fmt.Println("closing alert:", ev.Message)
-			libs.DebugF("Detecting Pop-up: %v", url)
+			utils.DebugF("Detecting Pop-up: %v", url)
 			res.HasPopUp = true
 			go func() {
 				if err := chromedp.Run(chromeContext,
@@ -93,7 +94,7 @@ func SendWithChrome(options libs.Options, req libs.Request) (libs.Response, erro
 	)
 	res.ResponseTime = time.Since(timeStart).Seconds()
 	if err != nil {
-		libs.ErrorF("%v", err)
+		utils.ErrorF("%v", err)
 		return res, err
 	}
 

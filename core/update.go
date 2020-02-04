@@ -51,11 +51,11 @@ func UpdateSignature(options libs.Options, customRepo string) {
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 	if err != nil {
-		libs.ErrorF("Error to clone Signature repo")
+		utils.ErrorF("Error to clone Signature repo")
 	} else {
 		_, err = r.Head()
 		if err != nil {
-			libs.ErrorF("Error to clone Signature repo")
+			utils.ErrorF("Error to clone Signature repo")
 		}
 	}
 

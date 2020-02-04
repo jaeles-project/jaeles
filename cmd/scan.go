@@ -171,7 +171,7 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 
 	// prepare initial signature and variables
 	Target := core.ParseTarget(url)
-	Target = core.MoreVariables(Target, options)
+	Target = core.MoreVariables(Target, sign, options)
 
 	// sending original
 	if sign.Origin.Method != "" {
@@ -293,7 +293,7 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 
 		// middleware part
 		if realRec.Request.MiddlewareOutput != "" {
-			libs.DebugF(realRec.Request.MiddlewareOutput)
+			utils.DebugF(realRec.Request.MiddlewareOutput)
 		}
 	}
 
@@ -304,7 +304,7 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 		}
 		// middleware part
 		if realRec.Request.MiddlewareOutput != "" {
-			libs.DebugF(realRec.Request.MiddlewareOutput)
+			utils.DebugF(realRec.Request.MiddlewareOutput)
 		}
 	}
 

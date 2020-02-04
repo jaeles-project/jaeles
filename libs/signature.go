@@ -16,6 +16,7 @@ type Signature struct {
 	Requests   []Request
 	RawRequest string
 	Payloads   []string
+	Params     []map[string]string
 	Variables  []map[string]string
 	Target     map[string]string
 }

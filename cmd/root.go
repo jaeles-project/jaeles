@@ -57,7 +57,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	// custom params from cli
-	RootCmd.Flags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params --params='foo=bar'")
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params --params='foo=bar'")
 }
 
 // initConfig reads in config file and ENV variables if set.

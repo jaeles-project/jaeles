@@ -20,11 +20,11 @@ import (
 func ParseSign(signFile string) (sign libs.Signature, err error) {
 	yamlFile, err := ioutil.ReadFile(signFile)
 	if err != nil {
-		utils.ErrorF("yamlFile.Get err  #%v ", err)
+		utils.ErrorF("yamlFile.Get err  #%v - %v", err, signFile)
 	}
 	err = yaml.Unmarshal(yamlFile, &sign)
 	if err != nil {
-		utils.ErrorF("Error: %v", err)
+		utils.ErrorF("Error: %v - %v", err, signFile)
 	}
 	// set some default value
 	if sign.Info.Category == "" {
@@ -47,11 +47,11 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 func ParsePassive(passiveFile string) (passive libs.Passive, err error) {
 	yamlFile, err := ioutil.ReadFile(passiveFile)
 	if err != nil {
-		utils.ErrorF("yamlFile.Get err  #%v ", err)
+		utils.ErrorF("yamlFile.Get err  #%v - %v", err, passiveFile)
 	}
 	err = yaml.Unmarshal(yamlFile, &passive)
 	if err != nil {
-		utils.ErrorF("Error: %v", err)
+		utils.ErrorF("Error: %v - %v", err, passiveFile)
 	}
 	return passive, err
 }
@@ -120,7 +120,7 @@ func ParseTarget(raw string) map[string]string {
 }
 
 // MoreVariables get more options to render in sign template
-func MoreVariables(target map[string]string, options libs.Options) map[string]string {
+func MoreVariables(target map[string]string, sign libs.Signature, options libs.Options) map[string]string {
 	realTarget := target
 
 	ssrf := database.GetDefaultBurpCollab()
@@ -134,6 +134,24 @@ func MoreVariables(target map[string]string, options libs.Options) map[string]st
 	realTarget["homePath"] = options.RootFolder
 	realTarget["proxy"] = options.Proxy
 	realTarget["output"] = options.Output
+
+	// default params in signature
+	signParams := sign.Params
+	if len(signParams) > 0 {
+		for _, param := range signParams {
+			for k, v := range param {
+				// variable as a script
+				if strings.Contains(v, "(") && strings.Contains(v, ")") {
+					newValue := RunVariables(v)
+					if len(newValue) > 0 {
+						realTarget[k] = newValue[0]
+					}
+				} else {
+					realTarget[k] = v
+				}
+			}
+		}
+	}
 
 	// more params
 	if len(options.Params) > 0 {
@@ -153,7 +171,8 @@ func ParseParams(rawParams []string) map[string]string {
 
 	for _, item := range rawParams {
 		if strings.Contains(item, "=") {
-			params[strings.Split(item, "=")[0]] = strings.Split(item, "=")[1]
+			data := strings.Split(item, "=")
+			params[data[0]] = strings.Replace(item, data[0] + "=", "",-1)
 		}
 	}
 	return params

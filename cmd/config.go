@@ -8,7 +8,6 @@ import (
 
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
-	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/spf13/cobra"
 )
@@ -83,7 +82,7 @@ func runConfig(cmd *cobra.Command, args []string) error {
 		username, _ := cmd.Flags().GetString("user")
 		password, _ := cmd.Flags().GetString("pass")
 		database.CreateUser(username, password)
-		libs.GoodF("Create new credentials %v:%v \n", username, password)
+		utils.GoodF("Create new credentials %v:%v \n", username, password)
 		break
 	case "oob":
 		secret, _ := cmd.Flags().GetString("secret")
@@ -104,7 +103,7 @@ func runConfig(cmd *cobra.Command, args []string) error {
 
 		allSigns := utils.GetFileNames(SignFolder, ".yaml")
 		if allSigns != nil {
-			libs.InforF("Load Signature from: %v", SignFolder)
+			utils.InforF("Load Signature from: %v", SignFolder)
 			for _, signFile := range allSigns {
 				database.ImportSign(signFile)
 			}

@@ -172,12 +172,11 @@ func ParseParams(rawParams []string) map[string]string {
 	for _, item := range rawParams {
 		if strings.Contains(item, "=") {
 			data := strings.Split(item, "=")
-			params[data[0]] = strings.Replace(item, data[0] + "=", "",-1)
+			params[data[0]] = strings.Replace(item, data[0]+"=", "", -1)
 		}
 	}
 	return params
 }
-
 
 // ParseOrigin parse origin request
 func ParseOrigin(req libs.Request, sign libs.Signature, options libs.Options) libs.Request {
@@ -279,7 +278,6 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	}
 
 	record.Request = req
-	// spew.Dump(record)
 	reqs := ParseFuzzRequest(record, sign)
 	if len(reqs) > 0 {
 		Reqs = append(Reqs, reqs...)
@@ -433,7 +431,7 @@ func ParseRequestFromServer(record *libs.Record, req libs.Request, sign libs.Sig
 	if req.Raw != "" {
 		parsedReq := ParseBurpRequest(req.Raw)
 		// check if parse request ok
-		if parsedReq.Method != "" {
+		if parsedReq.Method != "ParseRequest" {
 			record.Request = parsedReq
 		} else {
 			record.Request = record.OriginReq

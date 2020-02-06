@@ -22,8 +22,7 @@ func init() {
 	var serverCmd = &cobra.Command{
 		Use:   "server",
 		Short: "Start API server",
-		Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing - %v by %v`, libs.VERSION, libs.AUTHOR),
-		RunE:  runServer,
+		Long:  libs.Banner(), RunE: runServer,
 	}
 	serverCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")

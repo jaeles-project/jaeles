@@ -15,6 +15,7 @@ type Options struct {
 	GlobalVar     map[string]string
 
 	Concurrency   int
+	Threads       int
 	Delay         int
 	SaveRaw       bool
 	Timeout       int

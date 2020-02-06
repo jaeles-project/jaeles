@@ -8,6 +8,7 @@ require (
 	github.com/appleboy/gin-jwt/v2 v2.6.3
 	github.com/chromedp/cdproto v0.0.0-20200127141643-96201809f07b
 	github.com/chromedp/chromedp v0.5.3
+	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.9.0
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2

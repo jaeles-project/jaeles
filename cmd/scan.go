@@ -2,15 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jaeles-project/jaeles/database"
+	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/sender"
+	"github.com/jaeles-project/jaeles/utils"
+	"github.com/thoas/go-funk"
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/jaeles-project/jaeles/database"
-	"github.com/jaeles-project/jaeles/libs"
-	"github.com/jaeles-project/jaeles/utils"
-	"github.com/thoas/go-funk"
 
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/spf13/cobra"
@@ -23,7 +22,7 @@ func init() {
 	var scanCmd = &cobra.Command{
 		Use:   "scan",
 		Short: "Scan list of URLs based on signatures",
-		Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing - %v by %v`, libs.VERSION, libs.AUTHOR),
+		Long:  libs.Banner(),
 		RunE:  runScan,
 	}
 
@@ -202,43 +201,70 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 			}
 		}
 	}
+	singleJob(originRec, sign, Target)
+}
+
+func singleJob(originRec libs.Record, sign libs.Signature, target map[string]string) {
 
 	globalVariables := core.ParseVariable(sign)
 	if len(globalVariables) > 0 {
+		// if Parallel not enable, override the threads
+		//if sign.Parallel == false {
+		//	options.Threads = 1
+		//}
+		var rg sync.WaitGroup
+		count := 0
 		for _, globalVariable := range globalVariables {
-			sign.Target = Target
+			sign.Target = target
 			for k, v := range globalVariable {
 				sign.Target[k] = v
 			}
-			singleJob(originRec, sign)
+
+			// start to send stuff
+			for _, req := range sign.Requests {
+				rg.Add(1)
+				// receive request from "-r req.txt"
+				if sign.RawRequest != "" {
+					req.Raw = sign.RawRequest
+				}
+				// gen bunch of request to send
+				realReqs := core.ParseRequest(req, sign, options)
+				// sending things
+				go func() {
+					defer rg.Done()
+					SendRequest(realReqs, sign, originRec)
+				}()
+
+				count++
+				if count == options.Threads {
+					rg.Wait()
+					count = 0
+				}
+			}
+
 		}
+		rg.Wait()
 	} else {
-		sign.Target = Target
-		singleJob(originRec, sign)
-	}
-
-}
-
-func singleJob(originRec libs.Record, sign libs.Signature) {
-	// start to send stuff
-	for _, req := range sign.Requests {
-		// receive request from "-r req.txt"
-		if sign.RawRequest != "" {
-			req.Raw = sign.RawRequest
+		sign.Target = target
+		//singleJob(originRec, sign)
+		// start to send stuff
+		for _, req := range sign.Requests {
+			// receive request from "-r req.txt"
+			if sign.RawRequest != "" {
+				req.Raw = sign.RawRequest
+			}
+			// gen bunch of request to send
+			realReqs := core.ParseRequest(req, sign, options)
+			// sending things
+			SendRequest(realReqs, sign, originRec)
+			//go func () {
+			//}()
 		}
-		// gen bunch of request to send
-		realReqs := core.ParseRequest(req, sign, options)
-		// sending things
-		SendRequest(realReqs, sign, originRec)
 	}
 }
 
 // SendRequest sending request generated
 func SendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Record) {
-	if len(realReqs) == 0 {
-		return
-	}
-
 	for _, realReq := range realReqs {
 		var realRec libs.Record
 		// set some stuff
@@ -281,22 +307,9 @@ func SendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Re
 
 		DoAnalyze(realRec, &sign)
 	}
-
 }
 
 func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
-	// print some log
-	if options.Verbose && realRec.Request.Method != "" {
-		if realRec.Response.StatusCode != 0 {
-			fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
-		}
-
-		// middleware part
-		if realRec.Request.MiddlewareOutput != "" {
-			utils.DebugF(realRec.Request.MiddlewareOutput)
-		}
-	}
-
 	// print some log
 	if options.Verbose && realRec.Request.Method != "" {
 		if realRec.Response.StatusCode != 0 {

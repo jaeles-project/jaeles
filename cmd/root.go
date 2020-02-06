@@ -20,7 +20,7 @@ var DB *gorm.DB
 var RootCmd = &cobra.Command{
 	Use:   "jaeles",
 	Short: "Jaeles Scanner",
-	Long:  fmt.Sprintf(`Jaeles - The Swiss Army knife for automated Web Application Testing - %v by %v`, libs.VERSION, libs.AUTHOR),
+	Long:  libs.Banner(),
 }
 
 // Execute main function
@@ -54,6 +54,7 @@ func init() {
 	RootCmd.PersistentFlags().IntVar(&options.Refresh, "refresh", 10, "Refresh")
 
 	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "concurrency")
+	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads", "t", 1, "Enable parallel in single signature")
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	// custom params from cli

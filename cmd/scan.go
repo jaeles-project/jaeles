@@ -29,7 +29,7 @@ func init() {
 	scanCmd.Flags().StringP("url", "u", "", "URL of target")
 	scanCmd.Flags().String("ssrf", "", "Fill your BurpCollab or any Out of Band host")
 	scanCmd.Flags().StringP("urls", "U", "", "URLs file of target")
-	scanCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
+	scanCmd.Flags().StringSliceP("sign","s", []string{} , "Signature selector (Multiple -s flags are accepted)")
 	scanCmd.Flags().StringP("raw", "r", "", "Raw request from Burp for origin")
 	RootCmd.AddCommand(scanCmd)
 
@@ -72,12 +72,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 		os.Exit(1)
 	}
 
-	signName, _ := cmd.Flags().GetString("sign")
-	signs = core.SelectSign(signName)
-
 	// search signature through Signatures table
-	Signs := database.SelectSign(signName)
-	signs = append(signs, Signs...)
+	signNames, _ := cmd.Flags().GetStringSlice("sign")
+	for _, signName := range signNames {
+		signs = core.SelectSign(signName)
+		Signs := database.SelectSign(signName)
+		signs = append(signs, Signs...)
+	}
 	utils.InforF("Signatures Loaded: %v", len(signs))
 
 	// create new scan or group with old one
@@ -209,9 +210,6 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 	globalVariables := core.ParseVariable(sign)
 	if len(globalVariables) > 0 {
 		// if Parallel not enable, override the threads
-		//if sign.Parallel == false {
-		//	options.Threads = 1
-		//}
 		var rg sync.WaitGroup
 		count := 0
 		for _, globalVariable := range globalVariables {

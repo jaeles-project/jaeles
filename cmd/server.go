@@ -24,7 +24,7 @@ func init() {
 		Short: "Start API server",
 		Long:  libs.Banner(), RunE: runServer,
 	}
-	serverCmd.Flags().StringP("sign", "s", "", "Provide custom header seperate by ','")
+	scanCmd.Flags().StringSliceP("sign", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
 	RootCmd.AddCommand(serverCmd)
@@ -51,16 +51,15 @@ func runServer(cmd *cobra.Command, args []string) error {
 
 	go func() {
 		for {
-			Signs := []string{}
-			signName, _ := cmd.Flags().GetString("sign")
-			// Get exactly signature
-			if signName != "" {
-				signs := core.SelectSign(signName)
-				Signs = append(Signs, signs...)
-			} else {
-				signName = database.GetDefaultSign()
+			var Signs []string
+			signNames, _ := cmd.Flags().GetStringSlice("sign")
+			for _, signName := range signNames {
+				Signs = core.SelectSign(signName)
+				signFromDB := database.SelectSign(signName)
+				Signs = append(Signs, signFromDB...)
 			}
-			Signs = append(Signs, database.SelectSign(signName)...)
+			utils.InforF("Signatures Loaded: %v", len(Signs))
+
 			signInfo := ""
 			for _, signName := range Signs {
 				signInfo += fmt.Sprintf("%v ", filepath.Base(signName))

@@ -24,7 +24,7 @@ func init() {
 		Short: "Start API server",
 		Long:  libs.Banner(), RunE: runServer,
 	}
-	scanCmd.Flags().StringSliceP("sign", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
+	serverCmd.Flags().StringSliceP("sign", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
 	RootCmd.AddCommand(serverCmd)

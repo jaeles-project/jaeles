@@ -14,15 +14,15 @@ type Record struct {
 
 // Request all information about request
 type Request struct {
-	Engine  string
-	Timeout int
-	Repeat  int
-	Scheme  string
-	Host    string
-	Port    string
-	Path    string
-	URL     string
-	Proxy   string
+	Engine            string
+	Timeout           int
+	Repeat            int
+	Scheme            string
+	Host              string
+	Port              string
+	Path              string
+	URL               string
+	Proxy             string
 	Method            string
 	Redirect          bool
 	UseTemplateHeader bool

@@ -77,7 +77,6 @@ func UpdateSignature(options libs.Options, customRepo string) {
 		utils.MoveFolder(resourcesPath, options.ResourcesFolder)
 	}
 
-
 }
 
 // // UpdateOutOfBand renew things in Out of band check

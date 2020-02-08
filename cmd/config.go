@@ -152,7 +152,7 @@ func HelpMessage() {
 	fmt.Printf(h)
 }
 
-func ScanHelp(cmd *cobra.Command, args []string)  {
+func ScanHelp(cmd *cobra.Command, args []string) {
 	fmt.Println(libs.Banner())
 	h := "\nScan Usage example:\n"
 	h += "  jaeles scan -s <signature> -u http://example.com\n"

@@ -2,17 +2,22 @@ package libs
 
 // Options global options
 type Options struct {
-	RootFolder    string
-	SignFolder    string
-	PassiveFolder string
-	ScanID        string
-	ConfigFile    string
-	Output        string
-	PassiveOutput string
-	LogFile       string
-	Proxy         string
-	Params        []string
-	GlobalVar     map[string]string
+	RootFolder      string
+	SignFolder      string
+	PassiveFolder   string
+	ResourcesFolder string
+	ScanID          string
+	ConfigFile      string
+	SummaryOutput   string
+	Output          string
+	PassiveOutput   string
+	LogFile         string
+	Proxy           string
+	Params          []string
+	Signs           []string
+	Excludes        []string
+	SelectedSigns   []string
+	GlobalVar       map[string]string
 
 	Concurrency   int
 	Threads       int

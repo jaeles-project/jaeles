@@ -1,14 +1,14 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
-	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/sender"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/thoas/go-funk"
 	"os"
-	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/jaeles-project/jaeles/core"
@@ -27,79 +27,43 @@ func init() {
 	}
 
 	scanCmd.Flags().StringP("url", "u", "", "URL of target")
-	scanCmd.Flags().String("ssrf", "", "Fill your BurpCollab or any Out of Band host")
 	scanCmd.Flags().StringP("urls", "U", "", "URLs file of target")
-	scanCmd.Flags().StringSliceP("sign","s", []string{} , "Signature selector (Multiple -s flags are accepted)")
 	scanCmd.Flags().StringP("raw", "r", "", "Raw request from Burp for origin")
+	scanCmd.SetHelpFunc(ScanHelp)
 	RootCmd.AddCommand(scanCmd)
 
 }
 
 func runScan(cmd *cobra.Command, args []string) error {
-	var err error
-	var signs []string
+	SelectSign()
 	var urls []string
-
-	// create output folder
-	err = os.MkdirAll(options.Output, 0750)
-	if err != nil && options.NoOutput == false {
-		fmt.Fprintf(os.Stderr, "failed to create output directory: %s\n", err)
-		os.Exit(1)
-	}
-
-	ssrf, _ := cmd.Flags().GetString("ssrf")
-	if ssrf != "" {
-		if options.Verbose {
-			utils.InforF("SSRF set: %v ", ssrf)
-		}
-		database.ImportBurpCollab(ssrf)
-	}
-
-	// parse URL here
+	// parse URL input here
 	urlFile, _ := cmd.Flags().GetString("urls")
 	urlInput, _ := cmd.Flags().GetString("url")
 	if urlInput != "" {
 		urls = append(urls, urlInput)
 	}
+	// input as a file
 	if urlFile != "" {
 		URLs := utils.ReadingLines(urlFile)
 		for _, url := range URLs {
 			urls = append(urls, url)
 		}
 	}
+
+	// input as stdin
+	sc := bufio.NewScanner(os.Stdin)
+	for sc.Scan() {
+		url := strings.TrimSpace(sc.Text())
+		if err := sc.Err(); err == nil && url != "" {
+			urls = append(urls, url)
+		}
+	}
+
 	if len(urls) == 0 {
 		utils.ErrorF("No Input found")
 		os.Exit(1)
 	}
-
-	// search signature through Signatures table
-	signNames, _ := cmd.Flags().GetStringSlice("sign")
-	for _, signName := range signNames {
-		signs = core.SelectSign(signName)
-		Signs := database.SelectSign(signName)
-		signs = append(signs, Signs...)
-	}
-	utils.InforF("Signatures Loaded: %v", len(signs))
-
-	// create new scan or group with old one
-	var scanID string
-	if options.ScanID == "" {
-		scanID = database.NewScan(options, "scan", signs)
-	} else {
-		scanID = options.ScanID
-	}
-	utils.InforF("Start Scan with ID: %v", scanID)
-	options.ScanID = scanID
-
-	if len(signs) == 0 {
-		fmt.Println("[Error] No signature loaded")
-		os.Exit(1)
-	}
-	signInfo := fmt.Sprintf("Signature Loaded: ")
-	for _, signName := range signs {
-		signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
-	}
-	utils.InforF(signInfo)
 	utils.InforF("Input Loaded: %v", len(urls))
 
 	// get origin request from a file
@@ -147,7 +111,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// jobs to send request
-	for _, signFile := range signs {
+	for _, signFile := range options.SelectedSigns {
 		sign, err := core.ParseSign(signFile)
 		if err != nil {
 			utils.ErrorF("Error parsing YAML sign %v", signFile)

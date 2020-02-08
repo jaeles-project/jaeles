@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"github.com/thoas/go-funk"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -19,23 +20,15 @@ import (
 func SelectSign(signName string) []string {
 	var Signs []string
 	// return default sign if doesn't set anything
-	if signName == "" {
-		Signs = database.SelectSign(signName)
+	if signName == "**" {
+		Signs = database.SelectSign("")
+		return Signs
 	}
-	if strings.Contains(signName, ",") {
-		rawSigns := strings.Split(signName, ",")
-		for _, rawSign := range rawSigns {
-			signs := SingleSign(strings.TrimSpace(rawSign))
-			if len(signs) > 0 {
-				Signs = append(Signs, signs...)
-			}
-		}
-	} else {
-		signs := SingleSign(strings.TrimSpace(signName))
-		if len(signs) > 0 {
-			Signs = append(Signs, signs...)
-		}
+	signs := SingleSign(strings.TrimSpace(signName))
+	if len(signs) > 0 {
+		Signs = append(Signs, signs...)
 	}
+	Signs = funk.UniqString(Signs)
 	return Signs
 }
 
@@ -49,7 +42,7 @@ func SingleSign(signName string) []string {
 			Signs = append(Signs, signName)
 		}
 	}
-	// get more sign nature
+	// get more signature
 	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
 		asbPath, _ := filepath.Abs(signName)
 		baseSelect := filepath.Base(signName)
@@ -62,7 +55,9 @@ func SingleSign(signName string) []string {
 			}
 			r, err := regexp.Compile(baseSelect)
 			if err != nil {
-				continue
+				if strings.Contains(signFile, baseSelect) {
+					Signs = append(Signs, signFile)
+				}
 			}
 			if r.MatchString(baseSign) {
 				Signs = append(Signs, signFile)

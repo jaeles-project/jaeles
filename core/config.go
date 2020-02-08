@@ -76,4 +76,20 @@ func InitConfig(options *libs.Options) {
 			utils.InforF("Store default credentials for client at: %v", burpConfigPath)
 		}
 	}
+
+	// set some default config
+	options.PassiveFolder = path.Join(utils.NormalizePath(options.RootFolder), "passives")
+	options.ResourcesFolder = path.Join(utils.NormalizePath(options.RootFolder), "resources")
+
+	// create output folder
+	var err error
+	err = os.MkdirAll(options.Output, 0750)
+	if err != nil && options.NoOutput == false {
+		fmt.Fprintf(os.Stderr, "failed to create output directory: %s\n", err)
+		os.Exit(1)
+	}
+	if options.SummaryOutput == "" {
+		options.SummaryOutput = path.Join(options.Output, "jaeles-summary.txt")
+	}
+	utils.InforF("Summary output: %v", options.SummaryOutput)
 }

@@ -24,7 +24,7 @@ func init() {
 		Short: "Start API server",
 		Long:  libs.Banner(), RunE: runServer,
 	}
-	serverCmd.Flags().StringSliceP("sign", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
+	//serverCmd.Flags().StringSliceP("sign", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
 	RootCmd.AddCommand(serverCmd)
@@ -32,6 +32,7 @@ func init() {
 }
 
 func runServer(cmd *cobra.Command, args []string) error {
+	SelectSign()
 	// prepare DB stuff
 	if options.Server.Username != "" {
 		database.CreateUser(options.Server.Username, options.Server.Password)
@@ -51,31 +52,9 @@ func runServer(cmd *cobra.Command, args []string) error {
 
 	go func() {
 		for {
-			var Signs []string
-			signNames, _ := cmd.Flags().GetStringSlice("sign")
-			for _, signName := range signNames {
-				Signs = core.SelectSign(signName)
-				signFromDB := database.SelectSign(signName)
-				Signs = append(Signs, signFromDB...)
-			}
-			utils.InforF("Signatures Loaded: %v", len(Signs))
-
-			signInfo := ""
-			for _, signName := range Signs {
-				signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
-			}
-			utils.InforF("Number of Signatures Loaded: %v", len(Signs))
-			utils.InforF("Signatures Loaded : %v", signInfo)
-
-			// create new scan or group with old one
-			if options.ScanID == "" {
-				options.ScanID = database.NewScan(options, "scan", Signs)
-			}
-
 			record := <-result
 			utils.InforF("[Receive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
-
-			for _, signFile := range Signs {
+			for _, signFile := range options.SelectedSigns {
 				sign, err := core.ParseSign(signFile)
 				if err != nil {
 					utils.ErrorF("Error loading sign: %v\n", signFile)

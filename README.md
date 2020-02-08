@@ -32,11 +32,13 @@ More usage [here](https://jaeles-project.github.io/usage/)
 Example commands.
 
 ```shell
-jaeles scan -u http://example.com
+jaeles scan -s 'jira' -s 'ruby' -u target.com
 
-jaeles scan -s signatures/common/phpdebug.yaml -U /tmp/list_of_urls.txt
+jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt
 
-jaeles scan -v --passive --verbose -s "signatures/cves/jira-*" -U /tmp/list_of_urls.txt -o /tmp/vuls
+jaeles scan -c 50 -t 3 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
+
+cat urls.txt | grep 'interesting' | jaeles scan -c 50 -t 3 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
 
 jaeles server --verbose -s sqli
 ```

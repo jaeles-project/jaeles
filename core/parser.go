@@ -131,7 +131,8 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 	}
 
 	// more options
-	realTarget["homePath"] = options.RootFolder
+	realTarget["rootPath"] = options.RootFolder
+	realTarget["resourcePath"] = options.ResourcesFolder
 	realTarget["proxy"] = options.Proxy
 	realTarget["output"] = options.Output
 

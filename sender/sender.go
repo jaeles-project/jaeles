@@ -19,7 +19,6 @@ import (
 
 // JustSend just sending request
 func JustSend(options libs.Options, req libs.Request) (res libs.Response, err error) {
-	proxy := options.Proxy
 	method := req.Method
 	url := req.URL
 	body := req.Body
@@ -116,8 +115,13 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 
 	client.SetRetryWaitTime(time.Duration(options.Timeout/2) * time.Second)
 	client.SetRetryMaxWaitTime(time.Duration(options.Timeout) * time.Second)
-	if proxy != "" {
-		client.SetProxy(proxy)
+
+	if options.Proxy != "" {
+		client.SetProxy(options.Proxy)
+	}
+	// override proxy
+	if req.Proxy != "" && req.Proxy != "blank" {
+		client.SetProxy(req.Proxy)
 	}
 
 	var resp *resty.Response

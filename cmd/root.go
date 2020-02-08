@@ -9,6 +9,9 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 var options = libs.Options{}
@@ -33,11 +36,9 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
 	RootCmd.PersistentFlags().StringVar(&options.ConfigFile, "config", "", "config file (default is $HOME/.jaeles/config.yaml)")
 	RootCmd.PersistentFlags().StringVar(&options.RootFolder, "rootDir", "~/.jaeles/", "root Project")
 	RootCmd.PersistentFlags().StringVar(&options.SignFolder, "signDir", "~/.jaeles/signatures-base/", "Folder contain default signatures")
-	RootCmd.PersistentFlags().StringVar(&options.PassiveFolder, "passiveDir", "~/.jaeles/passives/", "Folder contain default passives")
 	RootCmd.PersistentFlags().StringVar(&options.ScanID, "scanID", "", "Scan ID")
 
 	RootCmd.PersistentFlags().StringVar(&options.Proxy, "proxy", "", "proxy")
@@ -56,8 +57,11 @@ func init() {
 	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "concurrency")
 	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads", "t", 1, "Enable parallel in single signature")
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
+	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	// custom params from cli
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Signs, "signs", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Excludes, "exclude", "x", []string{}, "Exclude Signature selector (Multiple -x flags are accepted)")
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params --params='foo=bar'")
 }
 
@@ -77,4 +81,63 @@ func initConfig() {
 		fmt.Printf("Can't connect to DB at %v\n", options.Server.DBPath)
 		os.Exit(-1)
 	}
+}
+
+// SelectSign select signature
+func SelectSign() {
+	//options.SelectedSigns
+	var selectedSigns []string
+
+	// default is all signature
+	if len(options.Signs) == 0 {
+		selectedSigns = core.SelectSign("**")
+	}
+
+	// search signature through Signatures table
+	for _, signName := range options.Signs {
+		selectedSigns = append(selectedSigns, core.SelectSign(signName)...)
+		Signs := database.SelectSign(signName)
+		selectedSigns = append(selectedSigns, Signs...)
+	}
+
+	// exclude some signature
+	if len(options.Excludes) > 0 {
+		for _, exclude := range options.Excludes {
+			for index, sign := range selectedSigns {
+				if strings.Contains(sign, exclude) {
+					selectedSigns = append(selectedSigns[:index], selectedSigns[index+1:]...)
+				}
+				r, err := regexp.Compile(exclude)
+				if err != nil {
+					continue
+				}
+				if r.MatchString(sign) {
+					selectedSigns = append(selectedSigns[:index], selectedSigns[index+1:]...)
+				}
+
+			}
+		}
+	}
+	options.SelectedSigns = selectedSigns
+
+	if len(selectedSigns) == 0 {
+		fmt.Println("[Error] No signature loaded")
+		os.Exit(1)
+	}
+	utils.InforF("Signatures Loaded: %v", len(selectedSigns))
+	signInfo := fmt.Sprintf("Signature Loaded: ")
+	for _, signName := range selectedSigns {
+		signInfo += fmt.Sprintf("%v ", filepath.Base(signName))
+	}
+	utils.InforF(signInfo)
+
+	// create new scan or group with old one
+	var scanID string
+	if options.ScanID == "" {
+		scanID = database.NewScan(options, "scan", selectedSigns)
+	} else {
+		scanID = options.ScanID
+	}
+	utils.InforF("Start Scan with ID: %v", scanID)
+	options.ScanID = scanID
 }

@@ -52,7 +52,8 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if rec.Request.URL == "" {
 		rec.Request.URL = rec.Request.Target["URL"]
 	}
-	content := fmt.Sprintf("[%v] - %v\n\n", rec.Sign.ID, rec.Request.URL)
+	head := fmt.Sprintf("[%v] - %v\n\n", rec.Sign.ID, rec.Request.URL)
+	content := head
 	if rec.Request.MiddlewareOutput != "" {
 		content += strings.Join(rec.Request.Middlewares, "\n")
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
@@ -91,5 +92,8 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		}
 	}
 	utils.WriteToFile(p, content)
+	sum := fmt.Sprintf("%v - %v", strings.TrimSpace(head), p)
+	utils.AppendToContent(options.SummaryOutput, sum)
+
 	return p
 }

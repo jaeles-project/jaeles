@@ -52,11 +52,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// input as stdin
-	sc := bufio.NewScanner(os.Stdin)
-	for sc.Scan() {
-		url := strings.TrimSpace(sc.Text())
-		if err := sc.Err(); err == nil && url != "" {
-			urls = append(urls, url)
+	if len(urls) == 0 {
+		sc := bufio.NewScanner(os.Stdin)
+		for sc.Scan() {
+			url := strings.TrimSpace(sc.Text())
+			if err := sc.Err(); err == nil && url != "" {
+				urls = append(urls, url)
+			}
 		}
 	}
 

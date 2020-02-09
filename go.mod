@@ -6,7 +6,7 @@ require (
 	github.com/Jeffail/gabs/v2 v2.4.0
 	github.com/Shopify/yaml v2.1.0+incompatible
 	github.com/appleboy/gin-jwt/v2 v2.6.3
-	github.com/chromedp/cdproto v0.0.0-20200205234657-5a93cbf1c808
+	github.com/chromedp/cdproto v0.0.0-20200209033844-7e00b02ea7d2
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fatih/color v1.9.0
 	github.com/gin-contrib/cors v1.3.0

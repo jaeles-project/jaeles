@@ -223,15 +223,6 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	req.Middlewares = ResolveDetection(req.Middlewares, target)
 	req.Conditions = ResolveDetection(req.Conditions, target)
 
-	// parse raw request
-	if req.Raw != "" {
-		rawReq := ResolveVariable(req.Raw, target)
-		burpReq := ParseBurpRequest(rawReq)
-		burpReq.Detections = ResolveDetection(req.Detections, target)
-		burpReq.Middlewares = ResolveDetection(req.Middlewares, target)
-		Reqs = append(Reqs, burpReq)
-	}
-
 	if sign.Type != "fuzz" {
 		// in case we only want to run a middleware alone
 		if req.Raw != "" {
@@ -283,6 +274,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	if len(reqs) > 0 {
 		Reqs = append(Reqs, reqs...)
 	}
+	utils.DebugF("[New Parsed Reuqest] %v", len(Reqs))
 
 	// repeat section
 	if req.Repeat == 0 {

@@ -48,6 +48,7 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 			for _, injectedReq := range injectedReqs {
 				// resolve detection this time because we may need parse something in the variable and original
 				injectedReq.Detections = AltResolveDetection(fuzzReq.Detections, injectedReq.Target)
+				injectedReq.Conclusions = AltResolveDetection(fuzzReq.Conclusions, injectedReq.Target)
 				reqs = append(reqs, injectedReq)
 			}
 		}

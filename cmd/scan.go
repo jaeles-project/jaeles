@@ -193,6 +193,7 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 				}
 				// gen bunch of request to send
 				realReqs := core.ParseRequest(req, sign, options)
+
 				// sending things
 				go func() {
 					defer rg.Done()

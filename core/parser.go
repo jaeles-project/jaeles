@@ -302,7 +302,7 @@ func ParseFuzzRequest(record libs.Record, sign libs.Signature) []libs.Request {
 
 // ParsePayloads parse payload to replace
 func ParsePayloads(sign libs.Signature) []string {
-	rawPayloads := []string{}
+	var rawPayloads []string
 	rawPayloads = append(rawPayloads, sign.Payloads...)
 	// strip out blank line
 	for index, value := range rawPayloads {
@@ -310,32 +310,7 @@ func ParsePayloads(sign libs.Signature) []string {
 			rawPayloads = append(rawPayloads[:index], rawPayloads[index+1:]...)
 		}
 	}
-
-	var realPayloads []string
-	// check if use variables or not
-	if len(sign.Variables) > 0 {
-		realVariables := ParseVariable(sign)
-		// replace payload with variables
-		if len(realVariables) > 0 {
-			for _, variable := range realVariables {
-				for _, payload := range rawPayloads {
-					target := make(map[string]string)
-					// replace here
-					for k, v := range variable {
-						target[k] = v
-					}
-					payload := ResolveVariable(payload, target)
-					realPayloads = append(realPayloads, payload)
-				}
-			}
-		}
-	} else {
-		// just append the payload
-		for _, payload := range rawPayloads {
-			realPayloads = append(realPayloads, ResolveVariable(payload, sign.Target))
-		}
-	}
-	return realPayloads
+	return rawPayloads
 }
 
 // ParseBurpRequest parse burp style request

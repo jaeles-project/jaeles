@@ -64,9 +64,7 @@ func runServer(cmd *cobra.Command, args []string) error {
 				if sign.Type != "fuzz" {
 					url := record.OriginReq.URL
 					jobs <- libs.Job{URL: url, Sign: sign}
-
 				} else {
-
 					fuzzSign := sign
 					fuzzSign.Requests = []libs.Request{}
 					for _, req := range sign.Requests {

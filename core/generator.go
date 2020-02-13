@@ -22,6 +22,7 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 	for _, payload := range realPayloads {
 		fuzzReq := req
 		// prepare something so we can access variable in generator string too
+		payload = ResolveVariable(payload, fuzzReq.Target)
 		fuzzReq.Target["payload"] = payload
 		// set original to blank first
 		fuzzReq.Target["original"] = ""

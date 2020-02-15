@@ -38,7 +38,7 @@ jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt
 
 jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
 
-cat urls.txt | grep 'interesting' | jaeles scan -c 50 -t 3 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
+cat urls.txt | grep 'interesting' | jaeles scan -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
 
 jaeles server --verbose -s sqli
 ```

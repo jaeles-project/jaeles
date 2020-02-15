@@ -23,7 +23,7 @@ GO111MODULE=on go get -u github.com/jaeles-project/jaeles
 
 Please visit the [Official Documention](https://jaeles-project.github.io/) for more details.
 
-Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature and passive signature.
+**Note**: Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature and passive signature.
 
 ## Usage
 

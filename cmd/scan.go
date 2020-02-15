@@ -176,13 +176,11 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 }
 
 func singleJob(originRec libs.Record, sign libs.Signature, target map[string]string) {
-
 	globalVariables := core.ParseVariable(sign)
+	// if Parallel not enable, override the threads
 	if len(globalVariables) > 0 {
-		// if Parallel not enable, override the threads
-		var rg sync.WaitGroup
-		count := 0
 		for _, globalVariable := range globalVariables {
+			//localSign := sign
 			sign.Target = target
 			for k, v := range globalVariable {
 				sign.Target[k] = v
@@ -190,32 +188,18 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 
 			// start to send stuff
 			for _, req := range sign.Requests {
-				rg.Add(1)
 				// receive request from "-r req.txt"
 				if sign.RawRequest != "" {
 					req.Raw = sign.RawRequest
 				}
 				// gen bunch of request to send
 				realReqs := core.ParseRequest(req, sign, options)
-
-				// sending things
-				go func() {
-					defer rg.Done()
-					SendRequest(realReqs, sign, originRec)
-				}()
-
-				count++
-				if count == options.Threads {
-					rg.Wait()
-					count = 0
-				}
+				SendRequest(realReqs, sign, originRec)
 			}
-
 		}
-		rg.Wait()
+
 	} else {
 		sign.Target = target
-		//singleJob(originRec, sign)
 		// start to send stuff
 		for _, req := range sign.Requests {
 			// receive request from "-r req.txt"
@@ -226,8 +210,6 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 			realReqs := core.ParseRequest(req, sign, options)
 			// sending things
 			SendRequest(realReqs, sign, originRec)
-			//go func () {
-			//}()
 		}
 	}
 }
@@ -298,10 +280,6 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 
 	if options.EnablePassive {
 		core.PassiveAnalyze(options, realRec)
-		//	go func() {
-		//		utils.DebugF("Passive Analyze")
-		//		core.PassiveAnalyze(options, realRec)
-		//	}()
 	}
 }
 

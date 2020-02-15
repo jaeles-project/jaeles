@@ -148,24 +148,25 @@ func HelpMessage() {
 	h += "  jaeles config -a reload\n\n"
 	h += "  jaeles config -a reload -F /tmp/custom-signatures/\n\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
-	h += "  jaeles config -a oob --secret SomethingSecret --collab list_of_collabs.txt\n\n"
+	//h += "  jaeles config -a oob --secret SomethingSecret --collab list_of_collabs.txt\n\n"
 	fmt.Printf(h)
 }
 
 func ScanHelp(cmd *cobra.Command, args []string) {
 	fmt.Println(libs.Banner())
 	h := "\nScan Usage example:\n"
-	h += "  jaeles scan -s <signature> -u http://example.com\n"
-	h += "  jaeles scan -c 50 -s <signature> -U list_target.txt\n"
+	h += "  jaeles scan -s <signature> -u <url>\n"
+	h += "  jaeles scan -c 50 -s <signature> -U <list_urls>\n"
+	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> [-p 'name=value']\n"
 	h += "  jaeles scan -v -c 50 -s <signature> -U list_target.txt -o /tmp/output\n"
 	h += "  jaeles scan -s <signature> -s <another-selector> -u http://example.com\n"
-	h += "  cat list_target.txt | jaeles scan -c 100 -t 5 -s <signature>\n"
+	h += "  cat list_target.txt | jaeles scan -c 100 -s <signature>\n"
 
 	h += "\n\nExamples:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
-	h += "  jaeles scan -c 50 -t 3 -s 'java' -x 'tomcat' -U list_of_urls.txt\n"
-	h += "  jaeles scan -c 50 -t 3 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
-	h += "  cat urls.txt | grep 'interesting' | jaeles scan -c 50 -t 3 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
+	h += "  jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt\n"
+	h += "  jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
+	h += "  cat urls.txt | grep 'interesting' | jaeles scan -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
 	h += "\n"
 	fmt.Printf(h)
 }

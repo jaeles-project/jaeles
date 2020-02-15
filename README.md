@@ -3,7 +3,7 @@
   <img alt="Jaeles" src="https://image.flaticon.com/icons/svg/1432/1432425.svg" height="140" />
   <p align="center">
     <a href=""><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
-    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.4-blue.svg"></a>
+    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.5-blue.svg"></a>
     <a href="https://inventory.rawsec.ml/tools.html#Jaeles"><img src="https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg" alt="Rawsec&#39;s CyberSecurity Inventory"></a>
   </p>
 </p>
@@ -36,7 +36,7 @@ jaeles scan -s 'jira' -s 'ruby' -u target.com
 
 jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt
 
-jaeles scan -c 50 -t 3 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
+jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
 
 cat urls.txt | grep 'interesting' | jaeles scan -c 50 -t 3 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
 
@@ -45,12 +45,11 @@ jaeles server --verbose -s sqli
 
 ## Showcases
 
-More showcase [here](https://jaeles-project.github.io/showcases/)
+|  ![apache-status.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/apache-status.png?raw=true) [**Apache Server Status**](https://youtu.be/nkBcIvzi3H4)  |  ![tableau-dom-xss.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/tableau-dom-xss.png?raw=true) [**Tableau DOM XSS CVE-2019-19719**](https://youtu.be/EG7Qmt8kt58) |
+|:----------:|:-------------:|
+| ![rabbitmq-cred.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/rabbitmq-cred.png?raw=true) [**RabbitMQ Default Credentials**](https://youtu.be/ed4n1sCNu3s) | ![jenkins-xss.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/jenkins-xss.png?raw=true) [**Jenkins XSS CVE-2020-2096**](https://youtu.be/JfihhEOEWSE) |
 
-[![asciicast](https://asciinema.org/a/281205.svg)](https://asciinema.org/a/281205)
-<p align="center">
-Detect Jira SSRF CVE-2019-8451
-</p>
+<h4 align='center'> More showcase can be found <a href="https://jaeles-project.github.io/showcases/">here</a></h4>
 
 ### Burp Integration
 

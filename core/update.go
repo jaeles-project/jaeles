@@ -65,7 +65,7 @@ func UpdateSignature(options libs.Options, customRepo string) {
 	})
 
 	if err != nil {
-		utils.ErrorF("Error to clone Signature repo: %v", url)
+		utils.ErrorF("Error to clone Signature repo: %v - %v", url, err)
 		return
 	}
 

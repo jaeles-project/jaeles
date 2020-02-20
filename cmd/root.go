@@ -8,6 +8,7 @@ import (
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
+	"github.com/thoas/go-funk"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -124,6 +125,7 @@ func SelectSign() {
 		fmt.Println("[Error] No signature loaded")
 		os.Exit(1)
 	}
+	selectedSigns = funk.UniqString(selectedSigns)
 	utils.InforF("Signatures Loaded: %v", len(selectedSigns))
 	signInfo := fmt.Sprintf("Signature Loaded: ")
 	for _, signName := range selectedSigns {

@@ -38,7 +38,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	if !options.Debug {
 		logger.Out = ioutil.Discard
 	}
-	client := resty.New().SetLogger(logger)
+	client := resty.New()
 	client.SetLogger(logger)
 	client.SetCloseConnection(true)
 
@@ -49,7 +49,6 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 
 	// redirect policy
 	if req.Redirect == false {
-		// client.SetRedirectPolicy(resty.NoRedirectPolicy())
 		client.SetRedirectPolicy(resty.RedirectPolicyFunc(func(req *http.Request, via []*http.Request) error {
 			// keep the header the same
 			// client.SetHeaders(headers)
@@ -189,7 +188,7 @@ func ParseResponse(resp resty.Response) (res libs.Response) {
 		resLength += len(fmt.Sprintf("%s: %s\n", k, strings.Join(v[:], "")))
 		resHeaders = append(resHeaders, element)
 	}
-	// respones time in second
+	// response time in second
 	resTime := float64(resp.Time()) / float64(time.Second)
 	resHeaders = append(resHeaders,
 		map[string]string{"Total Length": strconv.Itoa(resLength)},
@@ -243,7 +242,7 @@ func GetHeaders(req libs.Request) map[string]string {
 // BeautifyRequest beautify request
 func BeautifyRequest(req libs.Request) string {
 	var beautifyReq string
-	// hardcord HTTP/1.1 for now
+	// hardcoded HTTP/1.1 for now
 	beautifyReq += fmt.Sprintf("%v %v HTTP/1.1\n", req.Method, req.URL)
 
 	for _, header := range req.Headers {

@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/thoas/go-funk"
 	"math/rand"
 	"net/url"
 	"os/exec"
@@ -73,37 +74,22 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 
 	// @TODO: Need to improve this
 	if len(rawVariables) == 2 {
-		if maxLength == 1 {
-			variable := make(map[string]string)
-			for k, Variables := range rawVariables {
-				variable[k] = Variables[0]
-			}
-			realVariables = append(realVariables, variable)
-			return realVariables
-		}
+		//([]string)
+		keys := funk.Keys(rawVariables).([]string)
+		list1 := rawVariables[keys[0]]
+		list2 := rawVariables[keys[1]]
 
-		tmpVar := make(map[string][]string)
-		secondVar := make(map[string][]string)
-		var maxKey string
-		for k, Variables := range rawVariables {
-			if len(Variables) == maxLength {
-				maxKey = k
-				tmpVar[k] = Variables
-			} else {
-				secondVar[k] = Variables
+		for _, item1 := range list1 {
+			// loop in second var
+			for _, item2 := range list2 {
+				element := make(map[string]string)
+				element[keys[0]] = item1
+				element[keys[1]] = item2
+				realVariables = append(realVariables, element)
 			}
 		}
-
-		for index := 0; index < maxLength; index++ {
-			for k, v := range secondVar {
-				for _, value := range v {
-					variable := make(map[string]string)
-					variable[maxKey] = tmpVar[maxKey][index]
-					variable[k] = value
-					realVariables = append(realVariables, variable)
-				}
-			}
-		}
+		//fmt.Println("realVariables: ", realVariables)
+		//fmt.Println("len(realVariables): ", len(realVariables))
 		return realVariables
 	}
 

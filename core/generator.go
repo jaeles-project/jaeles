@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/Jeffail/gabs/v2"
-	//"github.com/davecgh/go-spew/spew"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/robertkrimen/otto"

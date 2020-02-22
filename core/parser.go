@@ -72,7 +72,6 @@ func ParseTarget(raw string) map[string]string {
 		if err != nil {
 			return target
 		}
-		// fmt.Println("parse again")
 	}
 	var hostname string
 	var query string

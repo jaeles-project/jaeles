@@ -66,13 +66,14 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			var resHeaders []map[string]string
 			for k, v := range resp.Header {
 				element := make(map[string]string)
+				//fmt.Printf("%v: %v\n", k, v)
 				element[k] = strings.Join(v[:], "")
 				resLength += len(fmt.Sprintf("%s: %s\n", k, strings.Join(v[:], "")))
 				resHeaders = append(resHeaders, element)
 			}
 
-			// respones time in second
-			resTime := float64(0.0)
+			// response time in second
+			resTime := 0.0
 			resHeaders = append(resHeaders,
 				map[string]string{"Total Length": strconv.Itoa(resLength)},
 				map[string]string{"Response Time": fmt.Sprintf("%f", resTime)},

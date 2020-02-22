@@ -79,8 +79,15 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if rec.Request.URL == "" {
 		parts = append(parts, rec.Request.Target["Domain"])
 	} else {
-		u, _ := url.Parse(rec.Request.URL)
-		parts = append(parts, u.Hostname())
+		host := utils.StripName(rec.Request.Host)
+		u, err := url.Parse(rec.Request.URL)
+		if err == nil {
+			host = u.Hostname()
+		}
+		if host == "" {
+			host = URLEncode(rec.Request.URL)
+		}
+		parts = append(parts, host)
 	}
 	parts = append(parts, fmt.Sprintf("%v-%x", rec.Sign.ID, checksum))
 

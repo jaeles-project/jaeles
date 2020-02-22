@@ -27,6 +27,41 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	// Printf print ouf some value, useful for debug
+	vm.Set("Printf", func(call otto.FunctionCall) otto.Value {
+		var err error
+		args := call.ArgumentList
+		componentName := args[0].String()
+		grepString := "**"
+		position := 0
+		if len(args) > 1 {
+			grepString = args[1].String()
+			if len(args) > 2 {
+				position, err = strconv.Atoi(args[2].String())
+				if err != nil {
+					position = 0
+				}
+			}
+		}
+		component := GetComponent(record, componentName)
+		if grepString != "**" {
+			r, rerr := regexp.Compile(grepString)
+			if rerr == nil {
+				matches := r.FindStringSubmatch(component)
+				if len(matches) > 0 {
+					if position <= len(matches) {
+						component = matches[position]
+					} else {
+						component = matches[0]
+					}
+				}
+			}
+		}
+		fmt.Println(component)
+		result, _ := vm.ToValue(true)
+		return result
+	})
+
 	vm.Set("StringGrepCmd", func(call otto.FunctionCall) otto.Value {
 		command := call.Argument(0).String()
 		searchString := call.Argument(0).String()
@@ -193,6 +228,14 @@ func GetComponent(record libs.Record, component string) string {
 			return record.Response.Body
 		}
 		return record.Response.Beautify
+	case "resheader":
+		beautifyHeader := fmt.Sprintf("%v \n", record.Response.Status)
+		for _, header := range record.Response.Headers {
+			for key, value := range header {
+				beautifyHeader += fmt.Sprintf("%v: %v\n", key, value)
+			}
+		}
+		return beautifyHeader
 	case "resheaders":
 		beautifyHeader := fmt.Sprintf("%v \n", record.Response.Status)
 		for _, header := range record.Response.Headers {
@@ -231,6 +274,8 @@ func RegexSearch(component string, analyzeString string) bool {
 	}
 	return r.MatchString(component)
 }
+
+//utils.ErrorF("Error Compile Regex: %v", analyzeString)
 
 // RegexCount count regex string in component
 func RegexCount(component string, analyzeString string) int {

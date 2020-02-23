@@ -49,15 +49,18 @@ func init() {
 
 	RootCmd.PersistentFlags().BoolVar(&options.SaveRaw, "save-raw", false, "save raw request")
 	RootCmd.PersistentFlags().BoolVar(&options.NoOutput, "no-output", false, "Do not store raw output")
-	RootCmd.PersistentFlags().BoolVar(&options.EnablePassive, "passive", false, "Do not run passive detections")
 	RootCmd.PersistentFlags().BoolVar(&options.NoBackGround, "no-background", false, "Do not run background task")
 	RootCmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "v", false, "Verbose")
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
 	RootCmd.PersistentFlags().IntVar(&options.Refresh, "refresh", 10, "Refresh")
 
+	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
+	RootCmd.PersistentFlags().StringVar(&options.SelectedPassive, "sp", "*", "Selector for passive detections")
 	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "concurrency")
 	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads", "t", 1, "Enable parallel in single signature")
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
+	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
+	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
 	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	// custom params from cli

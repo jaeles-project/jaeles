@@ -8,15 +8,17 @@ type Options struct {
 	ResourcesFolder string
 	ScanID          string
 	ConfigFile      string
-	SummaryOutput   string
-	Output          string
 	PassiveOutput   string
+	PassiveSummary  string
+	Output          string
+	SummaryOutput   string
 	LogFile         string
 	Proxy           string
 	Params          []string
 	Signs           []string
 	Excludes        []string
 	SelectedSigns   []string
+	SelectedPassive string
 	GlobalVar       map[string]string
 
 	Concurrency   int

@@ -18,15 +18,20 @@ func PassiveAnalyze(options libs.Options, record libs.Record) {
 		return
 	}
 	passives := GetPassives(options)
-	//spew.Dump(passives)
 	if len(passives) <= 0 {
 		return
 	}
-	options.PassiveOutput = getPassiveOutput(options)
 	for _, passive := range passives {
 		for _, rule := range passive.Rules {
 			if len(rule.Detections) <= 0 {
 				continue
+			}
+			// select passive
+			if options.SelectedPassive != "*" {
+				passiveName := fmt.Sprintf("%v-%v", passive.Name, rule.ID)
+				if !strings.Contains(passiveName, options.SelectedPassive) {
+					continue
+				}
 			}
 			runPassive(options, record, rule)
 		}
@@ -51,12 +56,6 @@ func runPassive(options libs.Options, record libs.Record, rule libs.Rule) {
 	}
 }
 
-func getPassiveOutput(options libs.Options) string {
-	passiveOut := "passive-" + path.Base(options.Output)
-	passiveOut = path.Join(path.Dir(options.Output), passiveOut)
-	return passiveOut
-}
-
 // GetPassives get all passives rule
 func GetPassives(options libs.Options) []libs.Passive {
 	var passives []libs.Passive
@@ -73,6 +72,7 @@ func GetPassives(options libs.Options) []libs.Passive {
 
 // StorePassiveOutput store passive output found
 func StorePassiveOutput(record libs.Record, rule libs.Rule, detectionString string, options libs.Options) string {
+	head := fmt.Sprintf("[%v|%v] - %v\n\n", rule.ID, strings.Replace(rule.Reason, " ", "_", -1), record.Request.URL)
 	content := fmt.Sprintf("[%v] - %v\n\n", rule.ID, record.Request.URL)
 	content += fmt.Sprintf("[%v] - %v\n\n", rule.Reason, detectionString)
 
@@ -112,6 +112,8 @@ func StorePassiveOutput(record libs.Record, rule libs.Rule, detectionString stri
 		}
 	}
 	utils.WriteToFile(p, content)
+	sum := fmt.Sprintf("%v - %v", strings.TrimSpace(head), p)
+	utils.AppendToContent(options.PassiveSummary, sum)
 	return p
 }
 

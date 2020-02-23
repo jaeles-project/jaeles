@@ -7,6 +7,7 @@ import (
 	"github.com/jaeles-project/jaeles/utils"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -38,15 +39,42 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	if !options.Debug {
 		logger.Out = ioutil.Discard
 	}
+
 	client := resty.New()
 	client.SetLogger(logger)
-	client.SetCloseConnection(true)
+	client.SetTransport(&http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   time.Duration(options.Timeout) * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		MaxConnsPerHost:       1000,
+		IdleConnTimeout:       time.Duration(options.Timeout) * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		ResponseHeaderTimeout: 3 * time.Second,
+		TLSHandshakeTimeout:   8 * time.Second,
+		DisableCompression:    true,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+	})
 
-	// setting for client
-	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	client.SetDisableWarn(true)
 	client.SetHeaders(headers)
-
+	client.SetCloseConnection(true)
+	if options.Proxy != "" {
+		client.SetProxy(options.Proxy)
+	}
+	// override proxy
+	if req.Proxy != "" && req.Proxy != "blank" {
+		client.SetProxy(req.Proxy)
+	}
+	if options.Retry > 0 {
+		client.SetRetryCount(options.Retry)
+	}
+	if req.Timeout > 0 {
+		client.SetTimeout(time.Duration(req.Timeout) * time.Second)
+	}
+	client.SetRetryWaitTime(time.Duration(options.Timeout/2) * time.Second)
+	client.SetRetryMaxWaitTime(time.Duration(options.Timeout) * time.Second)
+	timeStart := time.Now()
 	// redirect policy
 	if req.Redirect == false {
 		client.SetRedirectPolicy(resty.RedirectPolicyFunc(func(req *http.Request, via []*http.Request) error {
@@ -73,7 +101,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			}
 
 			// response time in second
-			resTime := 0.0
+			resTime := time.Since(timeStart).Seconds()
 			resHeaders = append(resHeaders,
 				map[string]string{"Total Length": strconv.Itoa(resLength)},
 				map[string]string{"Response Time": fmt.Sprintf("%f", resTime)},
@@ -96,32 +124,12 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 				return false
 			},
 		)
-
 	} else {
 		client.SetRedirectPolicy(resty.RedirectPolicyFunc(func(req *http.Request, via []*http.Request) error {
 			// keep the header the same
 			client.SetHeaders(headers)
 			return nil
 		}))
-	}
-
-	if options.Retry > 0 {
-		client.SetRetryCount(options.Retry)
-	}
-	client.SetTimeout(time.Duration(options.Timeout) * time.Second)
-	if req.Timeout > 0 {
-		client.SetTimeout(time.Duration(req.Timeout) * time.Second)
-	}
-
-	client.SetRetryWaitTime(time.Duration(options.Timeout/2) * time.Second)
-	client.SetRetryMaxWaitTime(time.Duration(options.Timeout) * time.Second)
-
-	if options.Proxy != "" {
-		client.SetProxy(options.Proxy)
-	}
-	// override proxy
-	if req.Proxy != "" && req.Proxy != "blank" {
-		client.SetProxy(req.Proxy)
 	}
 
 	var resp *resty.Response

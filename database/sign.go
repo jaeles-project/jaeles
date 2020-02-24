@@ -38,7 +38,7 @@ func SelectSign(signName string) []string {
 		}
 		// grep info
 		info := fmt.Sprintf("%v|%v|%v|tech:%v", sign.SignID, strings.ToLower(sign.Name), sign.AsbPath, sign.Tech)
-		if strings.Contains(info, signName) {
+		if strings.Contains(strings.ToLower(info), strings.ToLower(signName)) {
 			selectedSigns = append(selectedSigns, sign.AsbPath)
 			continue
 		}

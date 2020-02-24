@@ -61,7 +61,7 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()
 		component := GetComponent(record, componentName)
-		validate := RegexSearch(component, analyzeString)
+		_, validate := RegexSearch(component, analyzeString)
 		result, _ := vm.ToValue(validate)
 		return result
 	})

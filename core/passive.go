@@ -51,7 +51,7 @@ func runPassive(options libs.Options, record libs.Record, rule libs.Rule) {
 				outputName = StorePassiveOutput(record, rule, detectionString, options)
 				record.RawOutput = outputName
 			}
-			color.Yellow("[Passive][%v] %v %v", record.Sign.Info.Risk, record.Request.URL, outputName)
+			color.Yellow("[Passive] %v %v", record.Request.URL, outputName)
 		}
 	}
 }
@@ -75,22 +75,22 @@ func StorePassiveOutput(record libs.Record, rule libs.Rule, detectionString stri
 	head := fmt.Sprintf("[%v|%v] - %v\n\n", rule.ID, strings.Replace(rule.Reason, " ", "_", -1), record.Request.URL)
 	content := fmt.Sprintf("[%v] - %v\n\n", rule.ID, record.Request.URL)
 	content += fmt.Sprintf("[%v] - %v\n\n", rule.Reason, detectionString)
+	// print out matches string
+	if record.ExtraOutput != "" {
+		content += fmt.Sprintf("%v\n", strings.Repeat("-", 50))
+		content += fmt.Sprintf("[Matches String]\n")
+		content += strings.TrimSpace(record.ExtraOutput)
+		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
+	}
 
 	if record.Request.MiddlewareOutput != "" {
 		content += strings.Join(record.Request.Middlewares, "\n")
-		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += record.Request.MiddlewareOutput
-	}
-	if record.ExtraOutput != "" {
-		content += strings.Join(record.Request.Middlewares, "\n")
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
-		content += record.ExtraOutput
 	}
-	if record.ExtraOutput == "" && record.Request.MiddlewareOutput == "" {
-		content += record.Request.Beautify
-		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
-		content += record.Response.Beautify
-	}
+	content += record.Request.Beautify
+	content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
+	content += record.Response.Beautify
 
 	// hash the content
 	h := sha1.New()

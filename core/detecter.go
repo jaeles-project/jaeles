@@ -72,7 +72,8 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	vm.Set("RegexGrepCmd", func(call otto.FunctionCall) otto.Value {
 		command := call.Argument(0).String()
 		searchString := call.Argument(0).String()
-		result, _ := vm.ToValue(RegexSearch(Execution(command), searchString))
+		_, validate := RegexSearch(Execution(command), searchString)
+		result, _ := vm.ToValue(validate)
 		return result
 	})
 
@@ -98,11 +99,14 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		componentName := call.Argument(0).String()
 		analyzeString := call.Argument(1).String()
 		component := GetComponent(record, componentName)
-		validate := RegexSearch(component, analyzeString)
+		matches, validate := RegexSearch(component, analyzeString)
 		result, err := vm.ToValue(validate)
 		if err != nil {
 			utils.ErrorF("Error Regex: %v", analyzeString)
 			result, _ = vm.ToValue(false)
+		}
+		if matches != "" {
+			extra = matches
 		}
 		return result
 	})
@@ -267,15 +271,21 @@ func StringCount(component string, analyzeString string) int {
 }
 
 // RegexSearch search regex string in component
-func RegexSearch(component string, analyzeString string) bool {
+func RegexSearch(component string, analyzeString string) (string, bool) {
+	var result bool
+	var extra string
 	r, err := regexp.Compile(analyzeString)
 	if err != nil {
-		return false
+		return extra, result
 	}
-	return r.MatchString(component)
-}
 
-//utils.ErrorF("Error Compile Regex: %v", analyzeString)
+	matches := r.FindStringSubmatch(component)
+	if len(matches) > 0 {
+		result = true
+		extra = strings.Join(matches, "\n")
+	}
+	return extra, result
+}
 
 // RegexCount count regex string in component
 func RegexCount(component string, analyzeString string) int {

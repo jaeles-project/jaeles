@@ -64,7 +64,7 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += rec.ExtraOutput
 	}
-	if rec.ExtraOutput == "" && rec.Request.MiddlewareOutput == "" {
+	if rec.Request.MiddlewareOutput == "" {
 		content += rec.Request.Beautify
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += rec.Response.Beautify

@@ -7,7 +7,6 @@ import (
 	"github.com/jaeles-project/jaeles/utils"
 	"io/ioutil"
 	"math/rand"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -43,10 +42,10 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	client := resty.New()
 	client.SetLogger(logger)
 	client.SetTransport(&http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout:   time.Duration(options.Timeout) * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
+		//DialContext: (&net.Dialer{
+		//	Timeout:   time.Duration(options.Timeout) * time.Second,
+		//	KeepAlive: 30 * time.Second,
+		//}).DialContext,
 		MaxIdleConns:          100,
 		MaxConnsPerHost:       1000,
 		IdleConnTimeout:       time.Duration(options.Timeout) * time.Second,

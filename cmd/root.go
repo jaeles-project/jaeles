@@ -64,6 +64,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	// custom params from cli
+	RootCmd.PersistentFlags().StringVarP(&options.Selectors, "selectorFile", "S", "", "Signature selector from file")
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Signs, "signs", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Excludes, "exclude", "x", []string{}, "Exclude Signature selector (Multiple -x flags are accepted)")
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params --params='foo=bar'")
@@ -89,8 +90,11 @@ func initConfig() {
 
 // SelectSign select signature
 func SelectSign() {
-	//options.SelectedSigns
 	var selectedSigns []string
+	// read selector from File
+	if options.Selectors != "" {
+		options.Signs = append(options.Signs, utils.ReadingFileUnique(options.Selectors)...)
+	}
 
 	// default is all signature
 	if len(options.Signs) == 0 {

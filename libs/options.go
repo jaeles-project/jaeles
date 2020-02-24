@@ -14,6 +14,7 @@ type Options struct {
 	SummaryOutput   string
 	LogFile         string
 	Proxy           string
+	Selectors       string
 	Params          []string
 	Signs           []string
 	Excludes        []string

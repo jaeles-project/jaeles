@@ -27,10 +27,6 @@ Please visit the [Official Documention](https://jaeles-project.github.io/) for m
 
 ## Usage
 
-More usage [here](https://jaeles-project.github.io/usage/)
-
-Example commands.
-
 ```shell
 jaeles scan -s 'jira' -s 'ruby' -u target.com
 
@@ -42,6 +38,8 @@ cat urls.txt | grep 'interesting' | jaeles scan -c 50 -s 'fuzz/.*' -U list_of_ur
 
 jaeles server --verbose -s sqli
 ```
+
+More usage can be found [here](https://jaeles-project.github.io/usage/)
 
 ## Showcases
 

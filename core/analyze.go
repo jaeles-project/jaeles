@@ -59,11 +59,14 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 		content += rec.Request.MiddlewareOutput
 	}
+
 	if rec.ExtraOutput != "" {
-		content += strings.Join(rec.Request.Middlewares, "\n")
+		content += fmt.Sprintf("%v\n", strings.Repeat("-", 50))
+		content += fmt.Sprintf("[Matches String]\n")
+		content += strings.TrimSpace(rec.ExtraOutput)
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
-		content += rec.ExtraOutput
 	}
+
 	if rec.Request.MiddlewareOutput == "" {
 		content += rec.Request.Beautify
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))

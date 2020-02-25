@@ -248,6 +248,8 @@ func GetComponent(record libs.Record, component string) string {
 			}
 		}
 		return beautifyHeader
+	case "body":
+		return record.Response.Body
 	case "resbody":
 		return record.Response.Body
 	case "middleware":

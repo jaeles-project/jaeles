@@ -53,20 +53,25 @@ func UpdateSignature(options libs.Options, customRepo string) {
 		os.RemoveAll(options.PassiveFolder)
 		os.RemoveAll(options.PassiveFolder)
 	}
-	_, err := git.PlainClone(signPath, false, &git.CloneOptions{
-		Auth: &http.BasicAuth{
-			Username: options.Server.Username,
-			Password: options.Server.Password,
-		},
-		URL:               url,
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-		Depth:             1,
-		Progress:          os.Stdout,
-	})
+	if options.Server.Key != "" {
+		cmd := fmt.Sprintf("GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i %v' git clone --depth=1 %v %v", options.Server.Key, url, signPath)
+		Execution(cmd)
 
-	if err != nil {
-		utils.ErrorF("Error to clone Signature repo: %v - %v", url, err)
-		return
+	} else {
+		_, err := git.PlainClone(signPath, false, &git.CloneOptions{
+			Auth: &http.BasicAuth{
+				Username: options.Server.Username,
+				Password: options.Server.Password,
+			},
+			URL:               url,
+			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+			Depth:             1,
+			Progress:          os.Stdout,
+		})
+		if err != nil {
+			utils.ErrorF("Error to clone Signature repo: %v - %v", url, err)
+			return
+		}
 	}
 
 	// move passive signatures to default passive
@@ -76,11 +81,5 @@ func UpdateSignature(options libs.Options, customRepo string) {
 	if utils.FolderExists(resourcesPath) {
 		utils.MoveFolder(resourcesPath, options.ResourcesFolder)
 	}
-
 }
 
-// // UpdateOutOfBand renew things in Out of band check
-// func UpdateOutOfBand(options libs.Options) {
-// 	// http
-// 	// dns
-// }

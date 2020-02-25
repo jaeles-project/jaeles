@@ -39,7 +39,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVar(&options.ConfigFile, "config", "", "config file (default is $HOME/.jaeles/config.yaml)")
 	RootCmd.PersistentFlags().StringVar(&options.RootFolder, "rootDir", "~/.jaeles/", "root Project")
-	RootCmd.PersistentFlags().StringVar(&options.SignFolder, "signDir", "~/.jaeles/signatures-base/", "Folder contain default signatures")
+	RootCmd.PersistentFlags().StringVar(&options.SignFolder, "signDir", "~/.jaeles/base-signatures/", "Folder contain default signatures")
 	RootCmd.PersistentFlags().StringVar(&options.ScanID, "scanID", "", "Scan ID")
 
 	RootCmd.PersistentFlags().StringVar(&options.Proxy, "proxy", "", "proxy")

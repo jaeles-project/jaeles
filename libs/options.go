@@ -47,6 +47,7 @@ type Server struct {
 	SecretCollab string
 	Username     string
 	Password     string
+	Key          string
 }
 
 // Job define job for running routine

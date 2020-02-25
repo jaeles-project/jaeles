@@ -22,11 +22,8 @@ func init() {
 		Long:  libs.Banner(),
 		RunE:  runConfig,
 	}
-	configCmd.Flags().Bool("clean", false, "Force continued operation when wildcard found")
-	//configCmd.Flags().Int16P("level", "l", 1, "Provide custom header seperate by ';'")
+	configCmd.Flags().Bool("clean", false, "Clean old record")
 	configCmd.Flags().StringP("action", "a", "", "Action")
-	// load signature
-	configCmd.Flags().StringP("signFolder", "F", "", "Signature Folder")
 	// used for cred action
 	configCmd.Flags().String("user", "", "Username")
 	configCmd.Flags().String("pass", "", "Password")
@@ -36,6 +33,7 @@ func init() {
 	configCmd.Flags().String("secret", "", "Secret of Burp Collab")
 	configCmd.Flags().String("collab", "", "List of Burp Collab File")
 	configCmd.Flags().String("repo", "", "Signature Repo")
+	configCmd.Flags().StringVarP(&options.Server.Key, "key", "K", "", "Private Key to pull repo")
 	configCmd.SetHelpFunc(configHelp)
 	RootCmd.AddCommand(configCmd)
 
@@ -72,7 +70,6 @@ func runConfig(cmd *cobra.Command, args []string) error {
 			options.Server.Username = username
 			options.Server.Password = password
 		}
-
 		core.UpdatePlugins(options)
 		repo, _ := cmd.Flags().GetString("repo")
 		core.UpdateSignature(options, repo)
@@ -102,9 +99,12 @@ func runConfig(cmd *cobra.Command, args []string) error {
 			database.ImportCollab(secret, collab)
 		}
 		break
+
+	case "init":
+		reloadSignature(options.SignFolder)
+		break
 	case "reload":
-		signFolder, _ := cmd.Flags().GetString("signFolder")
-		reloadSignature(signFolder)
+		reloadSignature(options.SignFolder)
 		break
 	default:
 		HelpMessage()
@@ -144,9 +144,10 @@ func HelpMessage() {
 	h := "\nConfig Command example:\n\n"
 	h += "  jaeles config -a update\n\n"
 	h += "  jaeles config -a update --repo http://github.com/jaeles-project/another-signatures --user admin --pass admin\n"
+	h += "  jaeles config -a update --repo http://github.com/jaeles-project/another-signatures -K your_private_key\n"
 	h += "  jaeles config -a clean\n\n"
 	h += "  jaeles config -a reload\n\n"
-	h += "  jaeles config -a reload -F /tmp/custom-signatures/\n\n"
+	h += "  jaeles config -a reload --signDir /tmp/custom-signatures/\n\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
 	//h += "  jaeles config -a oob --secret SomethingSecret --collab list_of_collabs.txt\n\n"
 	fmt.Printf(h)

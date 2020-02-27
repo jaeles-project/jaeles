@@ -142,9 +142,9 @@ func configHelp(cmd *cobra.Command, args []string) {
 func HelpMessage() {
 	fmt.Println(libs.Banner())
 	h := "\nConfig Command example:\n\n"
-	h += "  jaeles config -a update\n\n"
+	h += "  jaeles config -a init\n\n"
 	h += "  jaeles config -a update --repo http://github.com/jaeles-project/another-signatures --user admin --pass admin\n"
-	h += "  jaeles config -a update --repo http://github.com/jaeles-project/another-signatures -K your_private_key\n"
+	h += "  jaeles config -a update --repo git@github.com/jaeles-project/another-signatures -K your_private_key\n"
 	h += "  jaeles config -a clean\n\n"
 	h += "  jaeles config -a reload\n\n"
 	h += "  jaeles config -a reload --signDir /tmp/custom-signatures/\n\n"

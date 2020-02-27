@@ -12,7 +12,7 @@ require (
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
 	github.com/gin-gonic/gin v1.5.0
-	github.com/go-resty/resty/v2 v2.1.0
+	github.com/go-resty/resty/v2 v2.2.0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.1
 	github.com/jinzhu/gorm v1.9.12
@@ -21,7 +21,7 @@ require (
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
 	github.com/thoas/go-funk v0.5.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2

@@ -29,6 +29,9 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 
 			// variable as a script
 			if strings.Contains(value, "(") && strings.Contains(value, ")") {
+				if strings.Contains(value, "{{.") && strings.Contains(value, "}}") {
+					value = ResolveVariable(value, sign.Target)
+				}
 				rawVariables[key] = RunVariables(value)
 			}
 			/*
@@ -73,21 +76,38 @@ func ParseVariable(sign libs.Signature) []map[string]string {
 	}
 
 	// @TODO: Need to improve this
-	if len(rawVariables) == 2 {
-		//([]string)
+	if len(rawVariables) > 1 && len(rawVariables) <= 3 {
 		keys := funk.Keys(rawVariables).([]string)
 		list1 := rawVariables[keys[0]]
 		list2 := rawVariables[keys[1]]
 
-		for _, item1 := range list1 {
-			// loop in second var
-			for _, item2 := range list2 {
-				element := make(map[string]string)
-				element[keys[0]] = item1
-				element[keys[1]] = item2
-				realVariables = append(realVariables, element)
+		if len(rawVariables) == 2 {
+			for _, item1 := range list1 {
+				// loop in second var
+				for _, item2 := range list2 {
+					element := make(map[string]string)
+					element[keys[0]] = item1
+					element[keys[1]] = item2
+					realVariables = append(realVariables, element)
+				}
+			}
+		} else if len(rawVariables) == 3 {
+			list3 := rawVariables[keys[2]]
+			for _, item1 := range list1 {
+				// loop in second var
+				for _, item2 := range list2 {
+					// loop in third var
+					for _, item3 := range list3 {
+						element := make(map[string]string)
+						element[keys[0]] = item1
+						element[keys[1]] = item2
+						element[keys[2]] = item3
+						realVariables = append(realVariables, element)
+					}
+				}
 			}
 		}
+
 		//fmt.Println("realVariables: ", realVariables)
 		//fmt.Println("len(realVariables): ", len(realVariables))
 		return realVariables
@@ -135,7 +155,6 @@ func RunVariables(variableString string) []string {
 	}
 
 	vm := otto.New()
-
 	vm.Set("ExecJS", func(call otto.FunctionCall) otto.Value {
 		jscode := call.Argument(0).String()
 		value, err := vm.Run(jscode)
@@ -239,6 +258,7 @@ func RunVariables(variableString string) []string {
 		return otto.Value{}
 	})
 
+	utils.DebugF("variableString: %v", variableString)
 	vm.Run(variableString)
 	return extra
 }

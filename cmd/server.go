@@ -24,7 +24,6 @@ func init() {
 		Short: "Start API server",
 		Long:  libs.Banner(), RunE: runServer,
 	}
-	//serverCmd.Flags().StringSliceP("sign", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
 	RootCmd.AddCommand(serverCmd)
@@ -60,6 +59,11 @@ func runServer(cmd *cobra.Command, args []string) error {
 					utils.ErrorF("Error loading sign: %v\n", signFile)
 					continue
 				}
+				// filter signature by level
+				if sign.Level > options.Level {
+					continue
+				}
+
 				// parse sign as list or single
 				if sign.Type != "fuzz" {
 					url := record.OriginReq.URL
@@ -107,6 +111,5 @@ func runServer(cmd *cobra.Command, args []string) error {
 	utils.InforF("Start API server at %v", fmt.Sprintf("http://%v/#/", bind))
 
 	server.InitRouter(options, result)
-	// wg.Wait()
 	return nil
 }

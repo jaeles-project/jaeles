@@ -38,8 +38,6 @@ func UpdatePlugins(options libs.Options) {
 // UpdateSignature update latest UI from UI repo
 func UpdateSignature(options libs.Options, customRepo string) {
 	signPath := path.Join(options.RootFolder, "base-signatures")
-	passivePath := path.Join(signPath, "passives")
-	resourcesPath := path.Join(signPath, "resources")
 
 	url := libs.SIGNREPO
 	if customRepo != "" {
@@ -51,7 +49,7 @@ func UpdateSignature(options libs.Options, customRepo string) {
 		utils.InforF("Remove: %v", signPath)
 		os.RemoveAll(signPath)
 		os.RemoveAll(options.PassiveFolder)
-		os.RemoveAll(options.PassiveFolder)
+		os.RemoveAll(options.ResourcesFolder)
 	}
 	if options.Server.Key != "" {
 		cmd := fmt.Sprintf("GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i %v' git clone --depth=1 %v %v", options.Server.Key, url, signPath)
@@ -73,13 +71,4 @@ func UpdateSignature(options libs.Options, customRepo string) {
 			return
 		}
 	}
-
-	// move passive signatures to default passive
-	if utils.FolderExists(passivePath) {
-		utils.MoveFolder(passivePath, options.PassiveFolder)
-	}
-	if utils.FolderExists(resourcesPath) {
-		utils.MoveFolder(resourcesPath, options.ResourcesFolder)
-	}
 }
-

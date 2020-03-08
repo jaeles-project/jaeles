@@ -114,14 +114,13 @@ func ParseTarget(raw string) map[string]string {
 
 	uu, _ := url.Parse(raw)
 	target["BaseURL"] = fmt.Sprintf("%v://%v", uu.Scheme, uu.Host)
-	target["Extension"] = filepath.Ext(target["BaseURL"])
+	target["Extension"] = filepath.Ext(target["URL"])
 	return target
 }
 
 // MoreVariables get more options to render in sign template
 func MoreVariables(target map[string]string, sign libs.Signature, options libs.Options) map[string]string {
 	realTarget := target
-
 	ssrf := database.GetDefaultBurpCollab()
 	if ssrf != "" {
 		target["oob"] = ssrf
@@ -130,8 +129,9 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 	}
 
 	// more options
-	realTarget["rootPath"] = options.RootFolder
-	realTarget["resourcePath"] = options.ResourcesFolder
+	realTarget["Root"] = options.RootFolder
+	realTarget["Resources"] = options.ResourcesFolder
+	realTarget["ThirdParty"] = options.ThirdPartyFolder
 	realTarget["proxy"] = options.Proxy
 	realTarget["output"] = options.Output
 
@@ -140,6 +140,10 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 	if len(signParams) > 0 {
 		for _, param := range signParams {
 			for k, v := range param {
+				if strings.Contains(v, "{{.") && strings.Contains(v, "}}") {
+					v = ResolveVariable(v, realTarget)
+				}
+
 				// variable as a script
 				if strings.Contains(v, "(") && strings.Contains(v, ")") {
 					newValue := RunVariables(v)

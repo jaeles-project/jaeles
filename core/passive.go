@@ -22,6 +22,11 @@ func PassiveAnalyze(options libs.Options, record libs.Record) {
 		return
 	}
 	for _, passive := range passives {
+		// filter by level
+		if passive.Level > options.Level {
+			continue
+		}
+
 		for _, rule := range passive.Rules {
 			if len(rule.Detections) <= 0 {
 				continue

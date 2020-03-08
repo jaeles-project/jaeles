@@ -202,6 +202,8 @@ func Query(req libs.Request, arguments []otto.Value) []libs.Request {
 	if len(arguments) > 1 {
 		paramName = arguments[1].String()
 	}
+	utils.DebugF("injectedString: %v", injectedString)
+	utils.DebugF("paramName: %v", paramName)
 
 	var reqs []libs.Request
 	rawURL := req.URL

@@ -29,7 +29,7 @@ func init() {
 	configCmd.Flags().String("pass", "", "Password")
 	configCmd.Flags().Bool("hh", false, "More helper")
 	configCmd.Flags().Bool("poll", false, "Polling all record in OOB config")
-	// used for cred action
+	// used for update action
 	configCmd.Flags().String("secret", "", "Secret of Burp Collab")
 	configCmd.Flags().String("collab", "", "List of Burp Collab File")
 	configCmd.Flags().String("repo", "", "Signature Repo")
@@ -119,7 +119,6 @@ func reloadSignature(signFolder string) {
 		return
 	}
 	utils.GoodF("Reload signature in: %v", signFolder)
-
 	database.CleanSigns()
 	SignFolder, _ := filepath.Abs(path.Join(options.RootFolder, "base-signatures"))
 	if signFolder != "" && utils.FolderExists(signFolder) {
@@ -132,6 +131,24 @@ func reloadSignature(signFolder string) {
 			database.ImportSign(signFile)
 		}
 	}
+
+	signPath := path.Join(options.RootFolder, "base-signatures")
+	passivePath := path.Join(signPath, "passives")
+	resourcesPath := path.Join(signPath, "resources")
+
+	// copy it to base signature folder
+	if !utils.FolderExists(signPath) {
+		utils.CopyDir(signFolder, signPath)
+	}
+
+	// move passive signatures to default passive
+	if utils.FolderExists(passivePath) {
+		utils.MoveFolder(passivePath, options.PassiveFolder)
+	}
+	if utils.FolderExists(resourcesPath) {
+		utils.MoveFolder(resourcesPath, options.ResourcesFolder)
+	}
+
 }
 
 func configHelp(cmd *cobra.Command, args []string) {
@@ -157,6 +174,7 @@ func ScanHelp(cmd *cobra.Command, args []string) {
 	fmt.Println(libs.Banner())
 	h := "\nScan Usage example:\n"
 	h += "  jaeles scan -s <signature> -u <url>\n"
+	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> -L <level-of-signatures>\n"
 	h += "  jaeles scan -c 50 -s <signature> -U <list_urls>\n"
 	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> [-p 'name=value']\n"
 	h += "  jaeles scan -v -c 50 -s <signature> -U list_target.txt -o /tmp/output\n"
@@ -167,7 +185,7 @@ func ScanHelp(cmd *cobra.Command, args []string) {
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
 	h += "  jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt\n"
 	h += "  jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
-	h += "  cat urls.txt | grep 'interesting' | jaeles scan -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
+	h += "  cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
 	h += "\n"
 	fmt.Printf(h)
 }

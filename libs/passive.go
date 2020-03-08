@@ -4,6 +4,7 @@ package libs
 type Passive struct {
 	Name  string
 	Desc  string
+	Level int
 	Rules []Rule
 }
 

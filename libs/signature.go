@@ -2,9 +2,10 @@ package libs
 
 // Signature base signature struct
 type Signature struct {
-	ID   string
-	Type string
-	Info struct {
+	ID    string
+	Type  string
+	Level int
+	Info  struct {
 		Name     string
 		Category string
 		Risk     string

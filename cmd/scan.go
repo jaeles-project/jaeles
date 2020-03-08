@@ -31,7 +31,6 @@ func init() {
 	scanCmd.Flags().StringP("raw", "r", "", "Raw request from Burp for origin")
 	scanCmd.SetHelpFunc(ScanHelp)
 	RootCmd.AddCommand(scanCmd)
-
 }
 
 func runScan(cmd *cobra.Command, args []string) error {
@@ -121,6 +120,10 @@ func runScan(cmd *cobra.Command, args []string) error {
 		sign, err := core.ParseSign(signFile)
 		if err != nil {
 			utils.ErrorF("Error parsing YAML sign %v", signFile)
+			continue
+		}
+		// filter signature by level
+		if sign.Level > options.Level {
 			continue
 		}
 		for _, url := range urls {

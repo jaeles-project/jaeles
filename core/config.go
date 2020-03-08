@@ -79,6 +79,7 @@ func InitConfig(options *libs.Options) {
 	// set some default config
 	options.PassiveFolder = path.Join(utils.NormalizePath(options.RootFolder), "passives")
 	options.ResourcesFolder = path.Join(utils.NormalizePath(options.RootFolder), "resources")
+	options.ThirdPartyFolder = path.Join(utils.NormalizePath(options.RootFolder), "thirdparty")
 
 	// create output folder
 	var err error

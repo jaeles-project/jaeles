@@ -18,7 +18,7 @@ import (
 var serverCmd *cobra.Command
 
 func init() {
-	// byeCmd represents the bye command
+	// serverCmd represents the server command
 	var serverCmd = &cobra.Command{
 		Use:   "server",
 		Short: "Start API server",
@@ -79,7 +79,6 @@ func runServer(cmd *cobra.Command, args []string) error {
 						req.Headers = record.Request.Headers
 						req.Body = record.Request.Body
 						fuzzSign.Requests = append(fuzzSign.Requests, req)
-
 					}
 					url := record.OriginReq.URL
 					jobs <- libs.Job{URL: url, Sign: fuzzSign}

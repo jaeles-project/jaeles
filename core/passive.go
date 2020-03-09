@@ -178,5 +178,6 @@ func defaultPassive() libs.Passive {
 		Name:  "Default",
 		Desc:  "Default Rule for catching common Error",
 		Rules: rules,
+		Level: 1,
 	}
 }

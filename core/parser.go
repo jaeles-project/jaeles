@@ -290,7 +290,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	return realReqsWithRepeat
 }
 
-// ParseFuzzRequest parse request recive in API server
+// ParseFuzzRequest parse request receive in API server
 func ParseFuzzRequest(record libs.Record, sign libs.Signature) []libs.Request {
 	req := record.Request
 

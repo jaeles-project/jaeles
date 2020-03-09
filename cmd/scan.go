@@ -18,7 +18,7 @@ import (
 var scanCmd *cobra.Command
 
 func init() {
-	// byeCmd represents the bye command
+	// scanCmd represents the scan command
 	var scanCmd = &cobra.Command{
 		Use:   "scan",
 		Short: "Scan list of URLs based on signatures",
@@ -108,7 +108,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 				if RawRequest != "" {
 					sign.RawRequest = RawRequest
 				}
-				// really run the job
 				RunJob(url, sign, options)
 			}
 			wg.Done()
@@ -138,7 +137,6 @@ func runScan(cmd *cobra.Command, args []string) error {
 
 // RunJob really run the job
 func RunJob(url string, sign libs.Signature, options libs.Options) {
-	// var signatures []libs.Signature
 	var originRec libs.Record
 	var err error
 
@@ -189,12 +187,10 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 	// if Parallel not enable, override the threads
 	if len(globalVariables) > 0 {
 		for _, globalVariable := range globalVariables {
-			//localSign := sign
 			sign.Target = target
 			for k, v := range globalVariable {
 				sign.Target[k] = v
 			}
-
 			// start to send stuff
 			for _, req := range sign.Requests {
 				// receive request from "-r req.txt"
@@ -203,10 +199,9 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 				}
 				// gen bunch of request to send
 				realReqs := core.ParseRequest(req, sign, options)
-				SendRequest(realReqs, sign, originRec)
+				SendRequests(realReqs, sign, originRec)
 			}
 		}
-
 	} else {
 		sign.Target = target
 		// start to send stuff
@@ -218,13 +213,13 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 			// gen bunch of request to send
 			realReqs := core.ParseRequest(req, sign, options)
 			// sending things
-			SendRequest(realReqs, sign, originRec)
+			SendRequests(realReqs, sign, originRec)
 		}
 	}
 }
 
-// SendRequest sending request generated
-func SendRequest(realReqs []libs.Request, sign libs.Signature, originRec libs.Record) {
+// SendRequests sending request generated
+func SendRequests(realReqs []libs.Request, sign libs.Signature, originRec libs.Record) {
 	for _, realReq := range realReqs {
 		var realRec libs.Record
 		// set some stuff
@@ -283,10 +278,10 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 
 	// set new values for next request here
 	core.RunConclusions(realRec, sign)
-	// really do analyzer
+	// really do analyze
 	core.Analyze(options, &realRec)
-	// do passive scan
 
+	// do passive scan
 	if options.EnablePassive {
 		core.PassiveAnalyze(options, realRec)
 	}

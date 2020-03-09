@@ -57,7 +57,6 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
 	RootCmd.PersistentFlags().StringVar(&options.SelectedPassive, "sp", "*", "Selector for passive detections")
 	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "concurrency")
-	//RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads", "t", 1, "Enable parallel in single signature")
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")

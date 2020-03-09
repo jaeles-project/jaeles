@@ -15,7 +15,7 @@ import (
 var configCmd *cobra.Command
 
 func init() {
-	// byeCmd represents the bye command
+	// configCmd represents the config command
 	var configCmd = &cobra.Command{
 		Use:   "config",
 		Short: "Configuration CLI",

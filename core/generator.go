@@ -28,6 +28,11 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 		fuzzReq.Detections = ResolveDetection(fuzzReq.Detections, fuzzReq.Target)
 		fuzzReq.Generators = funk.UniqString(ResolveDetection(fuzzReq.Generators, fuzzReq.Target))
 
+		// in case we want to send normal request with no generator
+		if len(fuzzReq.Generators) == 0 && fuzzReq.Method != "" {
+			reqs = append(reqs, fuzzReq)
+		}
+
 		for _, genString := range fuzzReq.Generators {
 			// just copy exactly request again
 			if genString == "Null()" {

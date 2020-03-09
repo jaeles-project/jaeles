@@ -3,13 +3,13 @@ module github.com/jaeles-project/jaeles
 go 1.13
 
 require (
-	github.com/Jeffail/gabs/v2 v2.4.0
+	github.com/Jeffail/gabs/v2 v2.5.0
 	github.com/Shopify/yaml v2.1.0+incompatible
 	github.com/appleboy/gin-jwt/v2 v2.6.3
 	github.com/chromedp/cdproto v0.0.0-20200209033844-7e00b02ea7d2
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fatih/color v1.9.0
-	github.com/gin-contrib/cors v1.3.0
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-resty/resty/v2 v2.2.0

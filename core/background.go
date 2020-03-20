@@ -16,6 +16,7 @@ import (
 func Background(options libs.Options) {
 	utils.DebugF("Checking backround task")
 	time.Sleep(time.Duration(options.Refresh) * time.Second)
+	// currently disable for now
 	PollingLog()
 	PickupLog(options)
 	// @TODO: Add passive signature for analyzer each request

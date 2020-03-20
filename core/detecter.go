@@ -78,8 +78,12 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	})
 
 	vm.Set("StringSearch", func(call otto.FunctionCall) otto.Value {
-		componentName := call.Argument(0).String()
-		analyzeString := call.Argument(1).String()
+		args := call.ArgumentList
+		componentName := "response"
+		analyzeString := args[0].String()
+		if len(args) >= 2 {
+			analyzeString = args[1].String()
+		}
 		component := GetComponent(record, componentName)
 		validate := StringSearch(component, analyzeString)
 		result, _ := vm.ToValue(validate)
@@ -96,8 +100,12 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	})
 
 	vm.Set("RegexSearch", func(call otto.FunctionCall) otto.Value {
-		componentName := call.Argument(0).String()
-		analyzeString := call.Argument(1).String()
+		args := call.ArgumentList
+		componentName := "response"
+		analyzeString := args[0].String()
+		if len(args) >= 2 {
+			analyzeString = args[1].String()
+		}
 		component := GetComponent(record, componentName)
 		matches, validate := RegexSearch(component, analyzeString)
 		result, err := vm.ToValue(validate)
@@ -261,6 +269,7 @@ func GetComponent(record libs.Record, component string) string {
 
 // StringSearch search string literal in component
 func StringSearch(component string, analyzeString string) bool {
+	utils.DebugF("analyzeString: %v", analyzeString)
 	if strings.Contains(component, analyzeString) {
 		return true
 	}
@@ -274,6 +283,7 @@ func StringCount(component string, analyzeString string) int {
 
 // RegexSearch search regex string in component
 func RegexSearch(component string, analyzeString string) (string, bool) {
+	utils.DebugF("analyzeString: %v", analyzeString)
 	var result bool
 	var extra string
 	r, err := regexp.Compile(analyzeString)

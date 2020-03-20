@@ -3,7 +3,7 @@
   <img alt="Jaeles" src="https://image.flaticon.com/icons/svg/1432/1432425.svg" height="140" />
   <p align="center">
     <a href=""><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
-    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.5-blue.svg"></a>
+    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/badge/version-beta%20v0.6-blue.svg"></a>
     <a href="https://inventory.rawsec.ml/tools.html#Jaeles"><img src="https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg" alt="Rawsec&#39;s CyberSecurity Inventory"></a>
   </p>
 </p>
@@ -37,6 +37,8 @@ jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
 cat urls.txt | grep 'interesting' | jaeles scan -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
 
 jaeles server --verbose -s sqli
+
+jaeles scan -v -s '/tmp/sensitive/.*' -u 'https://wp.target.com' -p 'root=[[.URL]]'
 ```
 
 More usage can be found [here](https://jaeles-project.github.io/usage/)

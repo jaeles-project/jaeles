@@ -12,8 +12,6 @@ import (
 	"path/filepath"
 )
 
-var configCmd *cobra.Command
-
 func init() {
 	// configCmd represents the config command
 	var configCmd = &cobra.Command{
@@ -39,7 +37,7 @@ func init() {
 
 }
 
-func runConfig(cmd *cobra.Command, args []string) error {
+func runConfig(cmd *cobra.Command, _ []string) error {
 	// print more help
 	helps, _ := cmd.Flags().GetBool("hh")
 	if helps == true {

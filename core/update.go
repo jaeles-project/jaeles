@@ -50,6 +50,7 @@ func UpdateSignature(options libs.Options, customRepo string) {
 		os.RemoveAll(signPath)
 		os.RemoveAll(options.PassiveFolder)
 		os.RemoveAll(options.ResourcesFolder)
+		os.RemoveAll(options.ThirdPartyFolder)
 	}
 	if options.Server.Key != "" {
 		cmd := fmt.Sprintf("GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i %v' git clone --depth=1 %v %v", options.Server.Key, url, signPath)

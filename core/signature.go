@@ -154,7 +154,6 @@ func ResolveVariable(format string, data map[string]string) string {
 	if strings.TrimSpace(format) == "" {
 		return format
 	}
-
 	_, exist := data["original"]
 	if !exist {
 		data["original"] = ""
@@ -197,7 +196,6 @@ func AltResolveVariable(format string, data map[string]string) string {
 		return format
 	}
 	realFormat, err := template.New("").Delims("[[", "]]").Parse(format)
-
 	_, exist := data["original"]
 	if !exist {
 		data["original"] = ""

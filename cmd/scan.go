@@ -3,19 +3,17 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/sender"
 	"github.com/jaeles-project/jaeles/utils"
+	"github.com/panjf2000/ants"
+	"github.com/spf13/cobra"
 	"github.com/thoas/go-funk"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/jaeles-project/jaeles/core"
-	"github.com/spf13/cobra"
 )
-
-var scanCmd *cobra.Command
 
 func init() {
 	// scanCmd represents the scan command
@@ -33,7 +31,7 @@ func init() {
 	RootCmd.AddCommand(scanCmd)
 }
 
-func runScan(cmd *cobra.Command, args []string) error {
+func runScan(cmd *cobra.Command, _ []string) error {
 	SelectSign()
 	var urls []string
 	// parse URL input here
@@ -80,7 +78,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 		OriginRaw = core.ParseBurpRequest(RawRequest)
 	}
 
-	// Really start do something
+	/* ---- Really start do something ---- */
 
 	// run background detector
 	if !options.NoBackGround {
@@ -91,30 +89,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	jobs := make(chan libs.Job)
-
 	var wg sync.WaitGroup
-	for i := 0; i < options.Concurrency; i++ {
-		wg.Add(1)
-		go func() {
-			for job := range jobs {
-				sign := job.Sign
-				url := job.URL
-
-				// get origin from -r req.txt options
-				if OriginRaw.Raw != "" {
-					sign.Origin = OriginRaw
-				}
-				if RawRequest != "" {
-					sign.RawRequest = RawRequest
-				}
-				RunJob(url, sign, options)
-			}
-			wg.Done()
-		}()
-	}
-
-	// jobs to send request
 	for _, signFile := range options.SelectedSigns {
 		sign, err := core.ParseSign(signFile)
 		if err != nil {
@@ -125,14 +100,35 @@ func runScan(cmd *cobra.Command, args []string) error {
 		if sign.Level > options.Level {
 			continue
 		}
+
+		p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
+			startScanJob(i)
+			wg.Done()
+		})
+		defer p.Release()
+
+		//get origin from -r req.txt options
+		if OriginRaw.Raw != "" {
+			sign.Origin = OriginRaw
+		}
+		if RawRequest != "" {
+			sign.RawRequest = RawRequest
+		}
+
+		// Submit tasks one by one.
 		for _, url := range urls {
-			jobs <- libs.Job{url, sign}
+			wg.Add(1)
+			job := libs.Job{url, sign}
+			_ = p.Invoke(job)
 		}
 	}
-
-	close(jobs)
 	wg.Wait()
 	return nil
+}
+
+func startScanJob(j interface{}) {
+	job := j.(libs.Job)
+	RunJob(job.URL, job.Sign, options)
 }
 
 // RunJob really run the job

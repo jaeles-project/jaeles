@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/panjf2000/ants"
 	"path"
 	"path/filepath"
 	"sync"
@@ -14,8 +15,6 @@ import (
 
 	"github.com/spf13/cobra"
 )
-
-var serverCmd *cobra.Command
 
 func init() {
 	// serverCmd represents the server command
@@ -30,7 +29,7 @@ func init() {
 
 }
 
-func runServer(cmd *cobra.Command, args []string) error {
+func runServer(cmd *cobra.Command, _ []string) error {
 	SelectSign()
 	// prepare DB stuff
 	if options.Server.Username != "" {
@@ -46,9 +45,14 @@ func runServer(cmd *cobra.Command, args []string) error {
 	}
 	database.InitConfigSign()
 
-	result := make(chan libs.Record)
-	jobs := make(chan libs.Job)
+	var wg sync.WaitGroup
+	p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
+		startScanJob(i)
+		wg.Done()
+	})
+	defer p.Release()
 
+	result := make(chan libs.Record)
 	go func() {
 		for {
 			record := <-result
@@ -67,7 +71,10 @@ func runServer(cmd *cobra.Command, args []string) error {
 				// parse sign as list or single
 				if sign.Type != "fuzz" {
 					url := record.OriginReq.URL
-					jobs <- libs.Job{URL: url, Sign: sign}
+					//jobs <- libs.Job{URL: url, Sign: sign}
+					wg.Add(1)
+					job := libs.Job{url, sign}
+					_ = p.Invoke(job)
 				} else {
 					fuzzSign := sign
 					fuzzSign.Requests = []libs.Request{}
@@ -81,27 +88,15 @@ func runServer(cmd *cobra.Command, args []string) error {
 						fuzzSign.Requests = append(fuzzSign.Requests, req)
 					}
 					url := record.OriginReq.URL
-					jobs <- libs.Job{URL: url, Sign: fuzzSign}
 
+					wg.Add(1)
+					job := libs.Job{url, sign}
+					_ = p.Invoke(job)
 				}
 			}
 
 		}
 	}()
-
-	/* Start sending request here */
-	var wg sync.WaitGroup
-	for i := 0; i < options.Concurrency; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for job := range jobs {
-				sign := job.Sign
-				url := job.URL
-				RunJob(url, sign, options)
-			}
-		}()
-	}
 
 	host, _ := cmd.Flags().GetString("host")
 	port, _ := cmd.Flags().GetString("port")
@@ -110,5 +105,6 @@ func runServer(cmd *cobra.Command, args []string) error {
 	utils.InforF("Start API server at %v", fmt.Sprintf("http://%v/#/", bind))
 
 	server.InitRouter(options, result)
+	wg.Wait()
 	return nil
 }

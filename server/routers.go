@@ -130,10 +130,9 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 	}
 
 	r.POST("/auth/login", authMiddleware.LoginHandler)
-
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
-		log.Printf("NoRoute claims: %#v\n", claims)
+		utils.InforF("NoRoute claims: %#v\n", claims)
 		c.JSON(404, gin.H{"code": "404", "message": "Page not found"})
 	})
 

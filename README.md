@@ -18,7 +18,7 @@ Download [precompiled version here](https://github.com/jaeles-project/jaeles/rel
 If you have a Go environment, make sure you have **Go >= 1.13** with Go Modules enable and run the following command.
 
 ```shell
-GO111MODULE=on go get -u github.com/jaeles-project/jaeles
+GO111MODULE=on go get github.com/jaeles-project/jaeles
 ```
 
 Please visit the [Official Documention](https://jaeles-project.github.io/) for more details.

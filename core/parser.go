@@ -210,7 +210,7 @@ func ParseOrigin(req libs.Request, sign libs.Signature, options libs.Options) li
 }
 
 // ParseRequest parse request part in YAML signature file
-func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) []libs.Request {
+func ParseRequest(req libs.Request, sign libs.Signature, _ libs.Options) []libs.Request {
 	var Reqs []libs.Request
 	target := sign.Target
 

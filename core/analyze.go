@@ -42,6 +42,9 @@ func Analyze(options libs.Options, record *libs.Record) {
 				database.ImportRecord(*record)
 			}
 			color.Green("[Vulnerable][%v] %v %v", record.Sign.Info.Risk, record.Request.URL, outputName)
+			if options.FoundCmd != "" {
+				Execution(options.FoundCmd)
+			}
 		}
 	}
 }

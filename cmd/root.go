@@ -2,6 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
@@ -9,10 +14,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/cobra"
 	"github.com/thoas/go-funk"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
 )
 
 var options = libs.Options{}
@@ -57,6 +58,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
 	RootCmd.PersistentFlags().StringVar(&options.SelectedPassive, "sp", "*", "Selector for passive detections")
 	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "Set the concurrency level")
+	RootCmd.PersistentFlags().StringVarP(&options.FoundCmd, "found", "f", "", "Run host OS command when vulnerable found")
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
@@ -67,7 +69,7 @@ func init() {
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Signs, "signs", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Excludes, "exclude", "x", []string{}, "Exclude Signature selector (Multiple -x flags are accepted)")
 	// custom params from cli
-	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params --params='foo=bar'")
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params -p='foo=bar' (Multiple -p flags are accepted)")
 }
 
 // initConfig reads in config file and ENV variables if set.

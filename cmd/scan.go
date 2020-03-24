@@ -139,7 +139,7 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 	// prepare initial signature and variables
 	Target := core.ParseTarget(url)
 	Target = core.MoreVariables(Target, sign, options)
-
+	sign.Target = Target
 	// sending original
 	if sign.Origin.Method != "" {
 		var originReq libs.Request
@@ -173,11 +173,8 @@ func RunJob(url string, sign libs.Signature, options libs.Options) {
 }
 
 func singleJob(originRec libs.Record, sign libs.Signature, target map[string]string) {
-	sign.Target = make(map[string]string)
 	// quick param for calling resource
-	sign.Target["Root"] = options.RootFolder
-	sign.Target["Resources"] = options.ResourcesFolder
-	sign.Target["ThirdParty"] = options.ThirdPartyFolder
+	sign.Target = core.MoreVariables(sign.Target, sign, options)
 
 	globalVariables := core.ParseVariable(sign)
 	// if Parallel not enable, override the threads

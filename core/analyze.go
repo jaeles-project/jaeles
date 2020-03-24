@@ -41,8 +41,15 @@ func Analyze(options libs.Options, record *libs.Record) {
 				record.RawOutput = outputName
 				database.ImportRecord(*record)
 			}
-			color.Green("[Vulnerable][%v] %v %v", record.Sign.Info.Risk, record.Request.URL, outputName)
+			vulnInfo := fmt.Sprintf("[%v] %v", record.Sign.Info.Risk, record.Request.URL)
+			color.Green("[Vulnerable]%v %v",vulnInfo, outputName)
+
 			if options.FoundCmd != "" {
+				// add some more variables for notification
+				record.Request.Target["vulnInfo"] = vulnInfo
+				record.Request.Target["vulnOut"] = outputName
+				record.Request.Target["notiText"] = vulnInfo
+
 				options.FoundCmd = ResolveVariable(options.FoundCmd, record.Request.Target)
 				Execution(options.FoundCmd)
 			}

@@ -43,6 +43,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 			}
 			color.Green("[Vulnerable][%v] %v %v", record.Sign.Info.Risk, record.Request.URL, outputName)
 			if options.FoundCmd != "" {
+				options.FoundCmd = ResolveVariable(options.FoundCmd, record.Request.Target)
 				Execution(options.FoundCmd)
 			}
 		}

@@ -23,6 +23,10 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	url := req.URL
 	body := req.Body
 	headers := GetHeaders(req)
+	timeout := options.Timeout
+	if req.Timeout > 0 {
+		timeout = req.Timeout
+	}
 
 	// update it again
 	var newHeader []map[string]string
@@ -44,10 +48,10 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	client.SetTransport(&http.Transport{
 		MaxIdleConns:          100,
 		MaxConnsPerHost:       1000,
-		IdleConnTimeout:       time.Duration(options.Timeout) * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		ResponseHeaderTimeout: 3 * time.Second,
-		TLSHandshakeTimeout:   8 * time.Second,
+		IdleConnTimeout:       time.Duration(timeout) * time.Second,
+		ExpectContinueTimeout: time.Duration(timeout) * time.Second,
+		ResponseHeaderTimeout: time.Duration(timeout) * time.Second,
+		TLSHandshakeTimeout:   time.Duration(timeout) * time.Second,
 		DisableCompression:    true,
 		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
 	})
@@ -64,11 +68,9 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	if options.Retry > 0 {
 		client.SetRetryCount(options.Retry)
 	}
-	if req.Timeout > 0 {
-		client.SetTimeout(time.Duration(req.Timeout) * time.Second)
-	}
-	client.SetRetryWaitTime(time.Duration(options.Timeout/2) * time.Second)
-	client.SetRetryMaxWaitTime(time.Duration(options.Timeout) * time.Second)
+	client.SetTimeout(time.Duration(timeout) * time.Second)
+	client.SetRetryWaitTime(time.Duration(timeout/2) * time.Second)
+	client.SetRetryMaxWaitTime(time.Duration(timeout) * time.Second)
 	timeStart := time.Now()
 	// redirect policy
 	if req.Redirect == false {

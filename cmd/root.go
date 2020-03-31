@@ -19,7 +19,7 @@ import (
 var options = libs.Options{}
 
 // DB database variables
-var DB *gorm.DB
+var _ *gorm.DB
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -38,38 +38,41 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	// config options
 	RootCmd.PersistentFlags().StringVar(&options.ConfigFile, "config", "", "config file (default is $HOME/.jaeles/config.yaml)")
 	RootCmd.PersistentFlags().StringVar(&options.RootFolder, "rootDir", "~/.jaeles/", "root Project")
 	RootCmd.PersistentFlags().StringVar(&options.SignFolder, "signDir", "~/.jaeles/base-signatures/", "Folder contain default signatures")
 	RootCmd.PersistentFlags().StringVar(&options.ScanID, "scanID", "", "Scan ID")
-
+	// http options
 	RootCmd.PersistentFlags().StringVar(&options.Proxy, "proxy", "", "proxy")
 	RootCmd.PersistentFlags().IntVar(&options.Timeout, "timeout", 20, "HTTP timeout")
 	RootCmd.PersistentFlags().IntVar(&options.Delay, "delay", 100, "Milliseconds delay for polling new job")
 	RootCmd.PersistentFlags().IntVar(&options.Retry, "retry", 0, "retry")
-
+	// output options
+	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
+	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
+	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
+	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
+	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
+	// core options
+	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
+	RootCmd.PersistentFlags().IntVarP(&options.Level, "level", "L", 1, "Filter signature by level")
+	RootCmd.PersistentFlags().StringVar(&options.SelectedPassive, "sp", "*", "Selector for passive detections")
+	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "Set the concurrency level")
+	RootCmd.PersistentFlags().StringVarP(&options.Selectors, "selectorFile", "S", "", "Signature selector from file")
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Signs, "signs", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Excludes, "exclude", "x", []string{}, "Exclude Signature selector (Multiple -x flags are accepted)")
+	// custom params from cli
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params -p='foo=bar' (Multiple -p flags are accepted)")
+	// misc options
+	RootCmd.PersistentFlags().StringVarP(&options.FoundCmd, "found", "f", "", "Run host OS command when vulnerable found")
 	RootCmd.PersistentFlags().BoolVar(&options.SaveRaw, "save-raw", false, "save raw request")
 	RootCmd.PersistentFlags().BoolVar(&options.NoOutput, "no-output", false, "Do not store raw output")
 	RootCmd.PersistentFlags().BoolVar(&options.NoBackGround, "no-background", false, "Do not run background task")
 	RootCmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "v", false, "Verbose")
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
 	RootCmd.PersistentFlags().IntVar(&options.Refresh, "refresh", 10, "Refresh")
-
-	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
-	RootCmd.PersistentFlags().StringVar(&options.SelectedPassive, "sp", "*", "Selector for passive detections")
-	RootCmd.PersistentFlags().IntVarP(&options.Concurrency, "concurrency", "c", 20, "Set the concurrency level")
-	RootCmd.PersistentFlags().StringVarP(&options.FoundCmd, "found", "f", "", "Run host OS command when vulnerable found")
-	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
-	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
-	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
-	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
-	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
-	RootCmd.PersistentFlags().IntVarP(&options.Level, "level", "L", 1, "Filter signature by level")
-	RootCmd.PersistentFlags().StringVarP(&options.Selectors, "selectorFile", "S", "", "Signature selector from file")
-	RootCmd.PersistentFlags().StringSliceVarP(&options.Signs, "signs", "s", []string{}, "Signature selector (Multiple -s flags are accepted)")
-	RootCmd.PersistentFlags().StringSliceVarP(&options.Excludes, "exclude", "x", []string{}, "Exclude Signature selector (Multiple -x flags are accepted)")
-	// custom params from cli
-	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params -p='foo=bar' (Multiple -p flags are accepted)")
+	RootCmd.SetHelpFunc(rootHelp)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -83,7 +86,7 @@ func initConfig() {
 
 	// Init DB
 	var err error
-	DB, err = database.InitDB(utils.NormalizePath(options.Server.DBPath))
+	_, err = database.InitDB(utils.NormalizePath(options.Server.DBPath))
 	if err != nil {
 		fmt.Printf("Can't connect to DB at %v\n", options.Server.DBPath)
 		os.Exit(-1)

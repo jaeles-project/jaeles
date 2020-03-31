@@ -16,10 +16,9 @@ import (
 )
 
 func init() {
-	// scanCmd represents the scan command
 	var scanCmd = &cobra.Command{
 		Use:   "scan",
-		Short: "Scan list of URLs based on signatures",
+		Short: "Scan list of URLs based on selected signatures",
 		Long:  libs.Banner(),
 		RunE:  runScan,
 	}
@@ -275,7 +274,7 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 	core.Analyze(options, &realRec)
 
 	// do passive scan
-	if options.EnablePassive {
+	if options.EnablePassive || sign.Passive {
 		core.PassiveAnalyze(options, realRec)
 	}
 }

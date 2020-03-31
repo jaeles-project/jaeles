@@ -149,8 +149,54 @@ func reloadSignature(signFolder string) {
 
 }
 
-func configHelp(cmd *cobra.Command, args []string) {
+func configHelp(_ *cobra.Command, _ []string) {
 	HelpMessage()
+}
+
+func rootHelp(_ *cobra.Command, _ []string) {
+	RootMessage()
+}
+
+// RootMessage print help message
+func RootMessage() {
+	fmt.Println(libs.Banner())
+	h := "\nUsage:\n jaeles scan|server|config [options]\n"
+	h += " jaeles scan|server|config -h -- Show usage message\n"
+	h += "\nSubcommands:\n"
+	h += "  jaeles scan   --  Scan list of URLs based on selected signatures\n"
+	h += "  jaeles server --  Start API server\n"
+	h += "  jaeles config --  Configuration CLI \n"
+	h += `
+Core Flags:
+  -c, --concurrency int         Set the concurrency level (default 20)
+  -o, --output string           output folder name (default "out")
+  -s, --signs strings           Signature selector (Multiple -s flags are accepted)
+  -x, --exclude strings         Exclude Signature selector (Multiple -x flags are accepted)
+  -L, --level int               Filter signatures by level (default 1)
+  -G, --passive                 Turn on passive detections
+  -p, --params strings          Custom params -p='foo=bar' (Multiple -p flags are accepted)
+
+Mics Flags:
+      --proxy string            proxy
+      --timeout int             HTTP timeout (default 20)
+      --debug                   Debug
+  -v, --verbose                 Verbose
+  -f, --found string            Run host OS command when vulnerable found
+  -O, --summaryOutput string    Summary output file
+      --passiveOutput string    Passive output folder (default is passive-out)
+      --passiveSummary string   Passive Summary file
+  -S, --selectorFile string     Signature selector from file
+      --sp string               Selector for passive detections (default "*")
+`
+	h += "\n\nExamples Commands:\n"
+	h += "  jaeles scan -s <signature> -u <url>\n"
+	h += "  jaeles scan -c 50 -s <signature> -U <list_urls>\n"
+	h += "  jaeles scan -s <signature> -s <another-selector> -u http://example.com\n"
+	h += "  cat list_target.txt | jaeles scan -c 100 -s <signature>\n"
+	h += "\nOthers Commands:\n"
+	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
+	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
+	fmt.Printf(h)
 }
 
 // HelpMessage print help message
@@ -164,25 +210,27 @@ func HelpMessage() {
 	h += "  jaeles config -a reload\n\n"
 	h += "  jaeles config -a reload --signDir /tmp/custom-signatures/\n\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
-	//h += "  jaeles config -a oob --secret SomethingSecret --collab list_of_collabs.txt\n\n"
 	fmt.Printf(h)
 }
 
-func ScanHelp(cmd *cobra.Command, args []string) {
+func ScanHelp(_ *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
 	h := "\nScan Usage example:\n"
 	h += "  jaeles scan -s <signature> -u <url>\n"
 	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> -L <level-of-signatures>\n"
 	h += "  jaeles scan -c 50 -s <signature> -U <list_urls>\n"
-	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> [-p 'name=value']\n"
+	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> -p 'dest=xxx.burpcollaborator.net'\n"
+	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> -f 'noti_slack \"{{.vulnInfo}}\"'\n"
 	h += "  jaeles scan -v -c 50 -s <signature> -U list_target.txt -o /tmp/output\n"
 	h += "  jaeles scan -s <signature> -s <another-selector> -u http://example.com\n"
+	h += "  jaeles scan -G -s <signature> -s <another-selector> -x <exclude-selector> -u http://example.com\n"
 	h += "  cat list_target.txt | jaeles scan -c 100 -s <signature>\n"
 
 	h += "\n\nExamples:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
 	h += "  jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt\n"
-	h += "  jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
+	h += "  jaeles scan -G -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
+	h += "  jaeles scan -v -s '~/my-signatures/products/wordpress/.*' -u 'https://wp.example.com' -p 'root=[[.URL]]'\n"
 	h += "  cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
 	h += "\n"
 	fmt.Printf(h)

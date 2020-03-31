@@ -9,7 +9,7 @@ type Options struct {
 	ThirdPartyFolder string
 	ScanID           string
 	ConfigFile       string
-	FoundCmd       string
+	FoundCmd         string
 	PassiveOutput    string
 	PassiveSummary   string
 	Output           string

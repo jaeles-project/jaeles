@@ -42,7 +42,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 				database.ImportRecord(*record)
 			}
 			vulnInfo := fmt.Sprintf("[%v] %v", record.Sign.Info.Risk, record.Request.URL)
-			color.Green("[Vulnerable]%v %v",vulnInfo, outputName)
+			color.Green("[Vulnerable]%v %v", vulnInfo, outputName)
 
 			if options.FoundCmd != "" {
 				// add some more variables for notification

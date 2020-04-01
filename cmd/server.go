@@ -70,7 +70,6 @@ func runServer(cmd *cobra.Command, _ []string) error {
 				// parse sign as list or single
 				if sign.Type != "fuzz" {
 					url := record.OriginReq.URL
-					//jobs <- libs.Job{URL: url, Sign: sign}
 					wg.Add(1)
 					job := libs.Job{url, sign}
 					_ = p.Invoke(job)
@@ -79,17 +78,24 @@ func runServer(cmd *cobra.Command, _ []string) error {
 					fuzzSign.Requests = []libs.Request{}
 					for _, req := range sign.Requests {
 						core.ParseRequestFromServer(&record, req, sign)
-						// append all requests in sign with request from api
-						req.Method = record.Request.Method
-						req.URL = record.Request.URL
-						req.Headers = record.Request.Headers
-						req.Body = record.Request.Body
+						// override the original if these field defined in signature
+						if req.Method == "" {
+							req.Method = record.OriginReq.Method
+						}
+						if req.URL == "" {
+							req.URL = record.OriginReq.URL
+						}
+						req.Headers = record.OriginReq.Headers
+						if len(req.Headers) == 0 {
+						}
+						if req.Body == "" {
+							req.Body = record.OriginReq.Body
+						}
 						fuzzSign.Requests = append(fuzzSign.Requests, req)
 					}
 					url := record.OriginReq.URL
-
 					wg.Add(1)
-					job := libs.Job{url, sign}
+					job := libs.Job{url, fuzzSign}
 					_ = p.Invoke(job)
 				}
 			}

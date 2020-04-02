@@ -393,7 +393,6 @@ func Path(req libs.Request, arguments []otto.Value) []libs.Request {
 			} else {
 				injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/") + "?" + rawQuery
 			}
-
 			// newPaths[len(newPaths)-1] = newValue + "&" + rawQuery
 		} else {
 			injectedReq.URL = target["BaseURL"] + strings.Join(newPaths[:], "/")
@@ -412,7 +411,6 @@ func Path(req libs.Request, arguments []otto.Value) []libs.Request {
 		}
 
 		if err == nil {
-
 			injectedReq := req
 			target["original"] = Paths[position]
 			newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
@@ -604,52 +602,67 @@ func Cookie(req libs.Request, arguments []otto.Value) []libs.Request {
 func Header(req libs.Request, arguments []otto.Value) []libs.Request {
 	var reqs []libs.Request
 	injectedString := arguments[0].String()
-	headerName := arguments[1].String()
+	var headerNames []string
 
-	target := req.Target
-
-	injectedReq := req
-	var isExistHeader bool
-	// check if inject header is  new or not
-	for _, header := range req.Headers {
-		isExistHeader = funk.Contains(header, headerName)
-		if isExistHeader == true {
-			break
-		} else {
-			isExistHeader = false
-		}
-	}
-	if isExistHeader == false {
-		newHeaders := req.Headers
-		target["original"] = ""
-		newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
-		head := map[string]string{
-			headerName: newValue,
-		}
-		newHeaders = append(newHeaders, head)
-		injectedReq.Headers = newHeaders
-		injectedReq.Target = target
-		reqs = append(reqs, injectedReq)
+	if len(arguments) > 1 {
+		headerNames = append(headerNames, arguments[1].String())
 	} else {
-		var newHeaders []map[string]string
-		// replace old header
 		for _, header := range req.Headers {
-			for k, v := range header {
-				if k == headerName {
-					target["original"] = v
-					newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
-					newHead := map[string]string{
-						headerName: newValue,
-					}
-					newHeaders = append(newHeaders, newHead)
-				} else {
-					newHeaders = append(newHeaders, header)
-				}
+			for key := range header {
+				headerNames = append(headerNames, key)
 			}
 		}
-		injectedReq.Target = target
-		injectedReq.Headers = newHeaders
-		reqs = append(reqs, injectedReq)
+	}
+	if len(headerNames) == 0 {
+		headerNames = append(headerNames, "User-Agent")
+	}
+
+	for _, headerName := range headerNames {
+
+		target := req.Target
+		injectedReq := req
+		var isExistHeader bool
+		// check if inject header is  new or not
+		for _, header := range req.Headers {
+			isExistHeader = funk.Contains(header, headerName)
+			if isExistHeader == true {
+				break
+			} else {
+				isExistHeader = false
+			}
+		}
+		if isExistHeader == false {
+			newHeaders := req.Headers
+			target["original"] = ""
+			newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
+			head := map[string]string{
+				headerName: newValue,
+			}
+			newHeaders = append(newHeaders, head)
+			injectedReq.Headers = newHeaders
+			injectedReq.Target = target
+			reqs = append(reqs, injectedReq)
+		} else {
+			var newHeaders []map[string]string
+			// replace old header
+			for _, header := range req.Headers {
+				for k, v := range header {
+					if k == headerName {
+						target["original"] = v
+						newValue := Encoder(req.Encoding, AltResolveVariable(injectedString, target))
+						newHead := map[string]string{
+							headerName: newValue,
+						}
+						newHeaders = append(newHeaders, newHead)
+					} else {
+						newHeaders = append(newHeaders, header)
+					}
+				}
+			}
+			injectedReq.Target = target
+			injectedReq.Headers = newHeaders
+			reqs = append(reqs, injectedReq)
+		}
 	}
 
 	return reqs

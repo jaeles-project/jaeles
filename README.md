@@ -23,22 +23,30 @@ GO111MODULE=on go get github.com/jaeles-project/jaeles
 
 Please visit the [Official Documention](https://jaeles-project.github.io/) for more details.
 
-**Note**: Checkout [Signature Repo](https://github.com/jaeles-project/jaeles-signatures) for base signature and passive signature.
+### **Note**: Checkout [Signatures Repo](https://github.com/jaeles-project/jaeles-signatures) for install signature.
 
 ## Usage
 
 ```shell
-jaeles scan -s 'jira' -s 'ruby' -u target.com
+# Scan Usage example:
+  jaeles scan -s <signature> -u <url>
+  jaeles scan -c 50 -s <signature> -U <list_urls> -L <level-of-signatures>
+  jaeles scan -c 50 -s <signature> -U <list_urls>
+  jaeles scan -c 50 -s <signature> -U <list_urls> -p 'dest=xxx.burpcollaborator.net'
+  jaeles scan -c 50 -s <signature> -U <list_urls> -f 'noti_slack "{{.vulnInfo}}"'
+  jaeles scan -v -c 50 -s <signature> -U list_target.txt -o /tmp/output
+  jaeles scan -s <signature> -s <another-selector> -u http://example.com
+  jaeles scan -G -s <signature> -s <another-selector> -x <exclude-selector> -u http://example.com
+  cat list_target.txt | jaeles scan -c 100 -s <signature>
 
-jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt
 
-jaeles scan -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
+# Examples:
+  jaeles scan -s 'jira' -s 'ruby' -u target.com
+  jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt
+  jaeles scan -G -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
+  jaeles scan -v -s '~/my-signatures/products/wordpress/.*' -u 'https://wp.example.com' -p 'root=[[.URL]]'
+  cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
 
-cat urls.txt | grep 'interesting' | jaeles scan -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
-
-jaeles server --verbose -s sqli
-
-jaeles scan -v -s '/tmp/sensitive/.*' -u 'https://wp.target.com' -p 'root=[[.URL]]'
 ```
 
 More usage can be found [here](https://jaeles-project.github.io/usage/)

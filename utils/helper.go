@@ -88,6 +88,9 @@ func ReadingLines(filename string) []string {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		val := scanner.Text()
+		if val == "" {
+			continue
+		}
 		result = append(result, val)
 	}
 

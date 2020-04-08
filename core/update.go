@@ -20,18 +20,15 @@ func UpdatePlugins(options libs.Options) {
 		utils.InforF("Remove: %v", pluginPath)
 		os.RemoveAll(pluginPath)
 	}
-	r, err := git.PlainClone(pluginPath, false, &git.CloneOptions{
+	_, err := git.PlainClone(pluginPath, false, &git.CloneOptions{
 		URL:               url,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 		Depth:             1,
 	})
+
 	if err != nil {
-		fmt.Println("Error to clone Plugins repo")
-	} else {
-		_, err = r.Head()
-		if err != nil {
-			fmt.Println("Error to clone Plugins repo")
-		}
+		utils.ErrorF("Error to clone Plugins repo: %v - %v", url, err)
+		return
 	}
 }
 
@@ -55,18 +52,28 @@ func UpdateSignature(options libs.Options, customRepo string) {
 	if options.Server.Key != "" {
 		cmd := fmt.Sprintf("GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i %v' git clone --depth=1 %v %v", options.Server.Key, url, signPath)
 		Execution(cmd)
-
 	} else {
-		_, err := git.PlainClone(signPath, false, &git.CloneOptions{
-			Auth: &http.BasicAuth{
-				Username: options.Server.Username,
-				Password: options.Server.Password,
-			},
-			URL:               url,
-			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-			Depth:             1,
-			Progress:          os.Stdout,
-		})
+		var err error
+		if options.Server.Username != "" && options.Server.Password != "" {
+			_, err = git.PlainClone(signPath, false, &git.CloneOptions{
+				Auth: &http.BasicAuth{
+					Username: options.Server.Username,
+					Password: options.Server.Password,
+				},
+				URL:               url,
+				RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+				Depth:             1,
+				Progress:          os.Stdout,
+			})
+		} else {
+			_, err = git.PlainClone(signPath, false, &git.CloneOptions{
+				URL:               url,
+				RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+				Depth:             1,
+				Progress:          os.Stdout,
+			})
+		}
+
 		if err != nil {
 			utils.ErrorF("Error to clone Signature repo: %v - %v", url, err)
 			return

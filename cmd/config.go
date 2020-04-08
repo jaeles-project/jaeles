@@ -64,10 +64,8 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 		// in case we want to in private repo
 		username, _ := cmd.Flags().GetString("user")
 		password, _ := cmd.Flags().GetString("pass")
-		if username != "" {
-			options.Server.Username = username
-			options.Server.Password = password
-		}
+		options.Server.Username = username
+		options.Server.Password = password
 		core.UpdatePlugins(options)
 		repo, _ := cmd.Flags().GetString("repo")
 		core.UpdateSignature(options, repo)
@@ -196,6 +194,7 @@ Mics Flags:
 	h += "\nOthers Commands:\n"
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
+	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
 	fmt.Printf(h)
 }
 

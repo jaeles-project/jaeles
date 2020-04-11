@@ -89,7 +89,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	var wg sync.WaitGroup
-	if !options.Parallel {
+	if options.DisableParallel {
 		for _, signFile := range options.SelectedSigns {
 			sign, err := core.ParseSign(signFile)
 			if err != nil {
@@ -101,14 +101,14 @@ func runScan(cmd *cobra.Command, _ []string) error {
 				continue
 			}
 
-			// pass to parallel run later
+			// pass to parallel to run later
 			if sign.Parallel {
 				options.ParallelSigns = append(options.ParallelSigns, signFile)
 				continue
 			}
 
 			p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
-				startScanJob(i)
+				startSingleJob(i)
 				wg.Done()
 			}, ants.WithPreAlloc(true))
 			defer p.Release()
@@ -131,10 +131,10 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	// run parallel routine instead
-	if options.Parallel || len(options.ParallelSigns) > 0 {
+	if !options.DisableParallel || len(options.ParallelSigns) > 0 {
 		utils.InforF("Sending request with Parallel mode.")
 		// pass all signs to parallel if forced from cli
-		if options.Parallel {
+		if !options.DisableParallel {
 			options.ParallelSigns = options.SelectedSigns
 		}
 		runParallel(urls)
@@ -144,10 +144,12 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func startScanJob(j interface{}) {
+func startSingleJob(j interface{}) {
 	job := j.(libs.Job)
-	originRec, sign, Target := InitJob(job.URL, job.Sign)
-	singleJob(originRec, sign, Target)
+	originRec, sign, target := InitJob(job.URL, job.Sign)
+	//singleJob(originRec, sign, target)
+	realReqs := genRequests(sign, target)
+	SendRequests(realReqs, sign, originRec)
 }
 
 // InitJob init origin and some variables
@@ -190,12 +192,12 @@ func InitJob(url string, sign libs.Signature) (libs.Record, libs.Signature, map[
 	return originRec, sign, Target
 }
 
-func singleJob(originRec libs.Record, sign libs.Signature, target map[string]string) {
+// generate request for sending
+func genRequests(sign libs.Signature, target map[string]string) []libs.Request {
 	// quick param for calling resource
 	sign.Target = core.MoreVariables(sign.Target, sign, options)
-
+	var realReqs []libs.Request
 	globalVariables := core.ParseVariable(sign)
-	// if Parallel not enable, override the threads
 	if len(globalVariables) > 0 {
 		for _, globalVariable := range globalVariables {
 			sign.Target = target
@@ -209,8 +211,7 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 					req.Raw = sign.RawRequest
 				}
 				// gen bunch of request to send
-				realReqs := core.ParseRequest(req, sign, options)
-				SendRequests(realReqs, sign, originRec)
+				realReqs = append(realReqs, core.ParseRequest(req, sign, options)...)
 			}
 		}
 	} else {
@@ -222,11 +223,10 @@ func singleJob(originRec libs.Record, sign libs.Signature, target map[string]str
 				req.Raw = sign.RawRequest
 			}
 			// gen bunch of request to send
-			realReqs := core.ParseRequest(req, sign, options)
-			// sending things
-			SendRequests(realReqs, sign, originRec)
+			realReqs = append(realReqs, core.ParseRequest(req, sign, options)...)
 		}
 	}
+	return realReqs
 }
 
 // SendRequests sending request generated
@@ -297,40 +297,7 @@ func runParallel(urls []string) {
 		// Submit tasks one by one.
 		for _, url := range urls {
 			originRec, sign, target := InitJob(url, sign)
-
-			// quick param for calling resource
-			sign.Target = core.MoreVariables(sign.Target, sign, options)
-			var realReqs []libs.Request
-			globalVariables := core.ParseVariable(sign)
-			if len(globalVariables) > 0 {
-				for _, globalVariable := range globalVariables {
-					sign.Target = target
-					for k, v := range globalVariable {
-						sign.Target[k] = v
-					}
-					// start to send stuff
-					for _, req := range sign.Requests {
-						// receive request from "-r req.txt"
-						if sign.RawRequest != "" {
-							req.Raw = sign.RawRequest
-						}
-						// gen bunch of request to send
-						realReqs = append(realReqs, core.ParseRequest(req, sign, options)...)
-					}
-				}
-			} else {
-				sign.Target = target
-				// start to send stuff
-				for _, req := range sign.Requests {
-					// receive request from "-r req.txt"
-					if sign.RawRequest != "" {
-						req.Raw = sign.RawRequest
-					}
-					// gen bunch of request to send
-					realReqs = append(realReqs, core.ParseRequest(req, sign, options)...)
-				}
-			}
-
+			realReqs := genRequests(sign, target)
 			for _, req := range realReqs {
 				wg.Add(1)
 				// parsing request here

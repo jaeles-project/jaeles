@@ -25,7 +25,6 @@ func init() {
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
 	RootCmd.AddCommand(serverCmd)
-
 }
 
 func runServer(cmd *cobra.Command, _ []string) error {
@@ -46,16 +45,23 @@ func runServer(cmd *cobra.Command, _ []string) error {
 
 	var wg sync.WaitGroup
 	p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
-		startScanJob(i)
+		startSingleJob(i)
 		wg.Done()
-	})
+	}, ants.WithPreAlloc(true))
 	defer p.Release()
+	// pool for parallel job
+	pp, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
+		parallelJob(i)
+		wg.Done()
+	}, ants.WithPreAlloc(true))
+	defer pp.Release()
 
 	result := make(chan libs.Record)
 	go func() {
 		for {
 			record := <-result
 			utils.InforF("[Receive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
+
 			for _, signFile := range options.SelectedSigns {
 				sign, err := core.ParseSign(signFile)
 				if err != nil {
@@ -68,11 +74,9 @@ func runServer(cmd *cobra.Command, _ []string) error {
 				}
 
 				// parse sign as list or single
+				var url string
 				if sign.Type != "fuzz" {
-					url := record.OriginReq.URL
-					wg.Add(1)
-					job := libs.Job{URL: url, Sign: sign}
-					_ = p.Invoke(job)
+					url = record.OriginReq.URL
 				} else {
 					fuzzSign := sign
 					fuzzSign.Requests = []libs.Request{}
@@ -85,21 +89,39 @@ func runServer(cmd *cobra.Command, _ []string) error {
 						if req.URL == "" {
 							req.URL = record.OriginReq.URL
 						}
-						req.Headers = record.OriginReq.Headers
 						if len(req.Headers) == 0 {
+							req.Headers = record.OriginReq.Headers
 						}
 						if req.Body == "" {
 							req.Body = record.OriginReq.Body
 						}
 						fuzzSign.Requests = append(fuzzSign.Requests, req)
 					}
-					url := record.OriginReq.URL
-					wg.Add(1)
-					job := libs.Job{URL: url, Sign: fuzzSign}
-					_ = p.Invoke(job)
+					url = record.OriginReq.URL
+					sign = fuzzSign
 				}
-			}
+				// run in parallel
+				if !options.DisableParallel || sign.Parallel {
+					originRec, sign, target := InitJob(url, sign)
+					realReqs := genRequests(sign, target)
+					for _, req := range realReqs {
+						wg.Add(1)
+						// parsing request here
+						job := libs.PJob{
+							Req:  req,
+							ORec: originRec,
+							Sign: sign,
+						}
+						_ = pp.Invoke(job)
+					}
+					continue
+				}
 
+				// single routine
+				wg.Add(1)
+				job := libs.Job{URL: url, Sign: sign}
+				_ = p.Invoke(job)
+			}
 		}
 	}()
 

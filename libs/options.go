@@ -25,21 +25,21 @@ type Options struct {
 	SelectedPassive  string
 	GlobalVar        map[string]string
 
-	Level         int
-	Concurrency   int
-	Threads       int
-	Delay         int
-	SaveRaw       bool
-	Timeout       int
-	Refresh       int
-	Retry         int
-	Verbose       bool
-	Debug         bool
-	NoBackGround  bool
-	NoOutput      bool
-	EnablePassive bool
-	Parallel      bool
-	Server        Server
+	Level           int
+	Concurrency     int
+	Threads         int
+	Delay           int
+	SaveRaw         bool
+	Timeout         int
+	Refresh         int
+	Retry           int
+	Verbose         bool
+	Debug           bool
+	NoBackGround    bool
+	NoOutput        bool
+	EnablePassive   bool
+	DisableParallel bool
+	Server          Server
 }
 
 // Server options for api server

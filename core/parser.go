@@ -20,13 +20,14 @@ import (
 func ParseSign(signFile string) (sign libs.Signature, err error) {
 	yamlFile, err := ioutil.ReadFile(signFile)
 	if err != nil {
-		utils.ErrorF("yamlFile.Get err  #%v - %v", err, signFile)
+		utils.ErrorF("Error parsing Signature:  #%v - %v", err, signFile)
 	}
 	err = yaml.Unmarshal(yamlFile, &sign)
 	if err != nil {
 		utils.ErrorF("Error: %v - %v", err, signFile)
 	}
 	// set some default value
+	sign.Parallel = true
 	if sign.Info.Category == "" {
 		if strings.Contains(sign.ID, "-") {
 			sign.Info.Category = strings.Split(sign.ID, "-")[0]
@@ -47,7 +48,7 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 func ParsePassive(passiveFile string) (passive libs.Passive, err error) {
 	yamlFile, err := ioutil.ReadFile(passiveFile)
 	if err != nil {
-		utils.ErrorF("yamlFile.Get err  #%v - %v", err, passiveFile)
+		utils.ErrorF("Error parsing Signature:  #%v - %v", err, passiveFile)
 	}
 	err = yaml.Unmarshal(yamlFile, &passive)
 	if err != nil {

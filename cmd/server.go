@@ -71,7 +71,7 @@ func runServer(cmd *cobra.Command, _ []string) error {
 				if sign.Type != "fuzz" {
 					url := record.OriginReq.URL
 					wg.Add(1)
-					job := libs.Job{url, sign}
+					job := libs.Job{URL: url, Sign: sign}
 					_ = p.Invoke(job)
 				} else {
 					fuzzSign := sign
@@ -95,7 +95,7 @@ func runServer(cmd *cobra.Command, _ []string) error {
 					}
 					url := record.OriginReq.URL
 					wg.Add(1)
-					job := libs.Job{url, fuzzSign}
+					job := libs.Job{URL: url, Sign: fuzzSign}
 					_ = p.Invoke(job)
 				}
 			}

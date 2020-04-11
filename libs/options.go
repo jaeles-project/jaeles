@@ -21,6 +21,7 @@ type Options struct {
 	Signs            []string
 	Excludes         []string
 	SelectedSigns    []string
+	ParallelSigns    []string
 	SelectedPassive  string
 	GlobalVar        map[string]string
 
@@ -37,6 +38,7 @@ type Options struct {
 	NoBackGround  bool
 	NoOutput      bool
 	EnablePassive bool
+	Parallel      bool
 	Server        Server
 }
 
@@ -56,5 +58,12 @@ type Server struct {
 // Job define job for running routine
 type Job struct {
 	URL  string
+	Sign Signature
+}
+
+// PJob define job for running routine
+type PJob struct {
+	Req  Request
+	ORec Record
 	Sign Signature
 }

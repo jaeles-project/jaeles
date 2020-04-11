@@ -2,14 +2,16 @@ package libs
 
 // Record all information about request
 type Record struct {
-	OriginReq   Request
-	OriginRes   Response
-	Request     Request
-	Response    Response
-	Sign        Signature
-	RawOutput   string
-	ExtraOutput string
-	ScanID      string
+	DonePassive   bool
+	SelectPassive string
+	OriginReq     Request
+	OriginRes     Response
+	Request       Request
+	Response      Response
+	Sign          Signature
+	RawOutput     string
+	ExtraOutput   string
+	ScanID        string
 }
 
 // Request all information about request

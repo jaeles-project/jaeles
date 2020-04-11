@@ -71,6 +71,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&options.NoBackGround, "no-background", false, "Do not run background task")
 	RootCmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "v", false, "Verbose")
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
+	RootCmd.PersistentFlags().BoolVarP(&options.Parallel, "parallel", "P", false, "Enable parallel mode")
 	RootCmd.PersistentFlags().IntVar(&options.Refresh, "refresh", 10, "Refresh")
 	RootCmd.SetHelpFunc(rootHelp)
 }

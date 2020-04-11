@@ -2,11 +2,12 @@ package libs
 
 // Signature base signature struct
 type Signature struct {
-	ID      string
-	Type    string
-	Level   int
-	Passive bool
-	Info    struct {
+	ID       string
+	Type     string
+	Level    int
+	Passive  bool
+	Parallel bool
+	Info     struct {
 		Name     string
 		Category string
 		Risk     string

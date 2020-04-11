@@ -35,6 +35,13 @@ func Analyze(options libs.Options, record *libs.Record) {
 			if options.Verbose {
 				color.Magenta("[Found] %v", analyze)
 			}
+
+			// do passive analyze if got called from detector
+			if strings.Contains(strings.ToLower(analyze), "dopassive") {
+				PassiveAnalyze(options, *record)
+				record.DonePassive = true
+			}
+
 			var outputName string
 			if options.NoOutput == false {
 				outputName = StoreOutput(*record, options)
@@ -53,6 +60,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 				options.FoundCmd = ResolveVariable(options.FoundCmd, record.Request.Target)
 				Execution(options.FoundCmd)
 			}
+
 		}
 	}
 }

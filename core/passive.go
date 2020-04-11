@@ -32,7 +32,7 @@ func PassiveAnalyze(options libs.Options, record libs.Record) {
 				continue
 			}
 			// select passive
-			if options.SelectedPassive != "*" {
+			if options.SelectedPassive != "*" || record.SelectPassive != "" {
 				passiveName := strings.ToLower(fmt.Sprintf("%v-%v", passive.Name, rule.ID))
 				if !strings.Contains(passiveName, options.SelectedPassive) {
 					continue

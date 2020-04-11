@@ -62,6 +62,16 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	// do passive if detections is true
+	vm.Set("DoPassive", func(call otto.FunctionCall) otto.Value {
+		args := call.ArgumentList
+		if len(args) > 0 {
+			extra = call.Argument(0).String()
+		}
+		result, _ := vm.ToValue(true)
+		return result
+	})
+
 	vm.Set("StringGrepCmd", func(call otto.FunctionCall) otto.Value {
 		command := call.Argument(0).String()
 		searchString := call.Argument(0).String()

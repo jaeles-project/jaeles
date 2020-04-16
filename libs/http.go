@@ -11,6 +11,7 @@ type Record struct {
 	Sign          Signature
 	RawOutput     string
 	ExtraOutput   string
+	DetectString  string
 	ScanID        string
 }
 

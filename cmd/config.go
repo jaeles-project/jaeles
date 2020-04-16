@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 func init() {
@@ -26,6 +27,7 @@ func init() {
 	configCmd.Flags().String("user", "", "Username")
 	configCmd.Flags().String("pass", "", "Password")
 	configCmd.Flags().Bool("hh", false, "More helper")
+	configCmd.Flags().Bool("mics", true, "Skip import mics signatures")
 	configCmd.Flags().Bool("poll", false, "Polling all record in OOB config")
 	// used for update action
 	configCmd.Flags().String("secret", "", "Secret of Burp Collab")
@@ -40,6 +42,7 @@ func init() {
 func runConfig(cmd *cobra.Command, _ []string) error {
 	// print more help
 	helps, _ := cmd.Flags().GetBool("hh")
+	mics, _ := cmd.Flags().GetBool("mics")
 	if helps == true {
 		HelpMessage()
 		os.Exit(1)
@@ -69,7 +72,7 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 		core.UpdatePlugins(options)
 		repo, _ := cmd.Flags().GetString("repo")
 		core.UpdateSignature(options, repo)
-		reloadSignature(path.Join(options.RootFolder, "base-signatures"))
+		reloadSignature(path.Join(options.RootFolder, "base-signatures"), mics)
 		break
 	case "clear":
 		database.CleanScans()
@@ -97,10 +100,10 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 		break
 
 	case "init":
-		reloadSignature(options.SignFolder)
+		reloadSignature(options.SignFolder, mics)
 		break
 	case "reload":
-		reloadSignature(options.SignFolder)
+		reloadSignature(options.SignFolder, mics)
 		break
 	default:
 		HelpMessage()
@@ -109,7 +112,8 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 }
 
 // reloadSignature signature
-func reloadSignature(signFolder string) {
+func reloadSignature(signFolder string, mics bool) {
+	signFolder = utils.NormalizePath(signFolder)
 	if !utils.FolderExists(signFolder) {
 		utils.ErrorF("Signature folder not found: %v", signFolder)
 		return
@@ -124,6 +128,12 @@ func reloadSignature(signFolder string) {
 	if allSigns != nil {
 		utils.InforF("Load Signature from: %v", SignFolder)
 		for _, signFile := range allSigns {
+			if mics {
+				if strings.Contains(signFile, "/mics/") {
+					continue
+				}
+				utils.DebugF("Skip sign: %v", signFile)
+			}
 			database.ImportSign(signFile)
 		}
 	}

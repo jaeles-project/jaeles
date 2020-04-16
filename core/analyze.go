@@ -32,6 +32,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 			record.ExtraOutput = extra
 		}
 		if result == true {
+			record.DetectString = analyze
 			if options.Verbose {
 				color.Magenta("[Found] %v", analyze)
 			}
@@ -71,7 +72,8 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if rec.Request.URL == "" {
 		rec.Request.URL = rec.Request.Target["URL"]
 	}
-	head := fmt.Sprintf("[%v] - %v\n\n", rec.Sign.ID, rec.Request.URL)
+	head := fmt.Sprintf("[%v] - %v\n", rec.Sign.ID, rec.Request.URL)
+	head += fmt.Sprintf("[Detect-String] - %v\n\n", rec.DetectString)
 	content := head
 	if rec.Request.MiddlewareOutput != "" {
 		content += strings.Join(rec.Request.Middlewares, "\n")

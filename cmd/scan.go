@@ -176,7 +176,7 @@ func InitJob(url string, sign libs.Signature) (libs.Record, libs.Signature, map[
 		originRes, err = sender.JustSend(options, originReq)
 		if err == nil {
 			if options.Verbose && (originReq.Method != "") {
-				fmt.Printf("[Sent-Origin] %v %v \n", originReq.Method, originReq.URL)
+				fmt.Printf("[Sent-Origin] %v %v %v %v %v\n", originReq.Method, originReq.URL, originRes.Status, originRes.ResponseTime, len(originRes.Beautify))
 			}
 		}
 		originRec.Request = originReq
@@ -366,7 +366,7 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 	// print some log
 	if options.Verbose && realRec.Request.Method != "" {
 		if realRec.Response.StatusCode != 0 {
-			fmt.Printf("[Sent] %v %v %v %v\n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime)
+			fmt.Printf("[Sent] %v %v %v %v %v \n", realRec.Request.Method, realRec.Request.URL, realRec.Response.Status, realRec.Response.ResponseTime, len(realRec.Response.Beautify))
 		}
 		// middleware part
 		if realRec.Request.MiddlewareOutput != "" {

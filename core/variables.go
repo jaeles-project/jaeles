@@ -167,6 +167,7 @@ func RunVariables(variableString string) []string {
 
 	vm.Set("File", func(call otto.FunctionCall) otto.Value {
 		filename := call.Argument(0).String()
+		filename = utils.NormalizePath(filename)
 		data := utils.ReadingLines(filename)
 		if len(data) > 0 {
 			extra = append(extra, data...)

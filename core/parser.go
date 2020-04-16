@@ -131,6 +131,7 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 
 	// more options
 	realTarget["Root"] = options.RootFolder
+	realTarget["Version"] = fmt.Sprintf("Jaeles - %v", libs.VERSION)
 	realTarget["Resources"] = options.ResourcesFolder
 	realTarget["ThirdParty"] = options.ThirdPartyFolder
 	realTarget["proxy"] = options.Proxy

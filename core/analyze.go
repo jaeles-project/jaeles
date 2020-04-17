@@ -73,8 +73,7 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		rec.Request.URL = rec.Request.Target["URL"]
 	}
 	head := fmt.Sprintf("[%v] - %v\n", rec.Sign.ID, rec.Request.URL)
-	head += fmt.Sprintf("[Detect-String] - %v\n\n", rec.DetectString)
-	content := head
+	content := head + fmt.Sprintf("[Detect-String] - %v\n\n", rec.DetectString)
 	if rec.Request.MiddlewareOutput != "" {
 		content += strings.Join(rec.Request.Middlewares, "\n")
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))

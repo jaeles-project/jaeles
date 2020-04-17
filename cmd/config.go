@@ -2,15 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+
 	"github.com/jaeles-project/jaeles/core"
 	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
 )
 
 func init() {
@@ -130,9 +131,9 @@ func reloadSignature(signFolder string, mics bool) {
 		for _, signFile := range allSigns {
 			if mics {
 				if strings.Contains(signFile, "/mics/") {
+					utils.DebugF("Skip sign: %v", signFile)
 					continue
 				}
-				utils.DebugF("Skip sign: %v", signFile)
 			}
 			database.ImportSign(signFile)
 		}

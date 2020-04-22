@@ -295,11 +295,12 @@ func GetComponent(record libs.Record, component string) string {
 
 // StringSearch search string literal in component
 func StringSearch(component string, analyzeString string) bool {
-	utils.DebugF("analyzeString: %v", analyzeString)
+	var result bool
 	if strings.Contains(component, analyzeString) {
-		return true
+		result = true
 	}
-	return false
+	utils.DebugF("analyzeString: %v -- %v", analyzeString, result)
+	return result
 }
 
 // StringCount count string literal in component
@@ -309,7 +310,6 @@ func StringCount(component string, analyzeString string) int {
 
 // RegexSearch search regex string in component
 func RegexSearch(component string, analyzeString string) (string, bool) {
-	utils.DebugF("analyzeString: %v", analyzeString)
 	var result bool
 	var extra string
 	r, err := regexp.Compile(analyzeString)
@@ -322,6 +322,7 @@ func RegexSearch(component string, analyzeString string) (string, bool) {
 		result = true
 		extra = strings.Join(matches, "\n")
 	}
+	utils.DebugF("analyzeRegex: %v -- %v", analyzeString, result)
 	return extra, result
 }
 

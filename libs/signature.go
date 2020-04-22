@@ -7,6 +7,7 @@ type Signature struct {
 	Level    int
 	Passive  bool
 	Parallel bool
+	Single   bool
 	Info     struct {
 		Name     string
 		Category string

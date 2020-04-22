@@ -26,7 +26,6 @@ func Analyze(options libs.Options, record *libs.Record) {
 	}
 
 	for _, analyze := range record.Request.Detections {
-		utils.DebugF("[Detection] %v", analyze)
 		extra, result := RunDetector(*record, analyze)
 		if extra != "" {
 			record.ExtraOutput = extra
@@ -63,6 +62,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 			}
 
 		}
+		utils.DebugF("[Detection] %v -- %v", analyze, result)
 	}
 }
 

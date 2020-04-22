@@ -108,6 +108,7 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 	//  - RegexSelect("component", "var_name", "regex", "position")
 	vm.Set("RegexSelect", func(call otto.FunctionCall) otto.Value {
 		valueName, value := RegexSelect(record, call.ArgumentList)
+		utils.DebugF("New variales: %v -- %v", valueName, value)
 		sign.Target[valueName] = value
 		return otto.Value{}
 	})
@@ -163,6 +164,7 @@ func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 	var value string
 	r, rerr := regexp.Compile(regexString)
 	if rerr != nil {
+		utils.DebugF("Error Regex: %v", regexString)
 		return valueName, ""
 	}
 	matches := r.FindStringSubmatch(component)

@@ -89,44 +89,42 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	var wg sync.WaitGroup
-	if options.DisableParallel {
-		for _, signFile := range options.SelectedSigns {
-			sign, err := core.ParseSign(signFile)
-			if err != nil {
-				utils.ErrorF("Error parsing YAML sign %v", signFile)
-				continue
-			}
-			// filter signature by level
-			if sign.Level > options.Level {
-				continue
-			}
+	for _, signFile := range options.SelectedSigns {
+		sign, err := core.ParseSign(signFile)
+		if err != nil {
+			utils.ErrorF("Error parsing YAML sign %v", signFile)
+			continue
+		}
+		// filter signature by level
+		if sign.Level > options.Level {
+			continue
+		}
 
-			// pass to parallel to run later
-			if sign.Parallel {
-				options.ParallelSigns = append(options.ParallelSigns, signFile)
-				continue
-			}
+		// pass to parallel to run later
+		if sign.Parallel {
+			options.ParallelSigns = append(options.ParallelSigns, signFile)
+			continue
+		}
 
-			p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
-				startSingleJob(i)
-				wg.Done()
-			}, ants.WithPreAlloc(true))
-			defer p.Release()
+		p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
+			startSingleJob(i)
+			wg.Done()
+		}, ants.WithPreAlloc(true))
+		defer p.Release()
 
-			//get origin from -r req.txt options
-			if OriginRaw.Raw != "" {
-				sign.Origin = OriginRaw
-			}
-			if RawRequest != "" {
-				sign.RawRequest = RawRequest
-			}
+		//get origin from -r req.txt options
+		if OriginRaw.Raw != "" {
+			sign.Origin = OriginRaw
+		}
+		if RawRequest != "" {
+			sign.RawRequest = RawRequest
+		}
 
-			// Submit tasks one by one.
-			for _, url := range urls {
-				wg.Add(1)
-				job := libs.Job{URL: url, Sign: sign}
-				_ = p.Invoke(job)
-			}
+		// Submit tasks one by one.
+		for _, url := range urls {
+			wg.Add(1)
+			job := libs.Job{URL: url, Sign: sign}
+			_ = p.Invoke(job)
 		}
 	}
 
@@ -291,6 +289,10 @@ func runParallel(urls []string) {
 		}
 		// filter signature by level
 		if sign.Level > options.Level {
+			continue
+		}
+		// avoid duplicate sending in signature
+		if sign.Single {
 			continue
 		}
 

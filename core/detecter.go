@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/jaeles-project/jaeles/utils"
+	"io/ioutil"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -159,6 +160,7 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		result, _ := vm.ToValue(statusCode)
 		return result
 	})
+
 	vm.Set("ResponseTime", func(call otto.FunctionCall) otto.Value {
 		responseTime := record.Response.ResponseTime
 		result, _ := vm.ToValue(responseTime)
@@ -191,6 +193,93 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		result, _ := vm.ToValue(ContentLength)
 		return result
 	})
+	// Origins('1', 'status')
+	// Origins('response')
+	vm.Set("Origins", func(call otto.FunctionCall) otto.Value {
+		args := call.ArgumentList
+		index := 0
+		componentName := args[0].String()
+		if len(args) >= 2 {
+			index = utils.StrToInt(args[0].String())
+			componentName = args[1].String()
+		}
+		selectedRec := ChooseOrigin(record, index)
+		componentName = strings.ToLower(componentName)
+		switch componentName {
+		case "status":
+			value := selectedRec.Response.StatusCode
+			result, _ := vm.ToValue(value)
+			return result
+		case "code":
+			value := selectedRec.Response.StatusCode
+			result, _ := vm.ToValue(value)
+			return result
+		case "responsetime":
+			value := selectedRec.Response.ResponseTime
+			result, _ := vm.ToValue(value)
+			return result
+		case "time":
+			value := selectedRec.Response.ResponseTime
+			result, _ := vm.ToValue(value)
+			return result
+		case "contentlength":
+			value := len(selectedRec.Response.Beautify)
+			result, _ := vm.ToValue(value)
+			return result
+		case "length":
+			value := len(selectedRec.Response.Beautify)
+			result, _ := vm.ToValue(value)
+			return result
+		}
+		// default value
+		result, _ := vm.ToValue(true)
+		return result
+	})
+
+	// OriginSearch('component', 'string')
+	// OriginSearch('1', 'component', 'string')
+	vm.Set("OriginsSearch", func(call otto.FunctionCall) otto.Value {
+		args := call.ArgumentList
+		index := 0
+		componentName := args[0].String()
+		analyzeString := args[1].String()
+		if len(args) >= 3 {
+			index = utils.StrToInt(args[0].String())
+			componentName = args[1].String()
+			analyzeString = args[2].String()
+		}
+		selectedRec := ChooseOrigin(record, index)
+		componentName = strings.ToLower(componentName)
+		component := GetComponent(selectedRec, componentName)
+		validate := StringSearch(component, analyzeString)
+		result, _ := vm.ToValue(validate)
+		return result
+	})
+	vm.Set("OriginsRegex", func(call otto.FunctionCall) otto.Value {
+		args := call.ArgumentList
+		index := 0
+		componentName := args[0].String()
+		analyzeString := args[1].String()
+		if len(args) >= 3 {
+			index = utils.StrToInt(args[0].String())
+			componentName = args[1].String()
+			analyzeString = args[2].String()
+		}
+		selectedRec := ChooseOrigin(record, index)
+		componentName = strings.ToLower(componentName)
+		component := GetComponent(selectedRec, componentName)
+		matches, validate := RegexSearch(component, analyzeString)
+		result, err := vm.ToValue(validate)
+		if err != nil {
+			utils.ErrorF("Error Regex: %v", analyzeString)
+			result, _ = vm.ToValue(false)
+		}
+		if matches != "" {
+			extra = matches
+		}
+		return result
+	})
+
 	vm.Set("Collab", func(call otto.FunctionCall) otto.Value {
 		analyzeString := call.Argument(0).String()
 		res, validate := PollCollab(record, analyzeString)
@@ -200,7 +289,7 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	})
 
 	// StringGrep select a string from component
-	// e.g: StringGrep("component", "right", "left")
+	// StringGrep("component", "right", "left")
 	vm.Set("StringSelect", func(call otto.FunctionCall) otto.Value {
 		componentName := call.Argument(0).String()
 		left := call.Argument(2).String()
@@ -244,6 +333,19 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	vm.Set("DirLength", func(call otto.FunctionCall) otto.Value {
+		validate := DirLength(call.Argument(0).String())
+		result, _ := vm.ToValue(validate)
+		return result
+	})
+
+	vm.Set("FileLength", func(call otto.FunctionCall) otto.Value {
+		validate := FileLength(call.Argument(0).String())
+		result, _ := vm.ToValue(validate)
+		return result
+	})
+
+
 	result, _ := vm.Run(detectionString)
 	analyzeResult, err := result.Export()
 	if err != nil || analyzeResult == nil {
@@ -252,9 +354,25 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	return extra, analyzeResult.(bool)
 }
 
+// ChooseOrigin choose origin to compare
+func ChooseOrigin(record libs.Record, index int) libs.Record {
+	selectedRec := record
+	if len(record.Origins) == 0 || len(record.Origins) < index {
+		return selectedRec
+	}
+
+	origin := record.Origins[index]
+	var compareRecord libs.Record
+	compareRecord.Request = origin.ORequest
+	compareRecord.Response = origin.OResponse
+	selectedRec = compareRecord
+	return selectedRec
+}
+
 // GetComponent get component to run detection
 func GetComponent(record libs.Record, component string) string {
-	switch strings.ToLower(component) {
+	component = strings.ToLower(component)
+	switch component {
 	case "orequest":
 		return record.OriginReq.Beautify
 	case "oresponse":
@@ -442,3 +560,21 @@ func PollCollab(record libs.Record, analyzeString string) (string, bool) {
 
 	return "", false
 }
+
+
+// FileLength count len of file
+func FileLength(filename string) int {
+	filename = utils.NormalizePath(filename)
+	return len(utils.ReadingLines(filename))
+}
+
+// DirLength count len of file
+func DirLength(dir string) int {
+	dir = utils.NormalizePath(dir)
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	return len(files)
+}
+

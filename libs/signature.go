@@ -17,6 +17,7 @@ type Signature struct {
 	}
 
 	Origin     Request
+	Origins    []Origin
 	Requests   []Request
 	RawRequest string
 	Payloads   []string

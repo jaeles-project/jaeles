@@ -188,10 +188,13 @@ func ParseParams(rawParams []string) map[string]string {
 }
 
 // ParseOrigin parse origin request
-func ParseOrigin(req libs.Request, sign libs.Signature, options libs.Options) libs.Request {
+func ParseOrigin(req libs.Request, sign libs.Signature, _ libs.Options) libs.Request {
 	target := sign.Target
 	// resolve some parts with global variables first
 	req.Target = target
+	if strings.Contains(req.Method, "{{.") {
+		req.Method = ResolveVariable(req.Method, target)
+	}
 	req.URL = ResolveVariable(req.URL, target)
 	// @NOTE: backward compatible
 	if req.URL == "" && req.Path != "" {
@@ -221,6 +224,9 @@ func ParseRequest(req libs.Request, sign libs.Signature, _ libs.Options) []libs.
 
 	// resolve some parts with global variables first
 	req.Target = target
+	if strings.Contains(req.Method, "{{.") {
+		req.Method = ResolveVariable(req.Method, target)
+	}
 	req.URL = ResolveVariable(req.URL, target)
 	// @NOTE: backward compatible
 	if req.URL == "" && req.Path != "" {

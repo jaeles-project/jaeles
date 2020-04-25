@@ -145,7 +145,6 @@ func runScan(cmd *cobra.Command, _ []string) error {
 func startSingleJob(j interface{}) {
 	job := j.(libs.Job)
 	originRec, sign, target := InitJob(job.URL, job.Sign)
-	//singleJob(originRec, sign, target)
 	realReqs := genRequests(sign, target)
 	SendRequests(realReqs, sign, originRec)
 }
@@ -153,41 +152,62 @@ func startSingleJob(j interface{}) {
 // InitJob init origin and some variables
 func InitJob(url string, sign libs.Signature) (libs.Record, libs.Signature, map[string]string) {
 	var originRec libs.Record
-	var err error
+	var origin libs.Origin
 	// prepare initial signature and variables
 	Target := core.ParseTarget(url)
 	Target = core.MoreVariables(Target, sign, options)
 	sign.Target = Target
-
+	// base origin
 	if sign.Origin.Method != "" {
-		var originReq libs.Request
-		var originRes libs.Response
-
-		originSign := sign
-		if sign.Origin.Raw == "" {
-			originSign.Target = Target
-			originReq = core.ParseOrigin(originSign.Origin, originSign, options)
-		} else {
-			originReq = sign.Origin
-		}
-
-		originRes, err = sender.JustSend(options, originReq)
-		if err == nil {
-			if options.Verbose && (originReq.Method != "") {
-				fmt.Printf("[Sent-Origin] %v %v %v %v %v\n", originReq.Method, originReq.URL, originRes.Status, originRes.ResponseTime, len(originRes.Beautify))
+		origin, Target = sendOrigin(sign, sign.Origin, Target)
+		originRec.Request = origin.ORequest
+		originRec.Response = origin.OResponse
+	}
+	// in case we have many origin
+	if len(sign.Origins) > 0 {
+		var origins []libs.Origin
+		for index, origin := range sign.Origins {
+			origin, Target = sendOrigin(sign, origin.ORequest, Target)
+			if origin.Label == "" {
+				origin.Label = fmt.Sprintf("%v", index)
 			}
+			origins = append(origins, origin)
 		}
-		originRec.Request = originReq
-		originRec.Response = originRes
-		// set some more variables
-		core.RunConclusions(originRec, &originSign)
-		for k, v := range originSign.Target {
-			if Target[k] == "" {
-				Target[k] = v
-			}
+		sign.Origins = origins
+	}
+
+	return originRec, sign, Target
+}
+
+// sending origin request
+func sendOrigin(sign libs.Signature, originReq libs.Request, target map[string]string) (libs.Origin, map[string]string) {
+	var origin libs.Origin
+	var err error
+	var originRes libs.Response
+
+	originSign := sign
+	if originReq.Raw == "" {
+		originSign.Target = target
+		originReq = core.ParseOrigin(originReq, originSign, options)
+	}
+
+	originRes, err = sender.JustSend(options, originReq)
+	if err == nil {
+		if options.Verbose && (originReq.Method != "") {
+			fmt.Printf("[Sent-Origin] %v %v %v %v %v\n", originReq.Method, originReq.URL, originRes.Status, originRes.ResponseTime, len(originRes.Beautify))
 		}
 	}
-	return originRec, sign, Target
+	originRec := libs.Record{Request: originReq, Response: originRes}
+	// set some more variables
+	core.RunConclusions(originRec, &originSign)
+	for k, v := range originSign.Target {
+		if target[k] == "" {
+			target[k] = v
+		}
+	}
+	origin.ORequest = originReq
+	origin.OResponse = originRes
+	return origin, target
 }
 
 // generate request for sending
@@ -374,6 +394,10 @@ func DoAnalyze(realRec libs.Record, sign *libs.Signature) {
 		if realRec.Request.MiddlewareOutput != "" {
 			utils.DebugF(realRec.Request.MiddlewareOutput)
 		}
+	}
+
+	if len(sign.Origins) > 0 {
+		realRec.Origins = sign.Origins
 	}
 
 	// set new values for next request here

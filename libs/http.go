@@ -6,6 +6,7 @@ type Record struct {
 	SelectPassive string
 	OriginReq     Request
 	OriginRes     Response
+	Origins       []Origin
 	Request       Request
 	Response      Response
 	Sign          Signature
@@ -13,6 +14,13 @@ type Record struct {
 	ExtraOutput   string
 	DetectString  string
 	ScanID        string
+}
+
+// Origin contain map of origins
+type Origin struct {
+	Label     string
+	ORequest  Request `yaml:"origin_req"`
+	OResponse Response `yaml:"origin_res"`
 }
 
 // Request all information about request

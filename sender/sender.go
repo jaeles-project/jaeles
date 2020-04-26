@@ -23,6 +23,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	url := req.URL
 	body := req.Body
 	headers := GetHeaders(req)
+
 	timeout := options.Timeout
 	if req.Timeout > 0 {
 		timeout = req.Timeout

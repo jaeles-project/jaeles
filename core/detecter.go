@@ -345,7 +345,6 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
-
 	result, _ := vm.Run(detectionString)
 	analyzeResult, err := result.Export()
 	if err != nil || analyzeResult == nil {
@@ -561,7 +560,6 @@ func PollCollab(record libs.Record, analyzeString string) (string, bool) {
 	return "", false
 }
 
-
 // FileLength count len of file
 func FileLength(filename string) int {
 	filename = utils.NormalizePath(filename)
@@ -577,4 +575,3 @@ func DirLength(dir string) int {
 	}
 	return len(files)
 }
-

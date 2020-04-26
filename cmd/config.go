@@ -159,16 +159,17 @@ func reloadSignature(signFolder string, mics bool) {
 }
 
 func configHelp(_ *cobra.Command, _ []string) {
+	fmt.Println(libs.Banner())
 	HelpMessage()
 }
 
 func rootHelp(_ *cobra.Command, _ []string) {
+	fmt.Println(libs.Banner())
 	RootMessage()
 }
 
 // RootMessage print help message
 func RootMessage() {
-	fmt.Println(libs.Banner())
 	h := "\nUsage:\n jaeles scan|server|config [options]\n"
 	h += " jaeles scan|server|config -h -- Show usage message\n"
 	h += "\nSubcommands:\n"
@@ -184,6 +185,7 @@ Core Flags:
   -L, --level int               Filter signatures by level (default 1)
   -G, --passive                 Turn on passive detections
   -p, --params strings          Custom params -p='foo=bar' (Multiple -p flags are accepted)
+  -H, --headers strings         Custom headers (e.g: -H 'Referer: {{.BaseURL}}') (Multiple -H flags are accepted)
 
 Mics Flags:
       --proxy string            proxy
@@ -196,12 +198,15 @@ Mics Flags:
       --passiveSummary string   Passive Summary file
   -S, --selectorFile string     Signature selector from file
       --sp string               Selector for passive detections (default "*")
+      --single string           Forced running in single mode
 `
 	h += "\n\nExamples Commands:\n"
-	h += "  jaeles scan -s <signature> -u <url>\n"
-	h += "  jaeles scan -c 50 -s <signature> -U <list_urls>\n"
+	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
+	h += "  jaeles scan -c 50 -s 'java' -x 'tomcat' -U list_of_urls.txt\n"
+	h += "  jaeles scan -G -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
+	h += "  jaeles scan -c 50 -S list_of_selectors.txt -U list_of_urls.txt -H 'Referer: {{.BaseURL}}/x' \n"
 	h += "  jaeles scan -s <signature> -s <another-selector> -u http://example.com\n"
-	h += "  cat list_target.txt | jaeles scan -c 100 -s <signature>\n"
+	h += "  cat list_target.txt | jaeles scan -c 50 -s <signature>\n"
 	h += "\nOthers Commands:\n"
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
@@ -211,7 +216,6 @@ Mics Flags:
 
 // HelpMessage print help message
 func HelpMessage() {
-	fmt.Println(libs.Banner())
 	h := "\nConfig Command example:\n\n"
 	h += "  jaeles config -a init\n\n"
 	h += "  jaeles config -a update --repo http://github.com/jaeles-project/another-signatures --user admin --pass admin\n"
@@ -225,6 +229,11 @@ func HelpMessage() {
 
 func ScanHelp(_ *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
+	ScanMessage()
+}
+
+// ScanMessage print help message
+func ScanMessage() {
 	h := "\nScan Usage example:\n"
 	h += "  jaeles scan -s <signature> -u <url>\n"
 	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> -L <level-of-signatures>\n"

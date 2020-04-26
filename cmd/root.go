@@ -64,6 +64,7 @@ func init() {
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Excludes, "exclude", "x", []string{}, "Exclude Signature selector (Multiple -x flags are accepted)")
 	// custom params from cli
 	RootCmd.PersistentFlags().StringSliceVarP(&options.Params, "params", "p", []string{}, "Custom params -p='foo=bar' (Multiple -p flags are accepted)")
+	RootCmd.PersistentFlags().StringSliceVarP(&options.Headers, "headers", "H", []string{}, "Custom headers (e.g: -H 'Referer: {{.BaseURL}}') (Multiple -H flags are accepted)")
 	// misc options
 	RootCmd.PersistentFlags().StringVarP(&options.FoundCmd, "found", "f", "", "Run host OS command when vulnerable found")
 	RootCmd.PersistentFlags().BoolVar(&options.SaveRaw, "save-raw", false, "save raw request")
@@ -136,6 +137,7 @@ func SelectSign() {
 
 	if len(selectedSigns) == 0 {
 		fmt.Println("[Error] No signature loaded")
+		RootMessage()
 		os.Exit(1)
 	}
 	selectedSigns = funk.UniqString(selectedSigns)

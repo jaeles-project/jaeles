@@ -18,6 +18,7 @@ type Options struct {
 	Proxy            string
 	Selectors        string
 	Params           []string
+	Headers          []string
 	Signs            []string
 	Excludes         []string
 	SelectedSigns    []string

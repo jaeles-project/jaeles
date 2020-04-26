@@ -63,7 +63,8 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	if len(urls) == 0 {
-		utils.ErrorF("No Input found")
+		fmt.Println("[Error] No signature loaded")
+		ScanMessage()
 		os.Exit(1)
 	}
 	utils.InforF("Input Loaded: %v", len(urls))
@@ -214,6 +215,7 @@ func sendOrigin(sign libs.Signature, originReq libs.Request, target map[string]s
 func genRequests(sign libs.Signature, target map[string]string) []libs.Request {
 	// quick param for calling resource
 	sign.Target = core.MoreVariables(sign.Target, sign, options)
+
 	var realReqs []libs.Request
 	globalVariables := core.ParseVariable(sign)
 	if len(globalVariables) > 0 {

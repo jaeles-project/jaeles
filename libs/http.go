@@ -19,7 +19,7 @@ type Record struct {
 // Origin contain map of origins
 type Origin struct {
 	Label     string
-	ORequest  Request `yaml:"origin_req"`
+	ORequest  Request  `yaml:"origin_req"`
 	OResponse Response `yaml:"origin_res"`
 }
 

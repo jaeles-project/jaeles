@@ -187,6 +187,19 @@ func ParseParams(rawParams []string) map[string]string {
 	return params
 }
 
+// ParseRawHeaders parse more headers from cli
+func ParseRawHeaders(rawHeaders []string) map[string]string {
+	headers := make(map[string]string)
+
+	for _, item := range rawHeaders {
+		if strings.Contains(item, ":") {
+			data := strings.Split(item, ":")
+			headers[data[0]] = strings.Join(data[1:], "")
+		}
+	}
+	return headers
+}
+
 // ParseOrigin parse origin request
 func ParseOrigin(req libs.Request, sign libs.Signature, _ libs.Options) libs.Request {
 	target := sign.Target
@@ -218,7 +231,7 @@ func ParseOrigin(req libs.Request, sign libs.Signature, _ libs.Options) libs.Req
 }
 
 // ParseRequest parse request part in YAML signature file
-func ParseRequest(req libs.Request, sign libs.Signature, _ libs.Options) []libs.Request {
+func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) []libs.Request {
 	var Reqs []libs.Request
 	target := sign.Target
 
@@ -234,6 +247,17 @@ func ParseRequest(req libs.Request, sign libs.Signature, _ libs.Options) []libs.
 	}
 	req.Body = ResolveVariable(req.Body, target)
 	req.Headers = ResolveHeader(req.Headers, target)
+
+	// more headers from cli
+	if len(options.Headers) > 0 {
+		moreHeaders := ParseRawHeaders(options.Headers)
+		for k, v := range moreHeaders {
+			element := make(map[string]string)
+			element[k] = ResolveVariable(v, req.Target)
+			req.Headers = append(req.Headers, element)
+		}
+	}
+
 	req.Middlewares = ResolveDetection(req.Middlewares, target)
 	req.Conditions = ResolveDetection(req.Conditions, target)
 

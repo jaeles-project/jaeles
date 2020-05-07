@@ -99,7 +99,7 @@ func initConfig() {
 	if !options.NoDB {
 		_, err = database.InitDB(utils.NormalizePath(options.Server.DBPath))
 		if err != nil {
-			fmt.Printf("Can't connect to DB at %v\n", options.Server.DBPath)
+			fmt.Fprintf(os.Stderr, "Can't connect to DB at %v\n", options.Server.DBPath)
 			os.Exit(-1)
 		}
 	}

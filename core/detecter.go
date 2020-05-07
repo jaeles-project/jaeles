@@ -168,8 +168,15 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 	vm.Set("ContentLength", func(call otto.FunctionCall) otto.Value {
-		ContentLength := record.Response.Length
-		result, _ := vm.ToValue(ContentLength)
+		args := call.ArgumentList
+		if len(args) == 0 {
+			ContentLength := record.Response.Length
+			result, _ := vm.ToValue(ContentLength)
+			return result
+		}
+		componentName := args[0].String()
+		componentLength := len(GetComponent(record, componentName))
+		result, _ := vm.ToValue(componentLength)
 		return result
 	})
 
@@ -190,8 +197,16 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 	vm.Set("OriginContentLength", func(call otto.FunctionCall) otto.Value {
-		ContentLength := record.OriginRes.Length
-		result, _ := vm.ToValue(ContentLength)
+		args := call.ArgumentList
+		if len(args) == 0 {
+			ContentLength := record.OriginRes.Length
+			result, _ := vm.ToValue(ContentLength)
+			return result
+		}
+		selectedRec := libs.Record{Request: record.OriginReq, Response: record.OriginRes}
+		componentName := args[0].String()
+		componentLength := len(GetComponent(selectedRec, componentName))
+		result, _ := vm.ToValue(componentLength)
 		return result
 	})
 	// Origins('1', 'status')
@@ -533,8 +548,8 @@ func PollCollab(record libs.Record, analyzeString string) (string, bool) {
 	secretCollab := url.QueryEscape(database.GetSecretbyCollab(analyzeString))
 
 	// poll directly
-	url := fmt.Sprintf("http://polling.burpcollaborator.net/burpresults?biid=%v", secretCollab)
-	_, response, _ := gorequest.New().Get(url).End()
+	burl := fmt.Sprintf("http://polling.burpcollaborator.net/burpresults?biid=%v", secretCollab)
+	_, response, _ := gorequest.New().Get(burl).End()
 	jsonParsed, _ := gabs.ParseJSON([]byte(response))
 	exists := jsonParsed.Exists("responses")
 	if exists == false {

@@ -161,12 +161,12 @@ func reloadSignature(signFolder string, mics bool) {
 }
 
 func configHelp(_ *cobra.Command, _ []string) {
-	fmt.Println(libs.Banner())
+	fmt.Fprintf(os.Stderr, libs.Banner())
 	HelpMessage()
 }
 
 func rootHelp(_ *cobra.Command, _ []string) {
-	fmt.Println(libs.Banner())
+	fmt.Fprintf(os.Stderr, libs.Banner())
 	RootMessage()
 }
 
@@ -215,7 +215,7 @@ Mics Flags:
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
-	fmt.Printf(h)
+	fmt.Fprintf(os.Stderr, h)
 }
 
 // HelpMessage print help message
@@ -228,11 +228,11 @@ func HelpMessage() {
 	h += "  jaeles config -a reload\n\n"
 	h += "  jaeles config -a reload --signDir /tmp/custom-signatures/\n\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
-	fmt.Printf(h)
+	fmt.Fprintf(os.Stderr, h)
 }
 
 func ScanHelp(_ *cobra.Command, _ []string) {
-	fmt.Println(libs.Banner())
+	fmt.Fprintf(os.Stderr, libs.Banner())
 	ScanMessage()
 }
 
@@ -256,7 +256,7 @@ func ScanMessage() {
 	h += "  jaeles scan -v -s '~/my-signatures/products/wordpress/.*' -u 'https://wp.example.com' -p 'root=[[.URL]]'\n"
 	h += "  cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
 	h += "\n"
-	fmt.Printf(h)
+	fmt.Fprintf(os.Stderr, h)
 }
 
 func CleanOutput() {

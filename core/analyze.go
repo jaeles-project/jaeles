@@ -46,10 +46,17 @@ func Analyze(options libs.Options, record *libs.Record) {
 			if options.NoOutput == false {
 				outputName = StoreOutput(*record, options)
 				record.RawOutput = outputName
-				database.ImportRecord(*record)
+				if !options.NoDB {
+					database.ImportRecord(*record)
+				}
 			}
 			vulnInfo := fmt.Sprintf("[%v] %v", record.Sign.Info.Risk, record.Request.URL)
-			color.Green("[Vulnerable]%v %v", vulnInfo, outputName)
+			if options.Quite {
+				record.Request.Target["VulnURL"] = record.Request.URL
+				fmt.Printf("%v\n", ResolveVariable(options.QuiteFormat, record.Request.Target))
+			} else {
+				color.Green("[Vulnerable]%v %v", vulnInfo, outputName)
+			}
 
 			if options.FoundCmd != "" {
 				// add some more variables for notification
@@ -125,5 +132,7 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	sum := fmt.Sprintf("%v - %v", strings.TrimSpace(head), p)
 	utils.AppendToContent(options.SummaryOutput, sum)
 
+	vulnSum := fmt.Sprintf("[%v][%v] - %v", rec.Sign.ID, rec.Sign.Info.Risk, rec.Request.Target["Raw"])
+	utils.AppendToContent(options.SummaryVuln, vulnSum)
 	return p
 }

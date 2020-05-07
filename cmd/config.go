@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/jaeles-project/jaeles/core"
@@ -253,4 +255,27 @@ func ScanMessage() {
 	h += "  cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
 	h += "\n"
 	fmt.Printf(h)
+}
+
+func CleanOutput() {
+	// clean output
+	if utils.DirLength(options.Output) == 0 {
+		os.RemoveAll(options.Output)
+	}
+	if utils.DirLength(options.PassiveFolder) == 0 {
+		os.RemoveAll(options.PassiveFolder)
+	}
+
+	// unique vulnSummary
+	// Sort sort content of a file
+	data := utils.ReadingFileUnique(options.SummaryVuln)
+	if len(data) == 0 {
+		return
+	}
+	sort.Strings(data)
+	content := strings.Join(data, "\n")
+	// remove blank line
+	content = regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(content), "\n")
+	utils.WriteToFile(options.SummaryVuln, content)
+
 }

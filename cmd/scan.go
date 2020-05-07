@@ -140,6 +140,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	wg.Wait()
+	CleanOutput()
 	return nil
 }
 

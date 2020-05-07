@@ -10,10 +10,12 @@ type Options struct {
 	ScanID           string
 	ConfigFile       string
 	FoundCmd         string
+	QuiteFormat      string
 	PassiveOutput    string
 	PassiveSummary   string
 	Output           string
 	SummaryOutput    string
+	SummaryVuln      string
 	LogFile          string
 	Proxy            string
 	Selectors        string
@@ -34,8 +36,11 @@ type Options struct {
 	Timeout         int
 	Refresh         int
 	Retry           int
+	Quite           bool
 	Verbose         bool
+	Version         bool
 	Debug           bool
+	NoDB            bool
 	NoBackGround    bool
 	NoOutput        bool
 	EnablePassive   bool

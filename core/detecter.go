@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"github.com/jaeles-project/jaeles/utils"
-	"io/ioutil"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -334,13 +333,13 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 	})
 
 	vm.Set("DirLength", func(call otto.FunctionCall) otto.Value {
-		validate := DirLength(call.Argument(0).String())
+		validate := utils.DirLength(call.Argument(0).String())
 		result, _ := vm.ToValue(validate)
 		return result
 	})
 
 	vm.Set("FileLength", func(call otto.FunctionCall) otto.Value {
-		validate := FileLength(call.Argument(0).String())
+		validate := utils.FileLength(call.Argument(0).String())
 		result, _ := vm.ToValue(validate)
 		return result
 	})
@@ -558,20 +557,4 @@ func PollCollab(record libs.Record, analyzeString string) (string, bool) {
 	}
 
 	return "", false
-}
-
-// FileLength count len of file
-func FileLength(filename string) int {
-	filename = utils.NormalizePath(filename)
-	return len(utils.ReadingLines(filename))
-}
-
-// DirLength count len of file
-func DirLength(dir string) int {
-	dir = utils.NormalizePath(dir)
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return 0
-	}
-	return len(files)
 }

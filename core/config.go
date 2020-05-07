@@ -91,6 +91,9 @@ func InitConfig(options *libs.Options) {
 	if options.SummaryOutput == "" {
 		options.SummaryOutput = path.Join(options.Output, "jaeles-summary.txt")
 	}
+	if options.SummaryVuln == "" {
+		options.SummaryVuln = path.Join(options.Output, "vuln-summary.txt")
+	}
 
 	if options.PassiveOutput == "" {
 		passiveOut := "passive-" + path.Base(options.Output)

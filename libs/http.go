@@ -25,6 +25,7 @@ type Origin struct {
 
 // Request all information about request
 type Request struct {
+	RawInput          string
 	Engine            string
 	Timeout           int
 	Repeat            int

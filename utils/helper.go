@@ -55,6 +55,22 @@ func NormalizePath(path string) string {
 	return path
 }
 
+// FileLength count len of file
+func FileLength(filename string) int {
+	filename = NormalizePath(filename)
+	return len(ReadingLines(filename))
+}
+
+// DirLength count len of file
+func DirLength(dir string) int {
+	dir = NormalizePath(dir)
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	return len(files)
+}
+
 // GetFileContent Reading file and return content of it
 func GetFileContent(filename string) string {
 	var result string

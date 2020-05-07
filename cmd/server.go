@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/panjf2000/ants"
+	"os"
 	"path"
 	"path/filepath"
 	"sync"
@@ -28,6 +29,10 @@ func init() {
 }
 
 func runServer(cmd *cobra.Command, _ []string) error {
+	if options.NoDB {
+		fmt.Fprintf(os.Stderr, "Can't run Jaeles Server without DB\n")
+		os.Exit(-1)
+	}
 	SelectSign()
 	// prepare DB stuff
 	if options.Server.Username != "" {
@@ -133,5 +138,8 @@ func runServer(cmd *cobra.Command, _ []string) error {
 
 	server.InitRouter(options, result)
 	wg.Wait()
+	if utils.DirLength(options.Output) == 0 {
+		os.RemoveAll(options.Output)
+	}
 	return nil
 }

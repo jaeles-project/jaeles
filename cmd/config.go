@@ -201,6 +201,8 @@ Mics Flags:
   -S, --selectorFile string     Signature selector from file
       --sp string               Selector for passive detections (default "*")
       --single string           Forced running in single mode
+  -q, --quite                   Quite Output
+  -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"

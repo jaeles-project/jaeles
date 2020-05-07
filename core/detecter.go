@@ -108,6 +108,7 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		componentName := "response"
 		analyzeString := args[0].String()
 		if len(args) >= 2 {
+			componentName = args[0].String()
 			analyzeString = args[1].String()
 		}
 		component := GetComponent(record, componentName)
@@ -130,6 +131,7 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		componentName := "response"
 		analyzeString := args[0].String()
 		if len(args) >= 2 {
+			componentName = args[0].String()
 			analyzeString = args[1].String()
 		}
 		component := GetComponent(record, componentName)
@@ -370,6 +372,7 @@ func ChooseOrigin(record libs.Record, index int) libs.Record {
 // GetComponent get component to run detection
 func GetComponent(record libs.Record, component string) string {
 	component = strings.ToLower(component)
+	utils.DebugF("Component: %v", component)
 	switch component {
 	case "orequest":
 		return record.OriginReq.Beautify

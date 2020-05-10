@@ -137,7 +137,6 @@ func ResolveHeader(headers []map[string]string, target map[string]string) []map[
 
 // AltResolveHeader resolve headers part in YAML signature file
 func AltResolveHeader(headers []map[string]string, target map[string]string) []map[string]string {
-	// realHeaders := headers
 	var realHeaders []map[string]string
 
 	for _, head := range headers {

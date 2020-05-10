@@ -50,7 +50,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 					database.ImportRecord(*record)
 				}
 			}
-			vulnInfo := fmt.Sprintf("[%v] %v", record.Sign.Info.Risk, record.Request.URL)
+			vulnInfo := fmt.Sprintf("[%v][%v] %v", record.Sign.ID, record.Sign.Info.Risk, record.Request.URL)
 			if options.Quite {
 				record.Request.Target["VulnURL"] = record.Request.URL
 				fmt.Printf("%v\n", ResolveVariable(options.QuiteFormat, record.Request.Target))

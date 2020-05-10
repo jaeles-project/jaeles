@@ -13,6 +13,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 func init() {
@@ -271,6 +272,11 @@ func SendRequests(realReqs []libs.Request, sign libs.Signature, originRec libs.R
 			if !validate {
 				return
 			}
+		}
+
+		if options.Delay > 0 {
+			utils.DebugF("Delay sending request: %v", options.Delay)
+			time.Sleep(time.Duration(options.Delay) * time.Second)
 		}
 
 		// run middleware here

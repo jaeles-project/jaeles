@@ -115,7 +115,7 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 }
 
 // reloadSignature signature
-func reloadSignature(signFolder string, mics bool) {
+func reloadSignature(signFolder string, skipMics bool) {
 	signFolder = utils.NormalizePath(signFolder)
 	if !utils.FolderExists(signFolder) {
 		utils.ErrorF("Signature folder not found: %v", signFolder)
@@ -131,8 +131,13 @@ func reloadSignature(signFolder string, mics bool) {
 	if allSigns != nil {
 		utils.InforF("Load Signature from: %v", SignFolder)
 		for _, signFile := range allSigns {
-			if mics {
+			if skipMics {
 				if strings.Contains(signFile, "/mics/") {
+					utils.DebugF("Skip sign: %v", signFile)
+					continue
+				}
+
+				if strings.Contains(signFile, "/exper/") {
 					utils.DebugF("Skip sign: %v", signFile)
 					continue
 				}

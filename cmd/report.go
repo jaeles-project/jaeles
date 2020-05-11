@@ -19,6 +19,7 @@ func init() {
 	}
 	reportCmd.Flags().StringP("html", "R", "jaeles-report.html", "Report name")
 	reportCmd.Flags().String("template", "~/.jaeles/plugins/report/index.html", "Report Template File")
+	reportCmd.SetHelpFunc(ReportHelp)
 	RootCmd.AddCommand(reportCmd)
 }
 

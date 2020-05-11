@@ -166,12 +166,12 @@ func reloadSignature(signFolder string, skipMics bool) {
 }
 
 func configHelp(_ *cobra.Command, _ []string) {
-	fmt.Fprintf(os.Stderr, libs.Banner())
+	fmt.Println(libs.Banner())
 	HelpMessage()
 }
 
 func rootHelp(_ *cobra.Command, _ []string) {
-	fmt.Fprintf(os.Stderr, libs.Banner())
+	fmt.Println(libs.Banner())
 	RootMessage()
 }
 
@@ -209,6 +209,7 @@ Mics Flags:
       --single string           Forced running in single mode
   -q, --quite                   Quite Output
   -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
+  	  --html string     		Generate HTML reports after the scan done
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
@@ -222,7 +223,7 @@ Mics Flags:
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
 	h += "  jaeles report -o /tmp/scanned/out\n"
-	fmt.Fprintf(os.Stderr, h)
+	fmt.Println(h)
 }
 
 // HelpMessage print help message
@@ -235,11 +236,11 @@ func HelpMessage() {
 	h += "  jaeles config -a reload\n\n"
 	h += "  jaeles config -a reload --signDir /tmp/custom-signatures/\n\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
-	fmt.Fprintf(os.Stderr, h)
+	fmt.Println(h)
 }
 
 func ScanHelp(_ *cobra.Command, _ []string) {
-	fmt.Fprintf(os.Stderr, libs.Banner())
+	fmt.Println(libs.Banner())
 	ScanMessage()
 }
 
@@ -263,7 +264,24 @@ func ScanMessage() {
 	h += "  jaeles scan -v -s '~/my-signatures/products/wordpress/.*' -u 'https://wp.example.com' -p 'root=[[.URL]]'\n"
 	h += "  cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080\n"
 	h += "\n"
-	fmt.Fprintf(os.Stderr, h)
+	fmt.Println(h)
+}
+
+// ReportHelp report help message
+func ReportHelp(_ *cobra.Command, _ []string) {
+	fmt.Println(libs.Banner())
+	ReportMessage()
+}
+
+// ReportHelp print help message
+func ReportMessage() {
+	h := "\nReport Command example:\n\n"
+	h += `
+  -h, --help              help for report
+  -R, --html string       Report name (default "jaeles-report.html")
+      --template string   Report Template File (default "~/.jaeles/plugins/report/index.html")
+	`
+	fmt.Println(h)
 }
 
 func CleanOutput() {
@@ -286,5 +304,4 @@ func CleanOutput() {
 	// remove blank line
 	content = regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(content), "\n")
 	utils.WriteToFile(options.SummaryVuln, content)
-
 }

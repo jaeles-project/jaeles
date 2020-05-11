@@ -3,6 +3,7 @@ package libs
 // Signature base signature struct
 type Signature struct {
 	ID       string
+	RawPath  string
 	Type     string
 	Level    int
 	Passive  bool

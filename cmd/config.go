@@ -178,11 +178,12 @@ func rootHelp(_ *cobra.Command, _ []string) {
 // RootMessage print help message
 func RootMessage() {
 	h := "\nUsage:\n jaeles scan|server|config [options]\n"
-	h += " jaeles scan|server|config -h -- Show usage message\n"
+	h += " jaeles scan|server|config|report -h -- Show usage message\n"
 	h += "\nSubcommands:\n"
 	h += "  jaeles scan   --  Scan list of URLs based on selected signatures\n"
 	h += "  jaeles server --  Start API server\n"
 	h += "  jaeles config --  Configuration CLI \n"
+	h += "  jaeles report --  Generate HTML report based on scanned output \n"
 	h += `
 Core Flags:
   -c, --concurrency int         Set the concurrency level (default 20)
@@ -220,6 +221,7 @@ Mics Flags:
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
+	h += "  jaeles report -o -o /tmp/scanned/out\n"
 	fmt.Fprintf(os.Stderr, h)
 }
 

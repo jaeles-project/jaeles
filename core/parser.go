@@ -31,6 +31,7 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 	if sign.Single {
 		sign.Parallel = false
 	}
+	sign.RawPath = signFile
 	if sign.Info.Category == "" {
 		if strings.Contains(sign.ID, "-") {
 			sign.Info.Category = strings.Split(sign.ID, "-")[0]

@@ -46,6 +46,14 @@ type Options struct {
 	EnablePassive   bool
 	DisableParallel bool
 	Server          Server
+	Report          Report
+}
+
+// Report options for api server
+type Report struct {
+	ReportName   string
+	TemplateFile string
+	OutputPath   string
 }
 
 // Server options for api server

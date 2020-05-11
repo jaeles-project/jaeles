@@ -19,6 +19,9 @@ import (
 
 // JustSend just sending request
 func JustSend(options libs.Options, req libs.Request) (res libs.Response, err error) {
+	if req.Method == "" {
+		req.Method = "GET"
+	}
 	method := req.Method
 	url := req.URL
 	body := req.Body

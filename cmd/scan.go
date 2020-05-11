@@ -27,6 +27,7 @@ func init() {
 	scanCmd.Flags().StringP("url", "u", "", "URL of target")
 	scanCmd.Flags().StringP("urls", "U", "", "URLs file of target")
 	scanCmd.Flags().StringP("raw", "r", "", "Raw request from Burp for origin")
+	scanCmd.Flags().Bool("html", false, "Generate HTML report after done")
 	scanCmd.SetHelpFunc(ScanHelp)
 	RootCmd.AddCommand(scanCmd)
 }
@@ -142,6 +143,11 @@ func runScan(cmd *cobra.Command, _ []string) error {
 
 	wg.Wait()
 	CleanOutput()
+
+	genReport, _ := cmd.Flags().GetBool("html")
+	if genReport && utils.FolderExists(options.Output) {
+		DoGenReport(options)
+	}
 	return nil
 }
 

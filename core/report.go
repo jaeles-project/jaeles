@@ -90,14 +90,17 @@ func ParseVuln(options libs.Options) []Vulnerability {
 		signID = strings.Split(data[0], "][")[0][1:]
 		risk = strings.Split(data[0], "][")[1][:len(strings.Split(data[0], "][")[1])-1]
 
-		report := data[2]
+		raw := data[2]
+		// host/sign-hash
+		reportPath := path.Join(path.Base(path.Dir(raw)), filepath.Base(raw))
+
 		vuln := Vulnerability{
 			SignID:     signID,
 			SignPath:   "SignPath",
 			URL:        data[1],
 			Risk:       strings.ToLower(risk),
-			ReportPath: report,
-			ReportFile: filepath.Base(report),
+			ReportPath: reportPath,
+			ReportFile: filepath.Base(raw),
 		}
 		vulns = append(vulns, vuln)
 	}

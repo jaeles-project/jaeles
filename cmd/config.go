@@ -221,7 +221,7 @@ Mics Flags:
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
-	h += "  jaeles report -o -o /tmp/scanned/out\n"
+	h += "  jaeles report -o /tmp/scanned/out\n"
 	fmt.Fprintf(os.Stderr, h)
 }
 

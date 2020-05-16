@@ -17,7 +17,6 @@ import (
 )
 
 func init() {
-	// configCmd represents the config command
 	var configCmd = &cobra.Command{
 		Use:   "config",
 		Short: "Configuration CLI",
@@ -209,7 +208,8 @@ Mics Flags:
       --single string           Forced running in single mode
   -q, --quite                   Quite Output
   -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
-  -R, --html string     		Generate HTML reports after the scan done
+  -R, --report string     		HTML report file name
+      --html string     		Enable generate HTML reports after the scan done 
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"

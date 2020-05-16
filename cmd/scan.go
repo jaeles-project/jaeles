@@ -145,7 +145,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	CleanOutput()
 
 	genReport, _ := cmd.Flags().GetBool("html")
-	if genReport && utils.FolderExists(options.Output) {
+	if genReport == true && utils.FolderExists(options.Output) {
 		DoGenReport(options)
 	}
 	return nil

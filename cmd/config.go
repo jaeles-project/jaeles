@@ -209,7 +209,7 @@ Mics Flags:
       --single string           Forced running in single mode
   -q, --quite                   Quite Output
   -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
-  	  --html string     		Generate HTML reports after the scan done
+  -R, --html string     		Generate HTML reports after the scan done
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
@@ -278,7 +278,6 @@ func ReportMessage() {
 	h := "\nReport Command example:\n\n"
 	h += `
   -h, --help              help for report
-  -R, --html string       Report name (default "jaeles-report.html")
       --template string   Report Template File (default "~/.jaeles/plugins/report/index.html")
 	`
 	fmt.Println(h)

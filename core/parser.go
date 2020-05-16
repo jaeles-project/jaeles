@@ -58,6 +58,9 @@ func ParsePassive(passiveFile string) (passive libs.Passive, err error) {
 	if err != nil {
 		utils.ErrorF("Error: %v - %v", err, passiveFile)
 	}
+	if passive.Risk == "" {
+		passive.Risk = "Potential"
+	}
 	return passive, err
 }
 

@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 // InitConfig init config
@@ -97,7 +98,7 @@ func InitConfig(options *libs.Options) {
 
 	if options.PassiveOutput == "" {
 		passiveOut := "passive-" + path.Base(options.Output)
-		options.PassiveOutput = path.Join(path.Dir(options.Output), passiveOut)
+		options.PassiveOutput = path.Join(filepath.Dir(path.Clean(options.Output)), passiveOut)
 	}
 	if options.PassiveSummary == "" {
 		options.PassiveSummary = path.Join(options.PassiveOutput, "jaeles-passive-summary.txt")

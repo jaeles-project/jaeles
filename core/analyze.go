@@ -94,9 +94,10 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
 	}
 
+	content += fmt.Sprintf(">>>>%v\n", strings.Repeat("-", 50))
 	if rec.Request.MiddlewareOutput == "" {
 		content += rec.Request.Beautify
-		content += fmt.Sprintf("\n>>%v<<\n", strings.Repeat("-", 50))
+		content += fmt.Sprintf("\n%v<<<<\n", strings.Repeat("-", 50))
 		content += rec.Response.Beautify
 	}
 

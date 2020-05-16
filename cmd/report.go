@@ -17,18 +17,14 @@ func init() {
 		Long:  libs.Banner(),
 		RunE:  runReport,
 	}
-	reportCmd.Flags().StringP("html", "R", "jaeles-report.html", "Report name")
 	reportCmd.Flags().String("template", "~/.jaeles/plugins/report/index.html", "Report Template File")
 	reportCmd.SetHelpFunc(ReportHelp)
 	RootCmd.AddCommand(reportCmd)
 }
 
 func runReport(cmd *cobra.Command, _ []string) error {
-	html, _ := cmd.Flags().GetString("html")
 	templateFile, _ := cmd.Flags().GetString("template")
-
 	options.Report.TemplateFile = templateFile
-	options.Report.ReportName = html
 	DoGenReport(options)
 	return nil
 }
@@ -65,10 +61,16 @@ func DoGenReport(options libs.Options) error {
 		utils.InforF("Write report template to: %v", options.Report.TemplateFile)
 	}
 
-	err := core.GenReport(options)
+	err := core.GenActiveReport(options)
 	if err != nil {
-		utils.ErrorF("Error gen report: %v", err)
+		utils.ErrorF("Error gen active report: %v", err)
 		return nil
 	}
+	err = core.GenPassiveReport(options)
+	if err != nil {
+		utils.ErrorF("Error gen passive report: %v", err)
+		return nil
+	}
+
 	return nil
 }

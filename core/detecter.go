@@ -27,6 +27,13 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 		return result
 	})
 
+	vm.Set("PrintVarf", func(call otto.FunctionCall) otto.Value {
+		varName := call.Argument(0).String()
+		fmt.Println(record.Request.Target[varName])
+		result, _ := vm.ToValue(true)
+		return result
+	})
+
 	// Printf print ouf some value, useful for debug
 	vm.Set("Printf", func(call otto.FunctionCall) otto.Value {
 		var err error

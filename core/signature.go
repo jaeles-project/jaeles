@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"github.com/thoas/go-funk"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -37,11 +38,18 @@ func SingleSign(signName string) []string {
 	signName = utils.NormalizePath(signName)
 
 	var Signs []string
-	if strings.HasSuffix(signName, ".yaml") {
+	// in case selector is file
+	if strings.HasSuffix(signName, ".yaml") && !strings.Contains(signName, "*") {
 		if utils.FileExists(signName) {
 			Signs = append(Signs, signName)
 		}
 	}
+
+	// in case selector is a folder
+	if utils.FolderExists(signName) {
+		signName = path.Join(path.Clean(signName), ".*")
+	}
+
 	// get more signature
 	if strings.Contains(signName, "*") && strings.Contains(signName, "/") {
 		asbPath, _ := filepath.Abs(signName)

@@ -101,6 +101,7 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 		component := GetComponent(record, componentName)
 		value := Between(component, left, right)
 		sign.Target[valueName] = value
+		utils.DebugF("StringSelect: %v --> %v", valueName, value)
 		return otto.Value{}
 	})
 
@@ -162,19 +163,17 @@ func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 	}
 
 	var value string
-	r, rerr := regexp.Compile(regexString)
-	if rerr != nil {
-		utils.DebugF("Error Regex: %v", regexString)
-		return valueName, ""
-	}
-	matches := r.FindStringSubmatch(component)
-	if len(matches) > 0 {
-		if position <= len(matches) {
-			value = matches[position]
-		} else {
-			value = matches[0]
+	utils.DebugF("component -- %v", component)
+	utils.DebugF("regexString -- %v", regexString)
+	re := regexp.MustCompile(regexString)
+	for i, match := range re.FindAllString(component, -1) {
+		utils.DebugF("Matchs %v -- %v", i, match)
+		if position == i {
+			value = match
 		}
 	}
+
+	utils.DebugF("RegexSelect: %v --> %v", valueName, value)
 	return valueName, value
 }
 

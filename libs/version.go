@@ -2,7 +2,7 @@ package libs
 
 const (
 	// VERSION current Jaeles version
-	VERSION = "beta v0.8.3"
+	VERSION = "beta v0.9"
 	// AUTHOR author of this
 	AUTHOR = "@j3ssiejjj"
 	// SIGNREPO default repo to get signature

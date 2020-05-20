@@ -394,7 +394,7 @@ func ChooseOrigin(record libs.Record, index int) libs.Record {
 // GetComponent get component to run detection
 func GetComponent(record libs.Record, component string) string {
 	component = strings.ToLower(component)
-	utils.DebugF("Component: %v", component)
+	utils.DebugF("Get Component: %v", component)
 	switch component {
 	case "orequest":
 		return record.OriginReq.Beautify

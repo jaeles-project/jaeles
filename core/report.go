@@ -27,6 +27,10 @@ type ReportData struct {
 
 // GenActiveReport generate report file
 func GenActiveReport(options libs.Options) error {
+	title := "Jaeles Active Report"
+	if options.Report.Title != "" {
+		title = options.Report.Title
+	}
 	// parse vulns from out/jaeles-summary.txt
 	vulns := ParseVuln(options)
 	if len(vulns) == 0 {
@@ -38,7 +42,7 @@ func GenActiveReport(options libs.Options) error {
 		Version         string
 		Title           string
 	}{
-		Title:           "Jaeles Active Report",
+		Title:           title,
 		Vulnerabilities: vulns,
 		CurrentDay:      utils.GetCurrentDay(),
 		Version:         libs.VERSION,
@@ -120,6 +124,10 @@ func ParseVuln(options libs.Options) []Vulnerability {
 
 // GenPassiveReport generate report file
 func GenPassiveReport(options libs.Options) error {
+	title := "Jaeles Passive Report"
+	if options.Report.Title != "" {
+		title = options.Report.Title
+	}
 	// parse vulns from passive-out/jaeles-passive-summary.txt
 	vulns := ParsePassiveVuln(options)
 	if len(vulns) == 0 {
@@ -131,7 +139,7 @@ func GenPassiveReport(options libs.Options) error {
 		Version         string
 		Title           string
 	}{
-		Title:           "Jaeles Passive Report",
+		Title:           title,
 		Vulnerabilities: vulns,
 		CurrentDay:      utils.GetCurrentDay(),
 		Version:         libs.VERSION,

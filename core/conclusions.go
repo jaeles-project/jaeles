@@ -148,6 +148,7 @@ func Between(value string, left string, right string) string {
 func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 	//  - RegexSelect("component", "var_name", "regex")
 	//  - RegexSelect("component", "var_name", "regex", "position")
+	utils.DebugF("arguments -- %v", arguments)
 	componentName := arguments[0].String()
 	valueName := arguments[1].String()
 	component := GetComponent(realRec, componentName)
@@ -161,17 +162,27 @@ func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 			position = 0
 		}
 	}
+	utils.DebugF("componentName -- %v", componentName)
+	//utils.DebugF("component -- %v", component)
+	utils.DebugF("valueName -- %v", valueName)
+	utils.DebugF("regexString -- %v", regexString)
 
 	var value string
-	utils.DebugF("component -- %v", component)
-	utils.DebugF("regexString -- %v", regexString)
 	re := regexp.MustCompile(regexString)
-	for i, match := range re.FindAllString(component, -1) {
-		utils.DebugF("Matchs %v -- %v", i, match)
-		if position == i {
-			value = match
-		}
+	matchs := re.FindStringSubmatch(component)
+	if len(matchs) == 0 || position > len(matchs) {
+		return valueName, ""
 	}
+	value = matchs[position]
+	utils.DebugF("Matchs [%v] -- %v", position, value)
+
+	//
+	//for i, match := range re.FindStringSubmatch(component) {
+	//	utils.DebugF("Matchs [%v] -- %v", i, match)
+	//	if position == i {
+	//		value = match
+	//	}
+	//}
 
 	utils.DebugF("RegexSelect: %v --> %v", valueName, value)
 	return valueName, value

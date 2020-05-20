@@ -21,7 +21,6 @@ var options = libs.Options{}
 // DB database variables
 var _ *gorm.DB
 
-// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "jaeles",
 	Short: "Jaeles Scanner",
@@ -56,6 +55,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&options.SummaryVuln, "summaryVuln", "", "Summary output file")
 	// report options
 	RootCmd.PersistentFlags().StringVarP(&options.Report.ReportName, "report", "R", "", "Report name")
+	RootCmd.PersistentFlags().StringVar(&options.Report.Title, "title", "",  "Report title name")
 	// core options
 	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
 	RootCmd.PersistentFlags().IntVarP(&options.Level, "level", "L", 1, "Filter signature by level")
@@ -81,6 +81,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "v", false, "Verbose output")
 	RootCmd.PersistentFlags().BoolVarP(&options.Version, "version", "V", false, "Print version of Jaeles")
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
+	RootCmd.PersistentFlags().BoolVar(&options.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")
 	RootCmd.SetHelpFunc(rootHelp)
 }
 
@@ -92,6 +93,9 @@ func initConfig() {
 	}
 	if options.Debug {
 		options.Verbose = true
+	}
+	if options.BurpProxy {
+		options.Proxy = "http://127.0.0.1:8080"
 	}
 	utils.InitLog(&options)
 	core.InitConfig(&options)

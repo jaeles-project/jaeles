@@ -45,6 +45,7 @@ type Options struct {
 	NoOutput        bool
 	EnablePassive   bool
 	DisableParallel bool
+	BurpProxy       bool
 	Server          Server
 	Report          Report
 }
@@ -54,6 +55,7 @@ type Report struct {
 	ReportName   string
 	TemplateFile string
 	OutputPath   string
+	Title        string
 }
 
 // Server options for api server

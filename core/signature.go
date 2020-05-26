@@ -43,6 +43,7 @@ func SingleSign(signName string) []string {
 		if utils.FileExists(signName) {
 			Signs = append(Signs, signName)
 		}
+		return Signs
 	}
 
 	// in case selector is a folder

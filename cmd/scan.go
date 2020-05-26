@@ -163,7 +163,14 @@ func InitJob(url string, sign libs.Signature) (libs.Record, libs.Signature, map[
 	var originRec libs.Record
 	var origin libs.Origin
 	// prepare initial signature and variables
-	Target := core.ParseTarget(url)
+	Target := make(map[string]string)
+	// parse Input from JSON format
+	if options.EnableFormatInput {
+		Target = core.ParseInputFormat(url)
+	} else {
+		Target = core.ParseTarget(url)
+	}
+
 	Target = core.MoreVariables(Target, sign, options)
 	sign.Target = Target
 	// base origin

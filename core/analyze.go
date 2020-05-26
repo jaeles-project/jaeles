@@ -91,7 +91,7 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 		content += fmt.Sprintf("%v\n", strings.Repeat("-", 50))
 		content += fmt.Sprintf("[Matches String]\n")
 		content += strings.TrimSpace(rec.ExtraOutput)
-		content += fmt.Sprintf("\n%v\n", strings.Repeat("-", 50))
+		content += fmt.Sprintf("\n")
 	}
 
 	content += fmt.Sprintf(">>>>%v\n", strings.Repeat("-", 50))

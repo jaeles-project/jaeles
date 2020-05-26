@@ -3,6 +3,7 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/jaeles-project/jaeles/utils"
 	"io/ioutil"
 	"net/http"
@@ -123,6 +124,29 @@ func ParseTarget(raw string) map[string]string {
 	uu, _ := url.Parse(raw)
 	target["BaseURL"] = fmt.Sprintf("%v://%v", uu.Scheme, uu.Host)
 	target["Extension"] = filepath.Ext(target["URL"])
+	return target
+}
+
+// ParseInputFormat format input
+func ParseInputFormat(raw string)  map[string]string {
+	target := make(map[string]string)
+	target["RawFormat"] = raw
+
+	jsonParsed, err := gabs.ParseJSON([]byte(raw))
+	if err != nil {
+		return target
+	}
+
+	// parse base URL too
+	rawURL , e := jsonParsed.ChildrenMap()["URL"]
+	if e == true {
+		target = ParseTarget(fmt.Sprintf("%v", rawURL.Data()))
+	}
+
+	// override whole things
+	for k,v := range jsonParsed.ChildrenMap() {
+		 target[k] = fmt.Sprintf("%v", v.Data())
+	}
 	return target
 }
 
@@ -294,7 +318,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 		return Reqs
 	}
 
-	// start parse fuzz req
+	/* -------- Start parse fuzz req -------- */
 	// only take URL as a input from cli
 	var record libs.Record
 

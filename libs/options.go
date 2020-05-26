@@ -28,26 +28,27 @@ type Options struct {
 	SelectedPassive  string
 	GlobalVar        map[string]string
 
-	Level           int
-	Concurrency     int
-	Threads         int
-	Delay           int
-	SaveRaw         bool
-	Timeout         int
-	Refresh         int
-	Retry           int
-	Quite           bool
-	Verbose         bool
-	Version         bool
-	Debug           bool
-	NoDB            bool
-	NoBackGround    bool
-	NoOutput        bool
-	EnablePassive   bool
-	DisableParallel bool
-	BurpProxy       bool
-	Server          Server
-	Report          Report
+	Level             int
+	Concurrency       int
+	Threads           int
+	Delay             int
+	SaveRaw           bool
+	Timeout           int
+	Refresh           int
+	Retry             int
+	Quite             bool
+	Verbose           bool
+	Version           bool
+	Debug             bool
+	NoDB              bool
+	NoBackGround      bool
+	NoOutput          bool
+	EnableFormatInput bool
+	EnablePassive     bool
+	DisableParallel   bool
+	BurpProxy         bool
+	Server            Server
+	Report            Report
 }
 
 // Report options for api server

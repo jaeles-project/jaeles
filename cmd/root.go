@@ -55,7 +55,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&options.SummaryVuln, "summaryVuln", "", "Summary output file")
 	// report options
 	RootCmd.PersistentFlags().StringVarP(&options.Report.ReportName, "report", "R", "", "Report name")
-	RootCmd.PersistentFlags().StringVar(&options.Report.Title, "title", "",  "Report title name")
+	RootCmd.PersistentFlags().StringVar(&options.Report.Title, "title", "", "Report title name")
 	// core options
 	RootCmd.PersistentFlags().BoolVarP(&options.EnablePassive, "passive", "G", false, "Turn on passive detections")
 	RootCmd.PersistentFlags().IntVarP(&options.Level, "level", "L", 1, "Filter signature by level")
@@ -70,6 +70,7 @@ func init() {
 	// misc options
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	RootCmd.PersistentFlags().StringVarP(&options.FoundCmd, "found", "f", "", "Run host OS command when vulnerable found")
+	RootCmd.PersistentFlags().BoolVarP(&options.EnableFormatInput, "format", "J", false, "Enable special input format")
 	RootCmd.PersistentFlags().BoolVar(&options.SaveRaw, "save-raw", false, "save raw request")
 	RootCmd.PersistentFlags().BoolVar(&options.NoOutput, "no-output", false, "Do not store raw output")
 	RootCmd.PersistentFlags().BoolVar(&options.NoBackGround, "no-background", false, "Do not run background task")
@@ -87,6 +88,7 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	// set some mics info
 	fmt.Fprintf(os.Stderr, "Jaeles %v by %v\n", libs.VERSION, libs.AUTHOR)
 	if options.Version {
 		os.Exit(0)
@@ -147,7 +149,6 @@ func SelectSign() {
 				if r.MatchString(sign) {
 					selectedSigns = append(selectedSigns[:index], selectedSigns[index+1:]...)
 				}
-
 			}
 		}
 	}

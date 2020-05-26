@@ -128,7 +128,7 @@ func ParseTarget(raw string) map[string]string {
 }
 
 // ParseInputFormat format input
-func ParseInputFormat(raw string)  map[string]string {
+func ParseInputFormat(raw string) map[string]string {
 	target := make(map[string]string)
 	target["RawFormat"] = raw
 
@@ -138,14 +138,14 @@ func ParseInputFormat(raw string)  map[string]string {
 	}
 
 	// parse base URL too
-	rawURL , e := jsonParsed.ChildrenMap()["URL"]
+	rawURL, e := jsonParsed.ChildrenMap()["URL"]
 	if e == true {
 		target = ParseTarget(fmt.Sprintf("%v", rawURL.Data()))
 	}
 
 	// override whole things
-	for k,v := range jsonParsed.ChildrenMap() {
-		 target[k] = fmt.Sprintf("%v", v.Data())
+	for k, v := range jsonParsed.ChildrenMap() {
+		target[k] = fmt.Sprintf("%v", v.Data())
 	}
 	return target
 }

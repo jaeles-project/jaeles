@@ -148,6 +148,7 @@ func reloadSignature(signFolder string, skipMics bool) {
 	signPath := path.Join(options.RootFolder, "base-signatures")
 	passivePath := path.Join(signPath, "passives")
 	resourcesPath := path.Join(signPath, "resources")
+	thirdpartyPath := path.Join(signPath, "thirdparty")
 
 	// copy it to base signature folder
 	if !utils.FolderExists(signPath) {
@@ -160,6 +161,9 @@ func reloadSignature(signFolder string, skipMics bool) {
 	}
 	if utils.FolderExists(resourcesPath) {
 		utils.MoveFolder(resourcesPath, options.ResourcesFolder)
+	}
+	if utils.FolderExists(thirdpartyPath) {
+		utils.MoveFolder(thirdpartyPath, options.ThirdPartyFolder)
 	}
 
 }

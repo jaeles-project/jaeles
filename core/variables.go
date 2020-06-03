@@ -259,6 +259,14 @@ func RunVariables(variableString string) []string {
 		return otto.Value{}
 	})
 
+	vm.Set("OSEnv", func(call otto.FunctionCall) otto.Value {
+		name := call.Argument(0).String()
+		if name != "" {
+			extra = append(extra, utils.GetOSEnv(name))
+		}
+		return otto.Value{}
+	})
+
 	utils.DebugF("variableString: %v", variableString)
 	vm.Run(variableString)
 	return extra

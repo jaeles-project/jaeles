@@ -173,6 +173,7 @@ func InitJob(url string, sign libs.Signature) (libs.Record, libs.Signature, map[
 
 	Target = core.MoreVariables(Target, sign, options)
 	sign.Target = Target
+
 	// base origin
 	if sign.Origin.Method != "" {
 		origin, Target = sendOrigin(sign, sign.Origin, Target)

@@ -82,6 +82,8 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "v", false, "Verbose output")
 	RootCmd.PersistentFlags().BoolVarP(&options.Version, "version", "V", false, "Print version of Jaeles")
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
+	// some shortcut
+	RootCmd.PersistentFlags().BoolVar(&options.BaseRoot, "ba", false, "Shortcut for '-p 'root=[[.Raw]]'")
 	RootCmd.PersistentFlags().BoolVar(&options.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")
 	RootCmd.SetHelpFunc(rootHelp)
 }
@@ -99,6 +101,10 @@ func initConfig() {
 	if options.BurpProxy {
 		options.Proxy = "http://127.0.0.1:8080"
 	}
+	if options.BaseRoot {
+		options.Params = append(options.Params, "root=[[.Raw]]")
+	}
+
 	utils.InitLog(&options)
 	core.InitConfig(&options)
 

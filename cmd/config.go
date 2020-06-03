@@ -214,6 +214,8 @@ Mics Flags:
   -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
   -R, --report string     		HTML report file name
       --html string     		Enable generate HTML reports after the scan done 
+	  --lc 						Shortcut for '--proxy http://127.0.0.1:8080'
+	  --ba 						Shortcut for '-p "root=[[.Raw]]" '
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"

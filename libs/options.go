@@ -46,6 +46,7 @@ type Options struct {
 	EnableFormatInput bool
 	EnablePassive     bool
 	DisableParallel   bool
+	BaseRoot          bool
 	BurpProxy         bool
 	Server            Server
 	Report            Report

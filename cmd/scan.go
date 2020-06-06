@@ -27,7 +27,7 @@ func init() {
 	scanCmd.Flags().StringP("url", "u", "", "URL of target")
 	scanCmd.Flags().StringP("urls", "U", "", "URLs file of target")
 	scanCmd.Flags().StringP("raw", "r", "", "Raw request from Burp for origin")
-	scanCmd.Flags().Bool("html", false, "Generate HTML report after done")
+	scanCmd.Flags().Bool("html", false, "Generate HTML report after the scan done")
 	scanCmd.SetHelpFunc(ScanHelp)
 	RootCmd.AddCommand(scanCmd)
 }
@@ -65,8 +65,8 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	if len(urls) == 0 {
-		fmt.Println("[Error] No signature loaded")
-		ScanMessage()
+		fmt.Fprintf(os.Stderr, "[Error] No input loaded")
+		fmt.Fprintf(os.Stderr, `Use "jaeles -h" for more information about a command.`)
 		os.Exit(1)
 	}
 	utils.InforF("Input Loaded: %v", len(urls))

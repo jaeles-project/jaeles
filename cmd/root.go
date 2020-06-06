@@ -45,10 +45,10 @@ func init() {
 	// http options
 	RootCmd.PersistentFlags().StringVar(&options.Proxy, "proxy", "", "proxy")
 	RootCmd.PersistentFlags().IntVar(&options.Timeout, "timeout", 20, "HTTP timeout")
-	RootCmd.PersistentFlags().IntVar(&options.Retry, "retry", 0, "retry")
+	RootCmd.PersistentFlags().IntVar(&options.Retry, "retry", 0, "HTTP Retry")
 	RootCmd.PersistentFlags().IntVar(&options.Delay, "delay", 0, "Delay time between requests")
 	// output options
-	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "output folder name")
+	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "Output folder name")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
 	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
@@ -70,7 +70,7 @@ func init() {
 	// misc options
 	RootCmd.PersistentFlags().StringVarP(&options.LogFile, "log", "l", "", "log file")
 	RootCmd.PersistentFlags().StringVarP(&options.FoundCmd, "found", "f", "", "Run host OS command when vulnerable found")
-	RootCmd.PersistentFlags().BoolVarP(&options.EnableFormatInput, "format", "J", false, "Enable special input format")
+	RootCmd.PersistentFlags().BoolVarP(&options.EnableFormatInput, "format-input", "J", false, "Enable special input format")
 	RootCmd.PersistentFlags().BoolVar(&options.SaveRaw, "save-raw", false, "save raw request")
 	RootCmd.PersistentFlags().BoolVar(&options.NoOutput, "no-output", false, "Do not store raw output")
 	RootCmd.PersistentFlags().BoolVar(&options.NoBackGround, "no-background", false, "Do not run background task")

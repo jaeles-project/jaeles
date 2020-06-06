@@ -190,7 +190,7 @@ func RootMessage() {
 	h += `
 Core Flags:
   -c, --concurrency int         Set the concurrency level (default 20)
-  -o, --output string           output folder name (default "out")
+  -o, --output string           Output folder name (default "out")
   -s, --signs strings           Signature selector (Multiple -s flags are accepted)
   -x, --exclude strings         Exclude Signature selector (Multiple -x flags are accepted)
   -L, --level int               Filter signatures by level (default 1)
@@ -203,19 +203,21 @@ Mics Flags:
       --timeout int             HTTP timeout (default 20)
       --debug                   Debug
   -v, --verbose                 Verbose
-  -f, --found string            Run host OS command when vulnerable found
-  -O, --summaryOutput string    Summary output file
-      --passiveOutput string    Passive output folder (default is passive-out)
-      --passiveSummary string   Passive Summary file
+      --no-db                   Disable Database
   -S, --selectorFile string     Signature selector from file
+  -J, --format-input            Enable special input format (default is false)
+  -f, --found string            Run host OS command when vulnerable found
+  -O, --summaryOutput string    Summary output file (default is "jaeles-summary.txt")
+      --passiveOutput string    Passive output folder (default is "passive-out")
+      --passiveSummary string   Passive Summary file
       --sp string               Selector for passive detections (default "*")
       --single string           Forced running in single mode
-  -q, --quite                   Quite Output
+  -q, --quite                   Enable Quite Output
   -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
   -R, --report string     		HTML report file name
       --html string     		Enable generate HTML reports after the scan done 
-	  --lc 						Shortcut for '--proxy http://127.0.0.1:8080'
-	  --ba 						Shortcut for '-p "root=[[.Raw]]" '
+      --lc                      Shortcut for '--proxy http://127.0.0.1:8080'
+      --ba                      Shortcut for '-p "root=[[.Raw]]"'
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s 'jira' -s 'ruby' -u target.com\n"
@@ -229,6 +231,7 @@ Mics Flags:
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
 	h += "  jaeles report -o /tmp/scanned/out\n"
+	h += "\nOfficial Documention can be found here: https://jaeles-project.github.io/\n"
 	fmt.Println(h)
 }
 

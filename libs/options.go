@@ -10,7 +10,7 @@ type Options struct {
 	ScanID           string
 	ConfigFile       string
 	FoundCmd         string
-	QuiteFormat      string
+	QuietFormat      string
 	PassiveOutput    string
 	PassiveSummary   string
 	Output           string
@@ -36,7 +36,7 @@ type Options struct {
 	Timeout           int
 	Refresh           int
 	Retry             int
-	Quite             bool
+	Quiet             bool
 	Verbose           bool
 	Version           bool
 	Debug             bool

@@ -51,9 +51,9 @@ func Analyze(options libs.Options, record *libs.Record) {
 				}
 			}
 			vulnInfo := fmt.Sprintf("[%v][%v] %v", record.Sign.ID, record.Sign.Info.Risk, record.Request.URL)
-			if options.Quite {
+			if options.Quiet {
 				record.Request.Target["VulnURL"] = record.Request.URL
-				fmt.Printf("%v\n", ResolveVariable(options.QuiteFormat, record.Request.Target))
+				fmt.Printf("%v\n", ResolveVariable(options.QuietFormat, record.Request.Target))
 			} else {
 				color.Green("[Vulnerable]%v %v", vulnInfo, outputName)
 			}

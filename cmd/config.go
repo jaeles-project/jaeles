@@ -212,8 +212,8 @@ Mics Flags:
       --passiveSummary string   Passive Summary file
       --sp string               Selector for passive detections (default "*")
       --single string           Forced running in single mode
-  -q, --quite                   Enable Quite Output
-  -Q, --quiteFormat string      Format for quite output (default "{{.VulnURL}}")
+  -q, --quiet                   Enable Quiet Output
+  -Q, --quietFormat string      Format for quiet output (default "{{.VulnURL}}")
   -R, --report string     		HTML report file name
       --html string     		Enable generate HTML reports after the scan done 
       --lc                      Shortcut for '--proxy http://127.0.0.1:8080'

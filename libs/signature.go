@@ -10,11 +10,12 @@ type Signature struct {
 	Parallel bool
 	Single   bool
 	Info     struct {
-		Name     string
-		Category string
-		Risk     string
-		Tech     string
-		OS       string
+		Name       string
+		Risk       string
+		Confidence string
+		Category   string
+		Tech       string
+		OS         string
 	}
 
 	Origin     Request

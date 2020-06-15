@@ -175,11 +175,12 @@ func InitJob(url string, sign libs.Signature) (libs.Record, libs.Signature, map[
 	sign.Target = Target
 
 	// base origin
-	if sign.Origin.Method != "" {
+	if sign.Origin.Method != "" || sign.Origin.Res != "" {
 		origin, Target = sendOrigin(sign, sign.Origin, Target)
 		originRec.Request = origin.ORequest
 		originRec.Response = origin.OResponse
 	}
+
 	// in case we have many origin
 	if len(sign.Origins) > 0 {
 		var origins []libs.Origin
@@ -208,12 +209,18 @@ func sendOrigin(sign libs.Signature, originReq libs.Request, target map[string]s
 		originReq = core.ParseOrigin(originReq, originSign, options)
 	}
 
-	originRes, err = sender.JustSend(options, originReq)
-	if err == nil {
-		if options.Verbose && (originReq.Method != "") {
-			fmt.Printf("[Sent-Origin] %v %v %v %v %v\n", originReq.Method, originReq.URL, originRes.Status, originRes.ResponseTime, len(originRes.Beautify))
+	// parse response directly without sending
+	if originReq.Res != "" {
+		originRes = core.ParseBurpResponse("", originReq.Res)
+	} else {
+		originRes, err = sender.JustSend(options, originReq)
+		if err == nil {
+			if options.Verbose && (originReq.Method != "") {
+				fmt.Printf("[Sent-Origin] %v %v %v %v %v\n", originReq.Method, originReq.URL, originRes.Status, originRes.ResponseTime, len(originRes.Beautify))
+			}
 		}
 	}
+
 	originRec := libs.Record{Request: originReq, Response: originRes}
 	// set some more variables
 	core.RunConclusions(originRec, &originSign)
@@ -299,18 +306,22 @@ func SendRequests(realReqs []libs.Request, sign libs.Signature, originRec libs.R
 		}
 
 		req := realRec.Request
-		// if middleware return the response skip sending it
-		if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" && realRec.Request.MiddlewareOutput == "" {
-			var res libs.Response
+		// if middleware return something skip sending it
+		var res libs.Response
+		if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" && realRec.Request.MiddlewareOutput == "" && req.Res == "" {
 			// sending with real browser
 			if req.Engine == "chrome" {
 				res, _ = sender.SendWithChrome(options, req)
 			} else {
 				res, _ = sender.JustSend(options, req)
 			}
-			realRec.Request = req
-			realRec.Response = res
 		}
+		// parse response directly without sending
+		if req.Res != "" {
+			res = core.ParseBurpResponse("", req.Res)
+		}
+		realRec.Request = req
+		realRec.Response = res
 		DoAnalyze(realRec, &sign)
 	}
 }
@@ -393,17 +404,21 @@ func parallelSending(realReq libs.Request, sign libs.Signature, originRec libs.R
 
 	req := realRec.Request
 	// if middleware return the response skip sending it
-	if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" && realRec.Request.MiddlewareOutput == "" {
-		var res libs.Response
+	var res libs.Response
+	if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" && realRec.Request.MiddlewareOutput == "" && req.Res == "" {
 		// sending with real browser
 		if req.Engine == "chrome" {
 			res, _ = sender.SendWithChrome(options, req)
 		} else {
 			res, _ = sender.JustSend(options, req)
 		}
-		realRec.Request = req
-		realRec.Response = res
 	}
+	// parse response directly without sending
+	if req.Res != "" {
+		res = core.ParseBurpResponse("", req.Res)
+	}
+	realRec.Request = req
+	realRec.Response = res
 	DoAnalyze(realRec, &sign)
 }
 

@@ -44,6 +44,7 @@ type Request struct {
 	Beautify          string
 	MiddlewareOutput  string
 	Raw               string
+	Res               string
 	Conditions        []string
 	Middlewares       []string
 	Conclusions       []string

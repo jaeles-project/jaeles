@@ -175,6 +175,16 @@ func RunVariables(variableString string) []string {
 		return otto.Value{}
 	})
 
+	vm.Set("Content", func(call otto.FunctionCall) otto.Value {
+		filename := call.Argument(0).String()
+		filename = utils.NormalizePath(filename)
+		data := utils.GetFileContent(filename)
+		if len(data) > 0 {
+			extra = append(extra, data)
+		}
+		return otto.Value{}
+	})
+
 	vm.Set("InputCmd", func(call otto.FunctionCall) otto.Value {
 		cmd := call.Argument(0).String()
 		data := InputCmd(cmd)
@@ -228,6 +238,15 @@ func RunVariables(variableString string) []string {
 	vm.Set("Base64Encode", func(call otto.FunctionCall) otto.Value {
 		data := call.Argument(0).String()
 		extra = append(extra, Base64Encode(data))
+		return otto.Value{}
+	})
+
+	vm.Set("Base64Decode", func(call otto.FunctionCall) otto.Value {
+		raw := call.Argument(0).String()
+		data, err := base64.StdEncoding.DecodeString(raw)
+		if err == nil {
+			extra = append(extra, string(data))
+		}
 		return otto.Value{}
 	})
 

@@ -17,6 +17,7 @@ type Vulnerability struct {
 	SignPath   string
 	URL        string
 	Risk       string
+	Confidence string
 	ReportPath string
 	ReportFile string
 }
@@ -97,9 +98,10 @@ func ParseVuln(options libs.Options) []Vulnerability {
 			continue
 		}
 
-		var signID, risk string
-		signID = strings.Split(data[0], "][")[0][1:]
-		risk = strings.Split(data[0], "][")[1][:len(strings.Split(data[0], "][")[1])-1]
+		signID := strings.Split(data[0], "][")[0][1:]
+		info := strings.Split(data[0], "][")[1][:len(strings.Split(data[0], "][")[1])-1]
+		confidence := strings.Split(info, "-")[0]
+		risk := strings.Split(info, "-")[1]
 
 		raw := data[2]
 		// host/sign-hash
@@ -109,7 +111,8 @@ func ParseVuln(options libs.Options) []Vulnerability {
 			SignID:     signID,
 			SignPath:   "SignPath",
 			URL:        data[1],
-			Risk:       strings.ToLower(risk),
+			Risk:       risk,
+			Confidence: confidence,
 			ReportPath: reportPath,
 			ReportFile: filepath.Base(raw),
 		}

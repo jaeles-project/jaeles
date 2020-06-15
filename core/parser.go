@@ -46,6 +46,9 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 	if sign.Info.Risk == "" {
 		sign.Info.Risk = "Potential"
 	}
+	if sign.Info.Confidence == "" {
+		sign.Info.Confidence = "Firm"
+	}
 	return sign, err
 }
 
@@ -95,7 +98,6 @@ func ParseTarget(raw string) map[string]string {
 		} else {
 			port = "80"
 		}
-
 		hostname = u.Hostname()
 	} else {
 		// ignore common port in Host
@@ -168,6 +170,16 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 	realTarget["proxy"] = options.Proxy
 	realTarget["output"] = options.Output
 
+	// more params
+	if len(options.Params) > 0 {
+		params := ParseParams(options.Params)
+		if len(params) > 0 {
+			for k, v := range params {
+				realTarget[k] = v
+			}
+		}
+	}
+
 	// default params in signature
 	signParams := sign.Params
 	if len(signParams) > 0 {
@@ -190,15 +202,6 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 		}
 	}
 
-	// more params
-	if len(options.Params) > 0 {
-		params := ParseParams(options.Params)
-		if len(params) > 0 {
-			for k, v := range params {
-				realTarget[k] = v
-			}
-		}
-	}
 	return realTarget
 }
 
@@ -245,6 +248,7 @@ func ParseOrigin(req libs.Request, sign libs.Signature, _ libs.Options) libs.Req
 	req.Headers = ResolveHeader(req.Headers, target)
 	req.Middlewares = ResolveDetection(req.Middlewares, target)
 	req.Conclusions = ResolveDetection(req.Conclusions, target)
+	req.Res = ResolveVariable(req.Res, target)
 
 	// parse raw request
 	if req.Raw != "" {
@@ -275,6 +279,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	}
 	req.Body = ResolveVariable(req.Body, target)
 	req.Headers = ResolveHeader(req.Headers, target)
+	req.Res = ResolveVariable(req.Res, target)
 
 	// more headers from cli
 	if len(options.Headers) > 0 {
@@ -290,6 +295,9 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	req.Conditions = ResolveDetection(req.Conditions, target)
 
 	if sign.Type != "fuzz" {
+		if req.Res != "" {
+			Reqs = append(Reqs, req)
+		}
 		// in case we only want to run a middleware alone
 		if req.Raw != "" {
 			rawReq := ResolveVariable(req.Raw, target)
@@ -315,6 +323,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 		if Req.URL != "" {
 			Reqs = append(Reqs, Req)
 		}
+
 		return Reqs
 	}
 
@@ -432,9 +441,16 @@ func ParseHeaders(rawHeaders map[string][]string) []map[string]string {
 
 // ParseBurpResponse parse burp style response
 func ParseBurpResponse(rawReq string, rawRes string) (res libs.Response) {
-	// var res libs.Response
-	readerr := bufio.NewReader(strings.NewReader(rawReq))
-	parsedReq, _ := http.ReadRequest(readerr)
+	utils.DebugF("Parsing response: %v", rawRes)
+
+	res.Beautify = rawRes
+	res.Body = rawRes
+	res.Length = len(rawRes)
+	var parsedReq *http.Request
+	if strings.TrimSpace(rawReq) != "" {
+		readerr := bufio.NewReader(strings.NewReader(rawReq))
+		parsedReq, _ = http.ReadRequest(readerr)
+	}
 
 	reader := bufio.NewReader(strings.NewReader(rawRes))
 	parsedRes, err := http.ReadResponse(reader, parsedReq)
@@ -446,7 +462,7 @@ func ParseBurpResponse(rawReq string, rawRes string) (res libs.Response) {
 	res.StatusCode = parsedRes.StatusCode
 
 	var headers []map[string]string
-	for name, value := range parsedReq.Header {
+	for name, value := range parsedRes.Header {
 		header := map[string]string{
 			name: strings.Join(value[:], ""),
 		}
@@ -456,12 +472,11 @@ func ParseBurpResponse(rawReq string, rawRes string) (res libs.Response) {
 
 	body, _ := ioutil.ReadAll(parsedRes.Body)
 	res.Body = string(body)
-
 	return res
 }
 
 // ParseRequestFromServer parse request receive from API server
-func ParseRequestFromServer(record *libs.Record, req libs.Request, sign libs.Signature) {
+func ParseRequestFromServer(record *libs.Record, req libs.Request, _ libs.Signature) {
 	if req.Raw != "" {
 		parsedReq := ParseBurpRequest(req.Raw)
 		// check if parse request ok
@@ -490,7 +505,7 @@ func ParseRequestFromServer(record *libs.Record, req libs.Request, sign libs.Sig
 	// header stuff
 	if len(req.Headers) > 0 {
 		realHeaders := req.Headers
-		keys := []string{}
+		var keys []string
 		for _, realHeader := range req.Headers {
 			for key := range realHeader {
 				keys = append(keys, key)

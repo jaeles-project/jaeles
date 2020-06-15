@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"strings"
 	"testing"
 )
@@ -189,6 +190,36 @@ Sed aliquam sem ut arcu. Phasellus sollicitudin.
 	res := ParseBurpResponse(rawReq, rawRes)
 	fmt.Println(res.Status)
 	fmt.Println(res.Headers)
+
+	if res.StatusCode != 200 {
+		t.Errorf("Error parsing Burp Response")
+	}
+
+}
+
+func TestParseOnlyResponse(t *testing.T) {
+	rawRes := `HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 53
+Connection: close
+Date: Sat, 13 Jun 2020 10:06:17 GMT
+x-amzn-RequestId: 439e890c-1e4e-4964-94b3-645bef384553
+access-control-allow-origin: *
+x-amz-apigw-id: OD68EG8KPHcFjzA=
+X-Amzn-Trace-Id: Root=1-5ee4a519-17f6b73a54489b02a298aab0;Sampled=0
+X-Cache: Miss from cloudfront
+Via: 1.1 fb176da9df72832dd488674f28c0a880.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: SIN5-C1
+X-Amz-Cf-Id: lQqv4XdysrJ1ODW9fUufpf2tpGHr4Sxj79BvkPmcUbRQaGChQwCBqw==
+
+{"Foo": "sample", "password": "eeee"}
+`
+	res := ParseBurpResponse("", rawRes)
+	fmt.Println(res.Status)
+	fmt.Println(res.Headers)
+	fmt.Println(res.Body)
+	fmt.Println(res.Beautify)
+	spew.Dump(res)
 	if res.StatusCode != 200 {
 		t.Errorf("Error parsing Burp Response")
 	}

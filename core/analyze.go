@@ -78,8 +78,8 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if rec.Request.URL == "" {
 		rec.Request.URL = rec.Request.Target["URL"]
 	}
-	head := fmt.Sprintf("[%v][%v] - %v\n", rec.Sign.ID, rec.Sign.Info.Risk, rec.Request.URL)
-	sInfo := fmt.Sprintf("[Sign-Info][%v] - %v - %v\n", rec.Sign.Info.Risk, rec.Sign.RawPath, rec.Sign.Info.Name)
+	head := fmt.Sprintf("[%v][%v-%v] - %v\n", rec.Sign.ID, rec.Sign.Info.Confidence, rec.Sign.Info.Risk, rec.Request.URL)
+	sInfo := fmt.Sprintf("[Sign-Info][%v-%v] - %v - %v\n", rec.Sign.Info.Confidence, rec.Sign.Info.Risk, rec.Sign.RawPath, rec.Sign.Info.Name)
 	content := "[Vuln-Info]" + head + sInfo + fmt.Sprintf("[Detect-String] - %v\n\n", rec.DetectString)
 	if rec.Request.MiddlewareOutput != "" {
 		content += strings.Join(rec.Request.Middlewares, "\n")

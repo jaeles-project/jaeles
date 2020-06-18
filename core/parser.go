@@ -415,14 +415,18 @@ func ParseBurpRequest(raw string) (req libs.Request) {
 			}
 		}
 	}
-	// fmt.Println(parsedReq.URL)
-	// parsedReq.URL.RequestURI = parsedReq.RequestURI
 	realReq.URL = parsedReq.URL.String()
 	realReq.Path = parsedReq.RequestURI
 	realReq.Headers = ParseHeaders(parsedReq.Header)
 
 	body, _ := ioutil.ReadAll(parsedReq.Body)
 	realReq.Body = string(body)
+	// net/http parse something weird here
+	if !strings.HasSuffix(raw, realReq.Body) {
+		if strings.Contains(raw, "\n\n") {
+			realReq.Body = strings.Split(raw, "\n\n")[1]
+		}
+	}
 
 	return realReq
 }

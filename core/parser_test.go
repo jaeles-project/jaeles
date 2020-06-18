@@ -37,27 +37,66 @@ func TestResolveVariable(t *testing.T) {
 }
 
 func TestParseBurpRequest(t *testing.T) {
-	raw := `GET /test HTTP/1.1
-Host: cors-test.appspot.com
-Connection: close
-Accept: */*
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3983.0 Safari/537.36
-Sec-Fetch-Site: cross-site
-Sec-Fetch-Mode: cors
-Referer: https://a.appspot.com/
+	raw := `POST /search.php?test=query HTTP/1.1
+Host: test.vulnweb.com
+Content-Length: 25
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Origin: http://test.vulnweb.com
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4175.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Referer: http://test.vulnweb.com/
 Accept-Encoding: gzip, deflate
 Accept-Language: en-US,en;q=0.9
+Connection: close
 
-`
+searchFor=123FUZZ&goButton=go2`
 
 	req := ParseBurpRequest(raw)
-	fmt.Println(req.URL)
-	fmt.Println(req.Host)
-	fmt.Println(req.Path)
+	fmt.Println("req.URL: ", req.URL)
+	fmt.Println("req.Host: ", req.Host)
+	fmt.Println("req.Path: ", req.Path)
+	fmt.Println("req.Headers: ", req.Headers)
+	fmt.Println("req.Body: ", req.Body)
 	if req.Method == "" {
 		t.Errorf("Error parsing Burp")
 	}
 }
+
+//
+//func TestParseBurpRequestMany(t *testing.T) {
+//	raw := `POST /users HTTP/1.1
+//Host: test.vulnweb.com
+//Connection: close
+//Content-Length: 200
+//sec-ch-ua: "\\Not;A\"Brand";v="99", "Google Chrome";v="85", "Chromium";v="85"
+//Accept: application/json, text/javascript, */*; q=0.01
+//X-CSRF-Token: JwSfLUfPkuTaTPKUbuqqRwC2S3tR6UfesgoBHfpuqDc8HaIqS2JVgpSF3LmW2efTWMa6SX9Sd0y9NAQFdwJheg==
+//X-Requested-With: XMLHttpRequest
+//sec-ch-ua-mobile: ?0
+//User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4175.0 Safari/537.36
+//Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+//Origin: https://hackerone.com
+//Sec-Fetch-Site: same-origin
+//Sec-Fetch-Mode: cors
+//Sec-Fetch-Dest: empty
+//Referer: https://hackerone.com/users/sign_up
+//Accept-Encoding: gzip, deflate
+//Accept-Language: en-US,en;q=0.9
+//
+//user%5Bname%5D=s3curity&user%5Busername%5D=s33curity101&user%5Bemail%5D=knowledgeexposed101%40gmail.com&user%5Bpassword%5D=Decadedassad123%23%40!&user%5Bpassword_confirmation%5D=Decadedassad123%23%40!`
+//
+//	req := ParseBurpRequest(raw)
+//	fmt.Println("req.URL: ", req.URL)
+//	fmt.Println("req.Host: ", req.Host)
+//	fmt.Println("req.Path: ", req.Path)
+//	fmt.Println("req.Headers: ", req.Headers)
+//	fmt.Println("req.Body: ", req.Body)
+//	if req.Method == "" {
+//		t.Errorf("Error parsing Burp")
+//	}
+//}
 
 func TestParseBurpResponse(t *testing.T) {
 	rawReq := `GET /listproducts.php?cat=1 HTTP/1.1

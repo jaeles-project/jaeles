@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/jaeles-project/jaeles/utils"
 	"net/http"
 
 	"github.com/jaeles-project/jaeles/libs"
@@ -105,11 +106,15 @@ func ReceiveRequest(result chan libs.Record) gin.HandlerFunc {
 			})
 			return
 		}
+
+		utils.DebugF("Raw req: %v", string(req))
+
 		record.OriginReq = core.ParseBurpRequest(string(req))
+		utils.DebugF("Origin Body: %v", record.OriginReq.Body)
 		if URL != "" {
 			record.OriginReq.URL = URL
 		}
-		//fmt.Printf("[Recive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
+		utils.InforF("[Recive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
 
 		/* Response part */
 		if rawRes != "" {

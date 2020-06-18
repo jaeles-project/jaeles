@@ -748,7 +748,9 @@ func ReplaceMe(req libs.Request, arguments []otto.Value) []libs.Request {
 	// replace URL and Body part
 	injectedReq.URL = strings.Replace(req.URL, replaceWord, injectedString, -1)
 	if req.Body != "" {
+		utils.DebugF("Raw body: %v", req.Body)
 		injectedReq.Body = strings.Replace(req.Body, replaceWord, injectedString, -1)
+		utils.DebugF("Injected body: %v", injectedReq.Body)
 	}
 	if len(req.Headers) == 0 {
 		reqs = append(reqs, injectedReq)

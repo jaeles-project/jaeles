@@ -119,6 +119,7 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 	vm.Set("SetValue", func(call otto.FunctionCall) otto.Value {
 		valueName := call.Argument(0).String()
 		value := call.Argument(1).String()
+		utils.DebugF("SetValue: %v -- %v", valueName, value)
 		sign.Target[valueName] = value
 		return otto.Value{}
 	})

@@ -170,16 +170,6 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 	realTarget["proxy"] = options.Proxy
 	realTarget["output"] = options.Output
 
-	// more params
-	if len(options.Params) > 0 {
-		params := ParseParams(options.Params)
-		if len(params) > 0 {
-			for k, v := range params {
-				realTarget[k] = v
-			}
-		}
-	}
-
 	// default params in signature
 	signParams := sign.Params
 	if len(signParams) > 0 {
@@ -190,7 +180,7 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 				}
 
 				// variable as a script
-				if strings.Contains(v, "(") && strings.Contains(v, ")") {
+				if strings.Contains(v, "(") && strings.HasSuffix(v, ")") {
 					newValue := RunVariables(v)
 					if len(newValue) > 0 {
 						realTarget[k] = newValue[0]
@@ -198,6 +188,16 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 				} else {
 					realTarget[k] = v
 				}
+			}
+		}
+	}
+
+	// more params
+	if len(options.Params) > 0 {
+		params := ParseParams(options.Params)
+		if len(params) > 0 {
+			for k, v := range params {
+				realTarget[k] = v
 			}
 		}
 	}

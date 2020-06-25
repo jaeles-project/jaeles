@@ -231,7 +231,7 @@ Mics Flags:
 	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
 	h += "  jaeles report -o /tmp/scanned/out\n"
-	h += "\nOfficial Documention can be found here: https://jaeles-project.github.io/\n"
+	h += "\nOfficial Documentation can be found here: https://jaeles-project.github.io/\n"
 	fmt.Println(h)
 }
 

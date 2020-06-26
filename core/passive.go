@@ -41,6 +41,9 @@ func PassiveAnalyze(options libs.Options, record libs.Record) {
 			if rule.Risk == "" {
 				rule.Risk = passive.Risk
 			}
+			if rule.Confidence == "" {
+				rule.Confidence = passive.Confidence
+			}
 			runPassive(options, record, rule)
 		}
 	}
@@ -80,7 +83,7 @@ func GetPassives(options libs.Options) []libs.Passive {
 
 // StorePassiveOutput store passive output found
 func StorePassiveOutput(record libs.Record, rule libs.Rule, detectionString string, options libs.Options) string {
-	head := fmt.Sprintf("[Passive-Info][%v|%v][%v] - %v\n", rule.ID, strings.Replace(rule.Reason, " ", "_", -1), rule.Risk, record.Request.URL)
+	head := fmt.Sprintf("[Passive-Info][%v|%v][%v-%v] - %v\n", rule.ID, strings.Replace(rule.Reason, " ", "_", -1), rule.Confidence, rule.Risk, record.Request.URL)
 	content := head
 	// print out matches string
 	if record.ExtraOutput != "" {
@@ -178,10 +181,11 @@ func defaultPassive() libs.Passive {
 
 	}
 	return libs.Passive{
-		Name:  "Default",
-		Desc:  "Default Rule for catching common Error",
-		Rules: rules,
-		Risk:  "Potential",
-		Level: 1,
+		Name:       "Default",
+		Desc:       "Default Rule for catching common Error",
+		Rules:      rules,
+		Risk:       "Potential",
+		Confidence: "Tentative",
+		Level:      1,
 	}
 }

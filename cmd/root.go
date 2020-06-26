@@ -40,7 +40,7 @@ func init() {
 	// config options
 	RootCmd.PersistentFlags().StringVar(&options.ConfigFile, "config", "", "config file (default is $HOME/.jaeles/config.yaml)")
 	RootCmd.PersistentFlags().StringVar(&options.RootFolder, "rootDir", "~/.jaeles/", "root Project")
-	RootCmd.PersistentFlags().StringVar(&options.SignFolder, "signDir", "~/.jaeles/base-signatures/", "Folder contain default signatures")
+	RootCmd.PersistentFlags().StringVarP(&options.SignFolder, "signDir", "B", "~/.jaeles/base-signatures/", "Folder contain default signatures")
 	RootCmd.PersistentFlags().StringVar(&options.ScanID, "scanID", "", "Scan ID")
 	// http options
 	RootCmd.PersistentFlags().StringVar(&options.Proxy, "proxy", "", "proxy")
@@ -161,8 +161,8 @@ func SelectSign() {
 	options.SelectedSigns = selectedSigns
 
 	if len(selectedSigns) == 0 {
-		fmt.Println("[Error] No signature loaded")
-		RootMessage()
+		fmt.Fprintf(os.Stderr, "[Error] No signature loaded\n")
+		fmt.Fprintf(os.Stderr, "Use 'jaeles -h' for more information about a command.\n")
 		os.Exit(1)
 	}
 	selectedSigns = funk.UniqString(selectedSigns)

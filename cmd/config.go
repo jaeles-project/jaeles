@@ -107,10 +107,29 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 	case "reload":
 		reloadSignature(options.SignFolder, mics)
 		break
+	case "add":
+		addSignature(options.SignFolder)
+		break
 	default:
 		HelpMessage()
 	}
 	return nil
+}
+
+// addSignature add active signatures from a folder
+func addSignature(signFolder string) {
+	signFolder = utils.NormalizePath(signFolder)
+	if !utils.FolderExists(signFolder) {
+		utils.ErrorF("Signature folder not found: %v", signFolder)
+		return
+	}
+	allSigns := utils.GetFileNames(signFolder, ".yaml")
+	if allSigns != nil {
+		utils.InforF("Add Signature from: %v", signFolder)
+		for _, signFile := range allSigns {
+			database.ImportSign(signFile)
+		}
+	}
 }
 
 // reloadSignature signature
@@ -214,8 +233,10 @@ Mics Flags:
       --single string           Forced running in single mode
   -q, --quiet                   Enable Quiet Output
   -Q, --quietFormat string      Format for quiet output (default "{{.VulnURL}}")
-  -R, --report string     		HTML report file name
-      --html string     		Enable generate HTML reports after the scan done 
+  -R, --report string           HTML report file name
+      --title string            HTML report title
+      --html string             Enable generate HTML reports after the scan done 
+      -PP string                Full help message
       --lc                      Shortcut for '--proxy http://127.0.0.1:8080'
       --ba                      Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'
 `
@@ -228,9 +249,11 @@ Mics Flags:
 	h += "  cat list_target.txt | jaeles scan -c 50 -s <signature>\n"
 	h += "\nOthers Commands:\n"
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
-	h += "  jaeles config -a reload --signDir /tmp/signatures-folder/\n"
+	h += "  jaeles config -a reload --signDir /tmp/standard-signatures/\n"
+	h += "  jaeles config -a add -B /tmp/custom-active-signatures/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
 	h += "  jaeles report -o /tmp/scanned/out\n"
+	h += "  jaeles report -o /tmp/scanned/out --title 'Passive Report'\n"
 	h += "\nOfficial Documentation can be found here: https://jaeles-project.github.io/\n"
 	fmt.Println(h)
 }
@@ -243,7 +266,8 @@ func HelpMessage() {
 	h += "  jaeles config -a update --repo git@github.com/jaeles-project/another-signatures -K your_private_key\n"
 	h += "  jaeles config -a clean\n\n"
 	h += "  jaeles config -a reload\n\n"
-	h += "  jaeles config -a reload --signDir /tmp/custom-signatures/\n\n"
+	h += "  jaeles config -a reload --signDir /tmp/standard-signatures/\n\n"
+	h += "  jaeles config -a add --signDir /tmp/standard-signatures/\n\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
 	fmt.Println(h)
 }

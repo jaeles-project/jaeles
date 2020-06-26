@@ -47,7 +47,7 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 		sign.Info.Risk = "Potential"
 	}
 	if sign.Info.Confidence == "" {
-		sign.Info.Confidence = "Firm"
+		sign.Info.Confidence = "Tentative"
 	}
 	return sign, err
 }
@@ -64,6 +64,9 @@ func ParsePassive(passiveFile string) (passive libs.Passive, err error) {
 	}
 	if passive.Risk == "" {
 		passive.Risk = "Potential"
+	}
+	if passive.Confidence == "" {
+		passive.Confidence = "Firm"
 	}
 	return passive, err
 }

@@ -65,8 +65,8 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}
 
 	if len(urls) == 0 {
-		fmt.Fprintf(os.Stderr, "[Error] No input loaded")
-		fmt.Fprintf(os.Stderr, `Use "jaeles -h" for more information about a command.`)
+		fmt.Fprintf(os.Stderr, "[Error] No input loaded\n")
+		fmt.Fprintf(os.Stderr, "Use 'jaeles -h' for more information about a command.\n")
 		os.Exit(1)
 	}
 	utils.InforF("Input Loaded: %v", len(urls))

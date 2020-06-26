@@ -197,9 +197,10 @@ func ParsePassiveVuln(options libs.Options) []Vulnerability {
 			continue
 		}
 
-		var signID, risk string
-		signID = strings.Split(data[0], "][")[1]
-		risk = strings.TrimRight(strings.Split(data[0], "][")[2], "]")
+		signID := strings.Split(data[0], "][")[1]
+		info := strings.TrimRight(strings.Split(data[0], "][")[2], "]")
+		confidence := strings.Split(info, "-")[0]
+		risk := strings.Split(info, "-")[1]
 
 		raw := data[2]
 		// host/sign-hash
@@ -209,7 +210,8 @@ func ParsePassiveVuln(options libs.Options) []Vulnerability {
 			SignID:     signID,
 			SignPath:   "SignPath",
 			URL:        data[1],
-			Risk:       strings.ToLower(risk),
+			Risk:       risk,
+			Confidence: confidence,
 			ReportPath: reportPath,
 			ReportFile: filepath.Base(raw),
 		}

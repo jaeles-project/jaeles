@@ -64,12 +64,10 @@ func DoGenReport(options libs.Options) error {
 	err := core.GenActiveReport(options)
 	if err != nil {
 		utils.ErrorF("Error gen active report: %v", err)
-		return nil
 	}
 	err = core.GenPassiveReport(options)
 	if err != nil {
 		utils.ErrorF("Error gen passive report: %v", err)
-		return nil
 	}
 
 	return nil

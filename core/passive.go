@@ -91,7 +91,7 @@ func StorePassiveOutput(record libs.Record, rule libs.Rule, detectionString stri
 		content += fmt.Sprintf("[Matches String]\n")
 		content += strings.TrimSpace(record.ExtraOutput)
 	}
-	content += fmt.Sprintf("[Detect-String] - %v\n\n", detectionString)
+	content += fmt.Sprintf("\n[Detect-String] - %v\n\n", detectionString)
 
 	content += fmt.Sprintf("\n\n>>>>%v\n", strings.Repeat("-", 50))
 	if record.Request.MiddlewareOutput != "" {

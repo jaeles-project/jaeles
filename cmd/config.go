@@ -246,6 +246,7 @@ Mics Flags:
 	h += "  jaeles scan -G -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt\n"
 	h += "  jaeles scan -c 50 -S list_of_selectors.txt -U list_of_urls.txt -H 'Referer: {{.BaseURL}}/x' \n"
 	h += "  jaeles scan -s <signature> -s <another-selector> -u http://example.com\n"
+	h += "  echo '{\"BaseURL\":\"https://example.com/sub/\"}' | jaeles scan -s sign.yaml -J \n"
 	h += "  cat list_target.txt | jaeles scan -c 50 -s <signature>\n"
 	h += "\nOthers Commands:\n"
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
@@ -287,6 +288,7 @@ func ScanMessage() {
 	h += "  jaeles scan -c 50 -s <signature> -U <list_urls> -f 'noti_slack \"{{.vulnInfo}}\"'\n"
 	h += "  jaeles scan -v -c 50 -s <signature> -U list_target.txt -o /tmp/output\n"
 	h += "  jaeles scan -s <signature> -s <another-selector> -u http://example.com\n"
+	h += "  echo '{\"BaseURL\":\"https://example.com/sub/\"}' | jaeles scan -s sign.yaml -J \n"
 	h += "  jaeles scan -G -s <signature> -s <another-selector> -x <exclude-selector> -u http://example.com\n"
 	h += "  cat list_target.txt | jaeles scan -c 100 -s <signature>\n"
 

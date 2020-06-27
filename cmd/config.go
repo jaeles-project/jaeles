@@ -250,6 +250,7 @@ Mics Flags:
 	h += "  cat list_target.txt | jaeles scan -c 50 -s <signature>\n"
 	h += "\nOthers Commands:\n"
 	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
+	h += "  jaeles server --host 0.0.0.0 --port 5000 -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config -a reload --signDir /tmp/standard-signatures/\n"
 	h += "  jaeles config -a add -B /tmp/custom-active-signatures/\n"
 	h += "  jaeles config -a update --repo https://github.com/jaeles-project/jaeles-signatures\n"
@@ -265,10 +266,10 @@ func HelpMessage() {
 	h += "  jaeles config -a init\n\n"
 	h += "  jaeles config -a update --repo http://github.com/jaeles-project/another-signatures --user admin --pass admin\n"
 	h += "  jaeles config -a update --repo git@github.com/jaeles-project/another-signatures -K your_private_key\n"
-	h += "  jaeles config -a clean\n\n"
-	h += "  jaeles config -a reload\n\n"
-	h += "  jaeles config -a reload --signDir /tmp/standard-signatures/\n\n"
-	h += "  jaeles config -a add --signDir /tmp/standard-signatures/\n\n"
+	h += "  jaeles config -a clean\n"
+	h += "  jaeles config -a reload\n"
+	h += "  jaeles config -a reload --signDir /tmp/standard-signatures/\n"
+	h += "  jaeles config -a add --signDir /tmp/standard-signatures/\n"
 	h += "  jaeles config -a cred --user sample --pass not123456\n\n"
 	fmt.Println(h)
 }

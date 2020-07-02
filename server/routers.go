@@ -1,8 +1,11 @@
 package server
 
 import (
+	"fmt"
+	"github.com/fatih/color"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"time"
 
@@ -40,6 +43,10 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
+	if options.Server.NoAuth {
+		fmt.Fprintf(os.Stderr, "[Warning] You're running server with %v\n", color.RedString("NO AUTHENTICATION"))
+	}
 
 	// default is ~/.jaeles/ui/
 	uiPath := path.Join(options.RootFolder, "/plugins/ui")
@@ -135,11 +142,13 @@ func InitRouter(options libs.Options, result chan libs.Record) {
 		utils.InforF("NoRoute claims: %#v\n", claims)
 		c.JSON(404, gin.H{"code": "404", "message": "Page not found"})
 	})
-
 	auth := r.Group("/api")
+
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
-	auth.Use(authMiddleware.MiddlewareFunc())
+	if !options.Server.NoAuth {
+		auth.Use(authMiddleware.MiddlewareFunc())
+	}
 	{
 		auth.GET("/ping", Ping)
 		auth.POST("/parse", ReceiveRequest(result))

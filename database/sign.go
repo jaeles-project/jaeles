@@ -26,7 +26,7 @@ func SelectSign(signName string) []string {
 	DB.Find(&signs)
 
 	if signName == "*" || signName == "" {
-		fmt.Fprintf(os.Stderr, "You literally just select ALL signatures. I hope you know what are you doing.\n")
+		fmt.Fprintf(os.Stderr, "[Warning] You literally just select ALL signatures. I hope you know what are you doing.\n")
 	}
 	//	DB.Find(&signs)
 	//} else {

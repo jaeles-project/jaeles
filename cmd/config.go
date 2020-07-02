@@ -303,6 +303,24 @@ func ScanMessage() {
 	fmt.Println(h)
 }
 
+// ServerHelp report help message
+func ServerHelp(_ *cobra.Command, _ []string) {
+	fmt.Println(libs.Banner())
+	ServerMessage()
+}
+
+// ServerMessage print help message
+func ServerMessage() {
+	h := "\nServer Command example:\n\n"
+	h += `
+  -h, --help          help for server
+      --host string   IP address to bind the server (default "127.0.0.1")
+      --port string   Port (default "5000")
+  -A, --no-auth       Turn off authenticated on API server
+	`
+	fmt.Println(h)
+}
+
 // ReportHelp report help message
 func ReportHelp(_ *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())

@@ -25,6 +25,8 @@ func init() {
 	}
 	serverCmd.Flags().String("host", "127.0.0.1", "IP address to bind the server")
 	serverCmd.Flags().String("port", "5000", "Port")
+	serverCmd.Flags().BoolP("no-auth", "A", false, "Turn off authenticated on API server")
+	serverCmd.SetHelpFunc(ServerHelp)
 	RootCmd.AddCommand(serverCmd)
 }
 
@@ -132,6 +134,7 @@ func runServer(cmd *cobra.Command, _ []string) error {
 
 	host, _ := cmd.Flags().GetString("host")
 	port, _ := cmd.Flags().GetString("port")
+	options.Server.NoAuth, _ = cmd.Flags().GetBool("no-auth")
 	bind := fmt.Sprintf("%v:%v", host, port)
 	options.Server.Bind = bind
 	utils.InforF("Start API server at %v", fmt.Sprintf("http://%v/#/", bind))

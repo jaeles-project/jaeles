@@ -62,6 +62,7 @@ type Report struct {
 
 // Server options for api server
 type Server struct {
+	NoAuth       bool
 	DBPath       string
 	Bind         string
 	JWTSecret    string

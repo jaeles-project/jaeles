@@ -282,6 +282,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	}
 	req.Body = ResolveVariable(req.Body, target)
 	req.Headers = ResolveHeader(req.Headers, target)
+	req.Proxy = ResolveVariable(req.Proxy, target)
 	req.Res = ResolveVariable(req.Res, target)
 
 	// more headers from cli
@@ -355,6 +356,18 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	}
 	utils.DebugF("[New Parsed Reuqest] %v", len(Reqs))
 
+	//// return
+	//if len(Reqs) > 0 && len(req.Middlewares) > 0 {
+	//	var realReqs []libs.Request
+	//	for _, Req := range Reqs {
+	//		Req.Middlewares = ResolveDetection(req.Middlewares, Req.Target)
+	//		realReqs = append(realReqs, Req)
+	//	}
+	//	spew.Dump("Rest", realReqs)
+	//	//return realReqs
+	//	Reqs = realReqs
+	//}
+
 	// repeat section
 	if req.Repeat == 0 {
 		return Reqs
@@ -363,6 +376,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	for i := 0; i < req.Repeat-1; i++ {
 		realReqsWithRepeat = append(realReqsWithRepeat, Reqs...)
 	}
+
 	return realReqsWithRepeat
 }
 

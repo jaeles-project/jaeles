@@ -6,7 +6,6 @@ import (
 	"github.com/robertkrimen/otto"
 	"os/exec"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -106,11 +105,13 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 	})
 
 	//  - RegexSelect("component", "var_name", "regex")
-	//  - RegexSelect("component", "var_name", "regex", "position")
+	//  - RegexSelect("component", "var_name", "regex")
 	vm.Set("RegexSelect", func(call otto.FunctionCall) otto.Value {
 		valueName, value := RegexSelect(record, call.ArgumentList)
-		utils.DebugF("New variales: %v -- %v", valueName, value)
-		sign.Target[valueName] = value
+		if valueName != "" && value != "" {
+			utils.DebugF("New variales: %v -- %v", valueName, value)
+			sign.Target[valueName] = value
+		}
 		return otto.Value{}
 	})
 
@@ -148,43 +149,33 @@ func Between(value string, left string, right string) string {
 // RegexSelect get regex string from component
 func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 	//  - RegexSelect("component", "var_name", "regex")
-	//  - RegexSelect("component", "var_name", "regex", "position")
 	utils.DebugF("arguments -- %v", arguments)
+	if len(arguments) < 1 {
+		utils.DebugF("Invalid Conclude")
+		return "", ""
+	}
 	componentName := arguments[0].String()
 	valueName := arguments[1].String()
 	component := GetComponent(realRec, componentName)
-
 	regexString := arguments[2].String()
-	var position int
-	var err error
-	if len(arguments) > 3 {
-		position, err = strconv.Atoi(arguments[3].String())
-		if err != nil {
-			position = 0
+
+	// map all selected
+	var myExp = regexp.MustCompile(regexString)
+	match := myExp.FindStringSubmatch(component)
+	if len(match) == 0 {
+		utils.DebugF("No match found: %v", regexString)
+	}
+	result := make(map[string]string)
+	for i, name := range myExp.SubexpNames() {
+		if i != 0 && name != "" && len(match) > i {
+			result[name] = match[i]
 		}
 	}
-	utils.DebugF("componentName -- %v", componentName)
-	//utils.DebugF("component -- %v", component)
-	utils.DebugF("valueName -- %v", valueName)
-	utils.DebugF("regexString -- %v", regexString)
-
-	var value string
-	re := regexp.MustCompile(regexString)
-	matchs := re.FindStringSubmatch(component)
-	if len(matchs) == 0 || position > len(matchs) {
-		return valueName, ""
+	utils.DebugF("RegexMatchs: %v", result)
+	value, exist := result[valueName]
+	if !exist {
+		return "", ""
 	}
-	value = matchs[position]
-	utils.DebugF("Matchs [%v] -- %v", position, value)
-
-	//
-	//for i, match := range re.FindStringSubmatch(component) {
-	//	utils.DebugF("Matchs [%v] -- %v", i, match)
-	//	if position == i {
-	//		value = match
-	//	}
-	//}
-
 	utils.DebugF("RegexSelect: %v --> %v", valueName, value)
 	return valueName, value
 }

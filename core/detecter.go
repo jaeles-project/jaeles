@@ -333,6 +333,7 @@ func RunDetector(record libs.Record, detectionString string) (string, bool) {
 
 	vm.Set("ValueOf", func(call otto.FunctionCall) otto.Value {
 		valueName := call.Argument(0).String()
+		utils.DebugF("ValueOf: %v -- %v", valueName, record.Request.Target[valueName])
 		if record.Request.Target[valueName] != "" {
 			value := record.Request.Target[valueName]
 			result, _ := vm.ToValue(value)

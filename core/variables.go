@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
@@ -302,20 +303,22 @@ func RunVariables(variableString string) []string {
 
 // RandomString return a random string with length
 func RandomString(n int) string {
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	var letter = []rune("abcdefghijklmnopqrstuvwxyz")
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
+		b[i] = letter[seededRand.Intn(len(letter))]
 	}
 	return string(b)
 }
 
 // RandomNumber return a random number with length
 func RandomNumber(n int) string {
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	var letter = []rune("0123456789")
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
+		b[i] = letter[seededRand.Intn(len(letter))]
 	}
 	result := string(b)
 	if !strings.HasPrefix(result, "0") || len(result) == 1 {

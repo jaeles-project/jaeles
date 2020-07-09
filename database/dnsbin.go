@@ -3,7 +3,6 @@ package database
 // Use to gen bunch of DNS on  dns.requestbin.net
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/Jeffail/gabs/v2"
 	"github.com/gorilla/websocket"
-	"github.com/parnurzeal/gorequest"
 )
 
 // NewDNSBin create new dnsbin
@@ -55,35 +53,6 @@ func NewDNSBin() string {
 	time.Sleep(time.Second)
 	c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	return dnsbin
-}
-
-// NewReqBin gen new http bin
-func NewReqBin() string {
-	var reqbin string
-	url := fmt.Sprintf("https://bin-api.pipedream.com/api/v2/http_endpoints")
-	prefix := strconv.FormatInt(time.Now().Unix(), 10)
-	// client := resty.New()
-	client := gorequest.New().TLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	client.Post(url)
-	body := fmt.Sprintf(`{"name":"%v","pvt":false}`, prefix)
-	client.Send(body)
-	_, resBody, _ := client.End()
-
-	message := resBody
-	// {"status":0,"message":"success","data":{"api_key":"enw9yvvawe47","name":"Untitled","pvt":false,"created_at":"2019-11-20T10:56:29.962Z"}}
-	jsonParsed, err := gabs.ParseJSON([]byte(message))
-	if err != nil {
-		return ""
-	}
-	// jsonParsed.Path("master")
-	// prefix := strconv.FormatInt(time.Now().Unix(), 10)
-	token := strings.Trim(fmt.Sprintf("%v", jsonParsed.Path("data.api_key")), `"`)
-	reqbin = fmt.Sprintf("https://%v.x.pipedream.net/", token)
-	if err != nil {
-		return ""
-	}
-
-	return reqbin
 }
 
 // GetTS get current timestamp and return a string

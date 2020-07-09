@@ -37,6 +37,7 @@ type Options struct {
 	Refresh           int
 	Retry             int
 	Quiet             bool
+	FullHelp          bool
 	Verbose           bool
 	Version           bool
 	Debug             bool

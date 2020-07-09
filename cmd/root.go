@@ -85,6 +85,7 @@ func init() {
 	// some shortcut
 	RootCmd.PersistentFlags().BoolVar(&options.BaseRoot, "ba", false, "Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'")
 	RootCmd.PersistentFlags().BoolVar(&options.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")
+	RootCmd.PersistentFlags().BoolVar(&options.FullHelp, "hh", false, "Show full help message")
 	RootCmd.SetHelpFunc(rootHelp)
 }
 

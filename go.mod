@@ -6,7 +6,7 @@ require (
 	github.com/Jeffail/gabs/v2 v2.5.1
 	github.com/Shopify/yaml v2.1.0+incompatible
 	github.com/appleboy/gin-jwt/v2 v2.6.3
-	github.com/chromedp/cdproto v0.0.0-20200608134039-8a80cdaf865c
+	github.com/chromedp/cdproto v0.0.0-20200706151146-b7f349b11751
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fatih/color v1.9.0
 	github.com/gin-contrib/cors v1.3.1
@@ -16,7 +16,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/jinzhu/gorm v1.9.14
-	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
+	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/panjf2000/ants v1.3.0
 	github.com/parnurzeal/gorequest v0.2.16

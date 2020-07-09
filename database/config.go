@@ -2,10 +2,9 @@ package database
 
 import (
 	"fmt"
-	"strings"
-
+	"github.com/go-resty/resty/v2"
 	"github.com/jaeles-project/jaeles/database/models"
-	"github.com/parnurzeal/gorequest"
+	"strings"
 )
 
 // ImportBurpCollab used to init some default config
@@ -28,7 +27,11 @@ func ImportBurpCollabResponse(burpcollab string, data string) string {
 	burpcollabres := data
 	if burpcollabres == "" {
 		url := fmt.Sprintf("http://%v?original=true", burpcollab)
-		_, burpcollabres, _ := gorequest.New().Get(url).End()
+		resp, err := resty.New().R().Get(url)
+		if err != nil {
+			return ""
+		}
+		burpcollabres = string(resp.Body())
 		burpcollabres = strings.Replace(burpcollabres, "<html><body>", "", -1)
 		burpcollabres = strings.Replace(burpcollabres, "</body></html>", "", -1)
 	}

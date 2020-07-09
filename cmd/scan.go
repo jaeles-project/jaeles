@@ -386,7 +386,7 @@ func parallelSending(realReq libs.Request, sign libs.Signature, originRec libs.R
 	realRec.Sign = sign
 	realRec.ScanID = options.ScanID
 
-	// replace things second time here with values section
+	// replace things second time here with new values section
 	core.AltResolveRequest(&realRec.Request)
 
 	// check conditions

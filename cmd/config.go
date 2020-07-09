@@ -192,8 +192,13 @@ func configHelp(_ *cobra.Command, _ []string) {
 	HelpMessage()
 }
 
-func rootHelp(_ *cobra.Command, _ []string) {
+func rootHelp(cmd *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
+	helps, _ := cmd.Flags().GetBool("hh")
+	if helps {
+		fmt.Println(cmd.UsageString())
+		return
+	}
 	RootMessage()
 }
 
@@ -236,7 +241,7 @@ Mics Flags:
   -R, --report string           HTML report file name
       --title string            HTML report title
       --html string             Enable generate HTML reports after the scan done 
-      -PP string                Full help message
+      --hh string               Full help message
       --lc                      Shortcut for '--proxy http://127.0.0.1:8080'
       --ba                      Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'
 `
@@ -274,8 +279,9 @@ func HelpMessage() {
 	fmt.Println(h)
 }
 
-func ScanHelp(_ *cobra.Command, _ []string) {
+func ScanHelp(cmd *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
+	fmt.Println(cmd.UsageString())
 	ScanMessage()
 }
 
@@ -304,37 +310,15 @@ func ScanMessage() {
 }
 
 // ServerHelp report help message
-func ServerHelp(_ *cobra.Command, _ []string) {
+func ServerHelp(cmd *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
-	ServerMessage()
-}
-
-// ServerMessage print help message
-func ServerMessage() {
-	h := "\nServer Command example:\n\n"
-	h += `
-  -h, --help          help for server
-      --host string   IP address to bind the server (default "127.0.0.1")
-      --port string   Port (default "5000")
-  -A, --no-auth       Turn off authenticated on API server
-	`
-	fmt.Println(h)
+	fmt.Println(cmd.UsageString())
 }
 
 // ReportHelp report help message
-func ReportHelp(_ *cobra.Command, _ []string) {
+func ReportHelp(cmd *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
-	ReportMessage()
-}
-
-// ReportHelp print help message
-func ReportMessage() {
-	h := "\nReport Command example:\n\n"
-	h += `
-  -h, --help              help for report
-      --template string   Report Template File (default "~/.jaeles/plugins/report/index.html")
-	`
-	fmt.Println(h)
+	fmt.Println(cmd.UsageString())
 }
 
 func CleanOutput() {

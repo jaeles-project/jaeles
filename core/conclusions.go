@@ -104,13 +104,15 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 		return otto.Value{}
 	})
 
-	//  - RegexSelect("component", "var_name", "regex")
-	//  - RegexSelect("component", "var_name", "regex")
+	//  - RegexSelect("component", "regex")
+	//  - RegexSelect("component", "regex")
 	vm.Set("RegexSelect", func(call otto.FunctionCall) otto.Value {
-		valueName, value := RegexSelect(record, call.ArgumentList)
-		if valueName != "" && value != "" {
-			utils.DebugF("New variales: %v -- %v", valueName, value)
-			sign.Target[valueName] = value
+		result := RegexSelect(record, call.ArgumentList)
+		if len(result) > 0 {
+			for k, value := range result {
+				utils.DebugF("New variales: %v -- %v", k, value)
+				sign.Target[k] = value
+			}
 		}
 		return otto.Value{}
 	})
@@ -147,17 +149,17 @@ func Between(value string, left string, right string) string {
 }
 
 // RegexSelect get regex string from component
-func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
+func RegexSelect(realRec libs.Record, arguments []otto.Value) map[string]string {
+	result := make(map[string]string)
 	//  - RegexSelect("component", "var_name", "regex")
 	utils.DebugF("arguments -- %v", arguments)
-	if len(arguments) < 1 {
+	if len(arguments) < 2 {
 		utils.DebugF("Invalid Conclude")
-		return "", ""
+		return result
 	}
 	componentName := arguments[0].String()
-	valueName := arguments[1].String()
 	component := GetComponent(realRec, componentName)
-	regexString := arguments[2].String()
+	regexString := arguments[1].String()
 
 	// map all selected
 	var myExp = regexp.MustCompile(regexString)
@@ -165,19 +167,12 @@ func RegexSelect(realRec libs.Record, arguments []otto.Value) (string, string) {
 	if len(match) == 0 {
 		utils.DebugF("No match found: %v", regexString)
 	}
-	result := make(map[string]string)
 	for i, name := range myExp.SubexpNames() {
 		if i != 0 && name != "" && len(match) > i {
 			result[name] = match[i]
 		}
 	}
-	utils.DebugF("RegexMatchs: %v", result)
-	value, exist := result[valueName]
-	if !exist {
-		return "", ""
-	}
-	utils.DebugF("RegexSelect: %v --> %v", valueName, value)
-	return valueName, value
+	return result
 }
 
 // Execution Run a command

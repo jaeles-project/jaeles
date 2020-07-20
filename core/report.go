@@ -126,8 +126,16 @@ func ParseVuln(options libs.Options) []Vulnerability {
 
 		// verbose info
 		if options.VerboseSummary {
+			if len(strings.Split(data[0], "][")) < 3 {
+				utils.ErrorF("Summary doesn't have verbose format")
+				return vulns
+			}
 			// status-length-words-time
 			verbose := strings.Split(strings.Split(data[0], "][")[2], "-")
+			if len(verbose) < 4 {
+				utils.ErrorF("Summary doesn't have verbose format")
+				return vulns
+			}
 			vuln.Status = verbose[0]
 			vuln.Length = verbose[1]
 			vuln.Words = verbose[2]

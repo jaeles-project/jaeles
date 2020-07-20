@@ -20,6 +20,10 @@ type Vulnerability struct {
 	Confidence string
 	ReportPath string
 	ReportFile string
+	Status     string
+	Length     string
+	Words      string
+	Time       string
 }
 
 type ReportData struct {
@@ -100,6 +104,9 @@ func ParseVuln(options libs.Options) []Vulnerability {
 
 		signID := strings.Split(data[0], "][")[0][1:]
 		info := strings.Split(data[0], "][")[1][:len(strings.Split(data[0], "][")[1])-1]
+		if options.VerboseSummary {
+			info = strings.Split(data[0], "][")[1]
+		}
 		confidence := strings.Split(info, "-")[0]
 		risk := strings.Split(info, "-")[1]
 
@@ -115,6 +122,16 @@ func ParseVuln(options libs.Options) []Vulnerability {
 			Confidence: confidence,
 			ReportPath: reportPath,
 			ReportFile: filepath.Base(raw),
+		}
+
+		// verbose info
+		if options.VerboseSummary {
+			// status-length-words-time
+			verbose := strings.Split(strings.Split(data[0], "][")[2], "-")
+			vuln.Status = verbose[0]
+			vuln.Length = verbose[1]
+			vuln.Words = verbose[2]
+			vuln.Time = strings.Trim(verbose[3], "]")
 		}
 		vulns = append(vulns, vuln)
 	}

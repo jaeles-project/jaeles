@@ -11,4 +11,6 @@ const (
 	UIREPO = "https://github.com/jaeles-project/jaeles-plugins"
 	// REPORT default report template file
 	REPORT = "https://raw.githubusercontent.com/jaeles-project/jaeles-plugins/master/report/index.html"
+	// VREPORT verbose report template file
+	VREPORT = "https://raw.githubusercontent.com/jaeles-project/jaeles-plugins/master/report/verbose.html"
 )

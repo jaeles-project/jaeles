@@ -34,6 +34,10 @@ func DoGenReport(options libs.Options) error {
 	if options.Report.TemplateFile == "" {
 		options.Report.TemplateFile = "~/.jaeles/plugins/report/index.html"
 	}
+	if options.VerboseSummary {
+		options.Report.TemplateFile = "~/.jaeles/plugins/report/verbose.html"
+	}
+
 	if options.Report.ReportName == "" {
 		options.Report.ReportName = "jaeles-report.html"
 	}
@@ -45,7 +49,11 @@ func DoGenReport(options libs.Options) error {
 		req := libs.Request{
 			URL: libs.REPORT,
 		}
-		utils.DebugF("Download template from: %v", libs.REPORT)
+		if options.VerboseSummary {
+			req.URL = libs.VREPORT
+		}
+		utils.DebugF("Download template from: %v", req.URL)
+
 		res, err := sender.JustSend(options, req)
 		if err != nil || len(res.Body) <= 0 {
 			utils.ErrorF("Error GET templateFile: %v", err)

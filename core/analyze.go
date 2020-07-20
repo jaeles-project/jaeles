@@ -57,6 +57,10 @@ func Analyze(options libs.Options, record *libs.Record) {
 			vulnInfo := fmt.Sprintf("[%v][%v] %v", record.Sign.ID, record.Sign.Info.Risk, record.Request.URL)
 			if options.Quiet {
 				record.Request.Target["VulnURL"] = record.Request.URL
+				record.Request.Target["Status"] = fmt.Sprintf("%v", record.Response.StatusCode)
+				record.Request.Target["Length"] = fmt.Sprintf("%v", record.Response.Length)
+				record.Request.Target["Words"] = fmt.Sprintf("%v", int64(len(strings.Split(record.Response.Beautify, " "))))
+				record.Request.Target["Time"] = fmt.Sprintf("%v", record.Response.ResponseTime)
 				fmt.Printf("%v\n", ResolveVariable(options.QuietFormat, record.Request.Target))
 			} else {
 				color.Green("[Vulnerable]%v %v", vulnInfo, outputName)
@@ -94,7 +98,13 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 	if rec.Request.URL == "" {
 		rec.Request.URL = rec.Request.Target["URL"]
 	}
+
 	head := fmt.Sprintf("[%v][%v-%v] - %v\n", rec.Sign.ID, rec.Sign.Info.Confidence, rec.Sign.Info.Risk, rec.Request.URL)
+	if options.VerboseSummary {
+		// status-length-words-time
+		moreInfo := fmt.Sprintf("%v-%v-%v-%v", rec.Response.StatusCode, rec.Response.Length, len(strings.Split(rec.Response.Beautify, " ")), rec.Response.ResponseTime)
+		head = fmt.Sprintf("[%v][%v-%v][%v] - %v\n", rec.Sign.ID, rec.Sign.Info.Confidence, rec.Sign.Info.Risk, moreInfo, rec.Request.URL)
+	}
 	sInfo := fmt.Sprintf("[Sign-Info][%v-%v] - %v - %v\n", rec.Sign.Info.Confidence, rec.Sign.Info.Risk, rec.Sign.RawPath, rec.Sign.Info.Name)
 	content := "[Vuln-Info]" + head + sInfo + fmt.Sprintf("[Detect-String] - %v\n\n", rec.DetectString)
 	if rec.Request.MiddlewareOutput != "" {

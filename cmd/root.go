@@ -54,6 +54,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
 	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")
 	RootCmd.PersistentFlags().StringVar(&options.SummaryVuln, "summaryVuln", "", "Summary output file")
+	RootCmd.PersistentFlags().BoolVar(&options.VerboseSummary, "sverbose", false, "Store verbose info in summary file")
 	// report options
 	RootCmd.PersistentFlags().StringVarP(&options.Report.ReportName, "report", "R", "", "Report name")
 	RootCmd.PersistentFlags().StringVar(&options.Report.Title, "title", "", "Report title name")

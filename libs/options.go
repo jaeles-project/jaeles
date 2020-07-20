@@ -37,7 +37,7 @@ type Options struct {
 	Retry             int
 	SaveRaw           bool
 	JsonOutput        bool
-	VerboseSummary        bool
+	VerboseSummary    bool
 	Quiet             bool
 	FullHelp          bool
 	Verbose           bool
@@ -57,12 +57,12 @@ type Options struct {
 
 // Report options for api server
 type Report struct {
-	VerboseReport   bool
-	ReportName   string
-	TemplateFile string
+	VerboseReport bool
+	ReportName    string
+	TemplateFile  string
 	VTemplateFile string
-	OutputPath   string
-	Title        string
+	OutputPath    string
+	Title         string
 }
 
 // Server options for api server

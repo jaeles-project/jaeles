@@ -49,6 +49,7 @@ func init() {
 	RootCmd.PersistentFlags().IntVar(&options.Delay, "delay", 0, "Delay time between requests")
 	// output options
 	RootCmd.PersistentFlags().StringVarP(&options.Output, "output", "o", "out", "Output folder name")
+	RootCmd.PersistentFlags().BoolVar(&options.JsonOutput, "json", false, "Store output as JSON")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveOutput, "passiveOutput", "", "Passive output folder (default is passive-out)")
 	RootCmd.PersistentFlags().StringVar(&options.PassiveSummary, "passiveSummary", "", "Passive Summary file")
 	RootCmd.PersistentFlags().StringVarP(&options.SummaryOutput, "summaryOutput", "O", "", "Summary output file")

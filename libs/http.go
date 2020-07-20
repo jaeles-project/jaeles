@@ -3,6 +3,7 @@ package libs
 // Record all information about request
 type Record struct {
 	DonePassive   bool
+	IsVulnerable  bool
 	SelectPassive string
 	OriginReq     Request
 	OriginRes     Response

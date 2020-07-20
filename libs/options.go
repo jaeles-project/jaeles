@@ -32,10 +32,11 @@ type Options struct {
 	Concurrency       int
 	Threads           int
 	Delay             int
-	SaveRaw           bool
 	Timeout           int
 	Refresh           int
 	Retry             int
+	SaveRaw           bool
+	JsonOutput        bool
 	Quiet             bool
 	FullHelp          bool
 	Verbose           bool

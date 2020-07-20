@@ -49,6 +49,7 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 	if sign.Info.Confidence == "" {
 		sign.Info.Confidence = "Tentative"
 	}
+
 	return sign, err
 }
 

@@ -9,7 +9,9 @@ type Signature struct {
 	Passive  bool
 	Parallel bool
 	Single   bool
-	Info     struct {
+	// Detect once
+	Donce bool
+	Info  struct {
 		Name       string
 		Risk       string
 		Confidence string

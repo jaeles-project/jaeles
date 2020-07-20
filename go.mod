@@ -16,6 +16,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/jinzhu/gorm v1.9.14
+	github.com/json-iterator/go v1.1.9
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/panjf2000/ants v1.3.0

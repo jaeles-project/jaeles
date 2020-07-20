@@ -3,16 +3,16 @@ package core
 import (
 	"crypto/sha1"
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/jaeles-project/jaeles/database"
+	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/sender"
+	"github.com/jaeles-project/jaeles/utils"
+	jsoniter "github.com/json-iterator/go"
 	"net/url"
 	"os"
 	"path"
 	"strings"
-
-	"github.com/fatih/color"
-	"github.com/jaeles-project/jaeles/database"
-	"github.com/jaeles-project/jaeles/libs"
-	"github.com/jaeles-project/jaeles/utils"
 )
 
 // Analyze run analyzer with each detections
@@ -26,6 +26,10 @@ func Analyze(options libs.Options, record *libs.Record) {
 	}
 
 	for _, analyze := range record.Request.Detections {
+		// skip multiple detection for the same request
+		if record.IsVulnerable && record.Sign.Donce {
+			return
+		}
 		extra, result := RunDetector(*record, analyze)
 		if extra != "" {
 			record.ExtraOutput = extra
@@ -66,10 +70,22 @@ func Analyze(options libs.Options, record *libs.Record) {
 				options.FoundCmd = ResolveVariable(options.FoundCmd, record.Request.Target)
 				Execution(options.FoundCmd)
 			}
-
+			record.Request.Target["IsVulnerable"] = "true"
+			record.IsVulnerable = true
 		}
 		utils.DebugF("[Detection] %v -- %v", analyze, result)
 	}
+}
+
+type VulnData struct {
+	SignID          string
+	SignName        string
+	URL             string
+	Risk            string
+	DetectionString string
+	Confidence      string
+	Req             string
+	Res             string
 }
 
 // StoreOutput store vulnerable request to a file
@@ -129,6 +145,24 @@ func StoreOutput(rec libs.Record, options libs.Options) string {
 			utils.ErrorF("Error Write content to: %v", p)
 		}
 	}
+	// store output as JSON
+	if options.JsonOutput {
+		vulnData := VulnData{
+			SignID:          rec.Sign.ID,
+			SignName:        rec.Sign.Info.Name,
+			Risk:            rec.Sign.Info.Risk,
+			Confidence:      rec.Sign.Info.Confidence,
+			DetectionString: rec.DetectString,
+			URL:             rec.Request.URL,
+			Req:             Base64Encode(rec.Request.Beautify),
+			Res:             Base64Encode(rec.Response.Beautify),
+		}
+		if data, err := jsoniter.MarshalToString(vulnData); err == nil {
+			content = data
+		}
+	}
+
+	// normal output
 	utils.WriteToFile(p, content)
 	sum := fmt.Sprintf("%v - %v", strings.TrimSpace(head), p)
 	utils.AppendToContent(options.SummaryOutput, sum)

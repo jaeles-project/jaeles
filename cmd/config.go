@@ -82,9 +82,7 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 		database.CleanRecords()
 		break
 	case "clean":
-		os.RemoveAll(path.Join(options.RootFolder, "sqlite.db"))
-		os.RemoveAll(path.Join(options.RootFolder, "config.yaml"))
-		os.RemoveAll(path.Join(options.RootFolder, "burp.json"))
+		os.RemoveAll(options.RootFolder)
 		break
 	case "cred":
 		username, _ := cmd.Flags().GetString("user")
@@ -100,11 +98,11 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 			database.ImportCollab(secret, collab)
 		}
 		break
-
 	case "init":
 		reloadSignature(options.SignFolder, mics)
 		break
 	case "reload":
+		os.RemoveAll(path.Join(options.RootFolder, "base-signatures"))
 		reloadSignature(options.SignFolder, mics)
 		break
 	case "add":

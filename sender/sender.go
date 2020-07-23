@@ -50,14 +50,22 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	client := resty.New()
 	client.SetLogger(logger)
 	tlsCfg := &tls.Config{
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-		},
+		Renegotiation:            tls.RenegotiateOnceAsClient,
 		PreferServerCipherSuites: true,
 		InsecureSkipVerify:       true,
-		MinVersion:               tls.VersionTLS11,
-		MaxVersion:               tls.VersionTLS11,
+	}
+
+	if options.Proxy != "" {
+		tlsCfg = &tls.Config{
+			CipherSuites: []uint16{
+				tls.TLS_RSA_WITH_RC4_128_SHA,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			},
+			Renegotiation:            tls.RenegotiateOnceAsClient,
+			PreferServerCipherSuites: true,
+			InsecureSkipVerify:       true,
+		}
 	}
 
 	client.SetTransport(&http.Transport{

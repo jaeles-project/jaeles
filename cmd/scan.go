@@ -138,6 +138,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 		if !options.DisableParallel {
 			options.ParallelSigns = options.SelectedSigns
 		}
+		options.ParallelSigns = funk.UniqString(options.ParallelSigns)
 		runParallel(urls)
 	}
 
@@ -155,6 +156,7 @@ func startSingleJob(j interface{}) {
 	job := j.(libs.Job)
 	originRec, sign, target := InitJob(job.URL, job.Sign)
 	realReqs := genRequests(sign, target)
+	utils.DebugF("New requests in single job: %v", len(realReqs))
 	SendRequests(realReqs, sign, originRec)
 }
 
@@ -354,6 +356,8 @@ func runParallel(urls []string) {
 		for _, url := range urls {
 			originRec, sign, target := InitJob(url, sign)
 			realReqs := genRequests(sign, target)
+			utils.DebugF("New requests in parallels job: %v", len(realReqs))
+
 			for _, req := range realReqs {
 				wg.Add(1)
 				// parsing request here

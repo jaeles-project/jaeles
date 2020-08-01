@@ -26,6 +26,12 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	url := req.URL
 	body := req.Body
 	headers := GetHeaders(req)
+	proxy := options.Proxy
+
+	// override proxy
+	if req.Proxy != "" && req.Proxy != "blank" {
+		proxy = req.Proxy
+	}
 
 	timeout := options.Timeout
 	if req.Timeout > 0 {
@@ -55,7 +61,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		InsecureSkipVerify:       true,
 	}
 
-	if options.Proxy != "" {
+	if proxy != "" {
 		tlsCfg = &tls.Config{
 			CipherSuites: []uint16{
 				tls.TLS_RSA_WITH_RC4_128_SHA,
@@ -79,15 +85,13 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		TLSClientConfig:       tlsCfg,
 	})
 
-	client.SetHeaders(headers)
-	client.SetCloseConnection(true)
-	if options.Proxy != "" {
-		client.SetProxy(options.Proxy)
-	}
-	// override proxy
-	if req.Proxy != "" && req.Proxy != "blank" {
+	if proxy != "" {
 		client.SetProxy(req.Proxy)
 	}
+
+	client.SetHeaders(headers)
+	client.SetCloseConnection(true)
+
 	if options.Retry > 0 {
 		client.SetRetryCount(options.Retry)
 	}

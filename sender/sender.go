@@ -86,9 +86,8 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	})
 
 	if proxy != "" {
-		client.SetProxy(req.Proxy)
+		client.SetProxy(proxy)
 	}
-
 	client.SetHeaders(headers)
 	client.SetCloseConnection(true)
 

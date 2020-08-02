@@ -76,7 +76,7 @@ func PrintLine() {
 // GoodF print good message
 func GoodF(format string, args ...interface{}) {
 	good := color.HiGreenString("[+]")
-	fmt.Printf("%s %s\n", good, fmt.Sprintf(format, args...))
+	fmt.Fprintf(os.Stderr, "%s %s\n", good, fmt.Sprintf(format, args...))
 }
 
 // BannerF print info message
@@ -104,7 +104,7 @@ func ErrorF(format string, args ...interface{}) {
 // WarningF print good message
 func WarningF(format string, args ...interface{}) {
 	good := color.YellowString("[!]")
-	fmt.Printf("%s %s\n", good, fmt.Sprintf(format, args...))
+	fmt.Fprintf(os.Stderr, "%s %s\n", good, fmt.Sprintf(format, args...))
 }
 
 // DebugF print debug message

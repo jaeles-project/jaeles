@@ -328,3 +328,16 @@ func StripName(raw string) string {
 func MoveFolder(src string, dest string) {
 	os.Rename(NormalizePath(src), NormalizePath(dest))
 }
+
+// GetFileSize get file size of a file in GB
+func GetFileSize(src string) float64 {
+	var sizeGB float64
+	fi, err := os.Stat(NormalizePath(src))
+	if err != nil {
+		return sizeGB
+	}
+	// get the size
+	size := fi.Size()
+	sizeGB = float64(size) / (1024 * 1024 * 1024)
+	return sizeGB
+}

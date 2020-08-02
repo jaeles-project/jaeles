@@ -103,5 +103,11 @@ func InitConfig(options *libs.Options) {
 	if options.PassiveSummary == "" {
 		options.PassiveSummary = path.Join(options.PassiveOutput, "jaeles-passive-summary.txt")
 	}
+
+	dbSize := utils.GetFileSize(options.Server.DBPath)
+	if dbSize > 5.0 {
+		utils.WarningF("Your Database size look very big: %vGB", fmt.Sprintf("%.2f", dbSize))
+		utils.WarningF("Consider clean your db with this command: 'jaeles config -a clear' or just remove your '~/.jaeles/'")
+	}
 	utils.InforF("Summary output: %v", options.SummaryOutput)
 }

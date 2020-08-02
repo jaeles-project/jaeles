@@ -77,6 +77,7 @@ func runConfig(cmd *cobra.Command, _ []string) error {
 		reloadSignature(path.Join(options.RootFolder, "base-signatures"), mics)
 		break
 	case "clear":
+		utils.GoodF("Cleaning your DB")
 		database.CleanScans()
 		database.CleanSigns()
 		database.CleanRecords()

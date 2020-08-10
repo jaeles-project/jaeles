@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thoas/go-funk"
 	"os"
+	"os/exec"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -33,6 +35,7 @@ func init() {
 }
 
 func runScan(cmd *cobra.Command, _ []string) error {
+	// fmt.Println(os.Args)
 	SelectSign()
 	var urls []string
 	// parse URL input here
@@ -61,6 +64,12 @@ func runScan(cmd *cobra.Command, _ []string) error {
 					urls = append(urls, url)
 				}
 			}
+			// store stdin as a temp file
+			if len(urls) > options.ChunkLimit && options.ChunkRun {
+				urlFile = path.Join(options.ChunkDir, fmt.Sprintf("raw-%v", core.RandomString(8)))
+				utils.InforF("Write stdin data to: %v", urlFile)
+				utils.WriteToFile(urlFile, strings.Join(urls, "\n"))
+			}
 		}
 	}
 
@@ -68,6 +77,27 @@ func runScan(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintf(os.Stderr, "[Error] No input loaded\n")
 		fmt.Fprintf(os.Stderr, "Use 'jaeles -h' for more information about a command.\n")
 		os.Exit(1)
+	}
+
+	if len(urls) > options.ChunkLimit && !options.ChunkRun {
+		utils.WarningF("Your inputs look very big.")
+		utils.WarningF("Consider using --chunk options")
+	}
+	if len(urls) > options.ChunkLimit && options.ChunkRun {
+		utils.InforF("Running Jaeles in Chunk mode")
+		rawCommand := strings.Join(os.Args, " ")
+
+		if strings.Contains(rawCommand, "-U ") {
+			rawCommand = strings.ReplaceAll(rawCommand, fmt.Sprintf("-U %v", urlFile), "-U {}")
+		} else {
+			rawCommand += " -U {}"
+		}
+		urlFiles := genChunkFiles(urlFile, options)
+		runChunk(rawCommand, urlFiles, options.Threads)
+		for _, chunkFile := range urlFiles {
+			os.RemoveAll(chunkFile)
+		}
+		os.Exit(0)
 	}
 	utils.InforF("Input Loaded: %v", len(urls))
 
@@ -465,4 +495,71 @@ func checkConditions(record libs.Record) bool {
 		}
 	}
 	return true
+}
+
+func genChunkFiles(urlFile string, options libs.Options) []string {
+	utils.DebugF("Store tmp chunk data at: %v", options.ChunkDir)
+	var divided [][]string
+	var chunkFiles []string
+	divided = utils.ChunkFileBySize(urlFile, options.ChunkSize)
+	for index, chunk := range divided {
+		outName := path.Join(options.ChunkDir, fmt.Sprintf("%v-%v", core.RandomString(6), index))
+		utils.WriteToFile(outName, strings.Join(chunk, "\n"))
+		chunkFiles = append(chunkFiles, outName)
+	}
+	return chunkFiles
+}
+
+func runChunk(command string, urlFiles []string, threads int) {
+	utils.DebugF("Run chunk command with template: %v", command)
+
+	var commands []string
+	for index, urlFile := range urlFiles {
+		cmd := command
+		cmd = strings.Replace(cmd, "{}", urlFile, -1)
+		cmd = strings.Replace(cmd, "{#}", fmt.Sprintf("%d", index), -1)
+		commands = append(commands, cmd)
+	}
+
+	var wg sync.WaitGroup
+	p, _ := ants.NewPoolWithFunc(threads, func(i interface{}) {
+		defer wg.Done()
+		cmd := i.(string)
+		ExecutionWithStd(cmd)
+	}, ants.WithPreAlloc(true))
+	defer p.Release()
+	for _, command := range commands {
+		wg.Add(1)
+		p.Invoke(command)
+	}
+	wg.Wait()
+}
+
+// ExecutionWithStd Run a command
+func ExecutionWithStd(cmd string) (string, error) {
+	command := []string{
+		"bash",
+		"-c",
+		cmd,
+	}
+	var output string
+	realCmd := exec.Command(command[0], command[1:]...)
+	// output command output to std too
+	cmdReader, _ := realCmd.StdoutPipe()
+	scanner := bufio.NewScanner(cmdReader)
+	var out string
+	go func() {
+		for scanner.Scan() {
+			out += scanner.Text()
+			//fmt.Fprintf(os.Stderr, scanner.Text()+"\n")
+			fmt.Println(scanner.Text())
+		}
+	}()
+	if err := realCmd.Start(); err != nil {
+		return "", err
+	}
+	if err := realCmd.Wait(); err != nil {
+		return "", err
+	}
+	return output, nil
 }

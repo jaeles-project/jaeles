@@ -53,6 +53,10 @@ type Options struct {
 	BurpProxy         bool
 	Server            Server
 	Report            Report
+	ChunkDir          string
+	ChunkRun          bool
+	ChunkSize         int
+	ChunkLimit         int
 }
 
 // Report options for api server

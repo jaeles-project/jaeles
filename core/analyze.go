@@ -9,6 +9,7 @@ import (
 	"github.com/jaeles-project/jaeles/sender"
 	"github.com/jaeles-project/jaeles/utils"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/logrusorgru/aurora/v3"
 	"net/url"
 	"os"
 	"path"
@@ -63,9 +64,15 @@ func Analyze(options libs.Options, record *libs.Record) {
 				record.Request.Target["Time"] = fmt.Sprintf("%v", record.Response.ResponseTime)
 				fmt.Printf("%v\n", ResolveVariable(options.QuietFormat, record.Request.Target))
 			} else {
-				color.Green("[Vulnerable]%v %v", vulnInfo, outputName)
+				info := fmt.Sprintf("[Vulnerable]%v %v", vulnInfo, outputName)
+				if options.Quiet {
+					fmt.Println(info)
+				} else {
+					// use this libs because we still want to see color when use chunked mode
+					au := aurora.NewAurora(true)
+					fmt.Println(au.Green(info))
+				}
 			}
-
 			if options.FoundCmd != "" {
 				// add some more variables for notification
 				record.Request.Target["vulnInfo"] = vulnInfo

@@ -341,3 +341,49 @@ func GetFileSize(src string) float64 {
 	sizeGB = float64(size) / (1024 * 1024 * 1024)
 	return sizeGB
 }
+
+// ChunkFileByPart chunk file to multiple part
+func ChunkFileByPart(source string, chunk int) [][]string {
+	var divided [][]string
+	data := ReadingLines(source)
+	if len(data) <= 0 || chunk > len(data) {
+		if len(data) > 0 {
+			divided = append(divided, data)
+		}
+		return divided
+	}
+
+	chunkSize := (len(data) + chunk - 1) / chunk
+	for i := 0; i < len(data); i += chunkSize {
+		end := i + chunkSize
+		if end > len(data) {
+			end = len(data)
+		}
+
+		divided = append(divided, data[i:end])
+	}
+	return divided
+}
+
+// ChunkFileBySize chunk file to multiple part
+func ChunkFileBySize(source string, chunk int) [][]string {
+	var divided [][]string
+	data := ReadingLines(source)
+	if len(data) <= 0 || chunk > len(data) {
+		if len(data) > 0 {
+			divided = append(divided, data)
+		}
+		return divided
+	}
+
+	chunkSize := chunk
+	for i := 0; i < len(data); i += chunkSize {
+		end := i + chunkSize
+		if end > len(data) {
+			end = len(data)
+		}
+
+		divided = append(divided, data[i:end])
+	}
+	return divided
+}

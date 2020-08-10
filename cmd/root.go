@@ -84,6 +84,12 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "v", false, "Verbose output")
 	RootCmd.PersistentFlags().BoolVarP(&options.Version, "version", "V", false, "Print version of Jaeles")
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
+	// chunk options
+	RootCmd.PersistentFlags().BoolVar(&options.ChunkRun, "chunk", false, "Enable chunk running against big input")
+	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads","t", 1, "Number of Threads")
+	RootCmd.PersistentFlags().IntVar(&options.ChunkSize, "chunk-size", 10000, "Chunk Size")
+	RootCmd.PersistentFlags().StringVar(&options.ChunkDir, "chunk-dir", "", "Temp Directory to store chunk directory")
+	RootCmd.PersistentFlags().IntVar(&options.ChunkLimit, "chunk-limit", 500000, "Limit size to trigger chunk run")
 	// some shortcut
 	RootCmd.PersistentFlags().BoolVar(&options.BaseRoot, "ba", false, "Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'")
 	RootCmd.PersistentFlags().BoolVar(&options.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")

@@ -87,9 +87,9 @@ func init() {
 	// chunk options
 	RootCmd.PersistentFlags().BoolVar(&options.ChunkRun, "chunk", false, "Enable chunk running against big input")
 	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads","t", 1, "Number of Threads (Only used in chunk mode)")
-	RootCmd.PersistentFlags().IntVar(&options.ChunkSize, "chunk-size", 10000, "Chunk Size")
+	RootCmd.PersistentFlags().IntVar(&options.ChunkSize, "chunk-size", 20000, "Chunk Size")
 	RootCmd.PersistentFlags().StringVar(&options.ChunkDir, "chunk-dir", "", "Temp Directory to store chunk directory")
-	RootCmd.PersistentFlags().IntVar(&options.ChunkLimit, "chunk-limit", 500000, "Limit size to trigger chunk run")
+	RootCmd.PersistentFlags().IntVar(&options.ChunkLimit, "chunk-limit", 200000, "Limit size to trigger chunk run")
 	// some shortcut
 	RootCmd.PersistentFlags().BoolVar(&options.BaseRoot, "ba", false, "Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'")
 	RootCmd.PersistentFlags().BoolVar(&options.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")

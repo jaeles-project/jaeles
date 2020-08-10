@@ -523,14 +523,14 @@ func runChunk(command string, urlFiles []string, threads int) {
 
 	var wg sync.WaitGroup
 	p, _ := ants.NewPoolWithFunc(threads, func(i interface{}) {
-		defer wg.Done()
 		cmd := i.(string)
 		ExecutionWithStd(cmd)
+		wg.Done()
 	}, ants.WithPreAlloc(true))
 	defer p.Release()
 	for _, command := range commands {
 		wg.Add(1)
-		p.Invoke(command)
+		_ = p.Invoke(command)
 	}
 	wg.Wait()
 }

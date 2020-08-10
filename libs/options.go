@@ -56,7 +56,7 @@ type Options struct {
 	ChunkDir          string
 	ChunkRun          bool
 	ChunkSize         int
-	ChunkLimit         int
+	ChunkLimit        int
 }
 
 // Report options for api server

@@ -86,7 +86,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&options.Debug, "debug", false, "Debug")
 	// chunk options
 	RootCmd.PersistentFlags().BoolVar(&options.ChunkRun, "chunk", false, "Enable chunk running against big input")
-	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads","t", 1, "Number of Threads (Only used in chunk mode)")
+	RootCmd.PersistentFlags().IntVarP(&options.Threads, "threads", "t", 1, "Number of Threads (Only used in chunk mode)")
 	RootCmd.PersistentFlags().IntVar(&options.ChunkSize, "chunk-size", 20000, "Chunk Size")
 	RootCmd.PersistentFlags().StringVar(&options.ChunkDir, "chunk-dir", "", "Temp Directory to store chunk directory")
 	RootCmd.PersistentFlags().IntVar(&options.ChunkLimit, "chunk-limit", 200000, "Limit size to trigger chunk run")

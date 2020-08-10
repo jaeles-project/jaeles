@@ -238,6 +238,7 @@ Mics Flags:
       --sverbose bool           Store verbose info in summary file
   -N  --no-output bool          Disable store output
       --json bool               Store output as JSON format
+      --chunk bool              Enable chunk running against big input
   -q, --quiet                   Enable Quiet Output
   -Q, --quietFormat string      Format for quiet output (default "{{.VulnURL}}")
   -R, --report string           HTML report file name

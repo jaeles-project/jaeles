@@ -162,7 +162,11 @@ func RegexSelect(realRec libs.Record, arguments []otto.Value) map[string]string 
 	regexString := arguments[1].String()
 
 	// map all selected
-	var myExp = regexp.MustCompile(regexString)
+	var myExp, err = regexp.Compile(regexString)
+	if err != nil {
+		utils.ErrorF("Regex error: %v %v", regexString, err)
+		return result
+	}
 	match := myExp.FindStringSubmatch(component)
 	if len(match) == 0 {
 		utils.DebugF("No match found: %v", regexString)

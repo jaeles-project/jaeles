@@ -64,14 +64,27 @@ func Analyze(options libs.Options, record *libs.Record) {
 				record.Request.Target["Time"] = fmt.Sprintf("%v", record.Response.ResponseTime)
 				fmt.Printf("%v\n", ResolveVariable(options.QuietFormat, record.Request.Target))
 			} else {
-				info := fmt.Sprintf("[Vulnerable]%v %v", vulnInfo, outputName)
-				if options.Quiet {
-					fmt.Println(info)
-				} else {
-					// use this libs because we still want to see color when use chunked mode
-					au := aurora.NewAurora(true)
-					fmt.Println(au.Green(info))
+				// use this libs because we still want to see color when use chunked mode
+				au := aurora.NewAurora(true)
+				colorSignID := fmt.Sprintf("%s", au.Cyan(record.Sign.ID))
+				colorRisk := fmt.Sprintf("%s", au.Cyan(record.Sign.Info.Risk))
+				risk := strings.ToLower(record.Sign.Info.Risk)
+				switch risk {
+				case "critical":
+					colorRisk = fmt.Sprintf("%s", au.Red(record.Sign.Info.Risk))
+				case "high":
+					colorRisk = fmt.Sprintf("%s", au.BrightRed(record.Sign.Info.Risk))
+				case "medium":
+					colorRisk = fmt.Sprintf("%s", au.Yellow(record.Sign.Info.Risk))
+				case "low":
+					colorRisk = fmt.Sprintf("%s", au.BrightMagenta(record.Sign.Info.Risk))
+				case "info":
+					colorRisk = fmt.Sprintf("%s", au.Blue(record.Sign.Info.Risk))
+				case "potential":
+					colorRisk = fmt.Sprintf("%s", au.Magenta(record.Sign.Info.Risk))
 				}
+				info := fmt.Sprintf("[%s][%s][%s] %s %s", au.Green("Vulnerable"), colorSignID, colorRisk, au.Green(record.Request.URL), au.Green(outputName))
+				fmt.Println(info)
 			}
 			if options.FoundCmd != "" {
 				// add some more variables for notification

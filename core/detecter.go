@@ -408,7 +408,7 @@ func GetComponent(record libs.Record, component string) string {
 			return record.Response.Body
 		}
 		return record.Response.Beautify
-	case "resheader":
+	case "resheader", "resheaders", "headers", "header":
 		beautifyHeader := fmt.Sprintf("%v \n", record.Response.Status)
 		for _, header := range record.Response.Headers {
 			for key, value := range header {
@@ -416,17 +416,7 @@ func GetComponent(record libs.Record, component string) string {
 			}
 		}
 		return beautifyHeader
-	case "resheaders":
-		beautifyHeader := fmt.Sprintf("%v \n", record.Response.Status)
-		for _, header := range record.Response.Headers {
-			for key, value := range header {
-				beautifyHeader += fmt.Sprintf("%v: %v\n", key, value)
-			}
-		}
-		return beautifyHeader
-	case "body":
-		return record.Response.Body
-	case "resbody":
+	case "body", "resbody":
 		return record.Response.Body
 	case "middleware":
 		return record.Request.MiddlewareOutput

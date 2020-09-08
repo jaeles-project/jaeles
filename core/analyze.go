@@ -35,7 +35,10 @@ func Analyze(options libs.Options, record *libs.Record) {
 		if extra != "" {
 			record.ExtraOutput = extra
 		}
-		if result == true {
+		//if options.AlwaysTrue {
+		//	result = true
+		//}
+		if result == true || options.AlwaysTrue {
 			record.DetectString = analyze
 			if options.Verbose {
 				color.Magenta("[Found] %v", analyze)
@@ -58,6 +61,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 			vulnInfo := fmt.Sprintf("[%v][%v] %v", record.Sign.ID, record.Sign.Info.Risk, record.Request.URL)
 			if options.Quiet {
 				record.Request.Target["VulnURL"] = record.Request.URL
+				record.Request.Target["Payload"] = record.Request.Payload
 				record.Request.Target["Status"] = fmt.Sprintf("%v", record.Response.StatusCode)
 				record.Request.Target["Length"] = fmt.Sprintf("%v", record.Response.Length)
 				record.Request.Target["Words"] = fmt.Sprintf("%v", int64(len(strings.Split(record.Response.Beautify, " "))))

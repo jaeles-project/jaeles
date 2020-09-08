@@ -55,6 +55,7 @@ func Generators(req libs.Request, sign libs.Signature) []libs.Request {
 			for _, injectedReq := range injectedReqs {
 				injectedReq.Target["InjectedURL"] = injectedReq.URL
 				utils.DebugF("Injected URL: %v", injectedReq.URL)
+				injectedReq.Payload = payload
 				// resolve detection this time because we may need parse something in the variable and original
 				injectedReq.Middlewares = AltResolveDetection(fuzzReq.Middlewares, injectedReq.Target)
 				injectedReq.Detections = AltResolveDetection(fuzzReq.Detections, injectedReq.Target)

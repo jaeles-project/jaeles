@@ -93,6 +93,7 @@ func init() {
 	// some shortcuts
 	RootCmd.PersistentFlags().BoolVar(&options.BaseRoot, "ba", false, "Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'")
 	RootCmd.PersistentFlags().BoolVar(&options.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")
+	RootCmd.PersistentFlags().BoolVar(&options.AlwaysTrue, "at", false, "Enable Always True Detection for observe response")
 	RootCmd.PersistentFlags().BoolVar(&options.FullHelp, "hh", false, "Show full help message")
 	RootCmd.SetHelpFunc(rootHelp)
 }
@@ -107,11 +108,15 @@ func initConfig() {
 	if options.Debug {
 		options.Verbose = true
 	}
+	// some shortcut
 	if options.BurpProxy {
 		options.Proxy = "http://127.0.0.1:8080"
 	}
 	if options.BaseRoot {
 		options.Params = append(options.Params, "BaseURL=[[.Raw]]")
+	}
+	if options.AlwaysTrue {
+		options.NoOutput = true
 	}
 
 	utils.InitLog(&options)

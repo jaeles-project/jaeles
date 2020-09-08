@@ -37,6 +37,7 @@ type Request struct {
 	URL               string
 	Proxy             string
 	Method            string
+	Payload           string
 	Redirect          bool
 	UseTemplateHeader bool
 	Headers           []map[string]string

@@ -312,7 +312,7 @@ func SendRequests(realReqs []libs.Request, sign libs.Signature, originRec libs.R
 		realRec.OriginReq = originRec.Request
 		realRec.OriginRes = originRec.Response
 		realRec.Request = realReq
-		realRec.Request.Target = sign.Target
+		realRec.Request.Target = realReq.Target
 		realRec.Sign = sign
 		realRec.ScanID = options.ScanID
 
@@ -338,6 +338,7 @@ func SendRequests(realReqs []libs.Request, sign libs.Signature, originRec libs.R
 		}
 
 		req := realRec.Request
+
 		// if middleware return something skip sending it
 		var res libs.Response
 		if realRec.Response.StatusCode == 0 && realRec.Request.Method != "" && realRec.Request.MiddlewareOutput == "" && req.Res == "" {
@@ -416,7 +417,7 @@ func parallelSending(realReq libs.Request, sign libs.Signature, originRec libs.R
 	realRec.OriginReq = originRec.Request
 	realRec.OriginRes = originRec.Response
 	realRec.Request = realReq
-	realRec.Request.Target = sign.Target
+	realRec.Request.Target = realReq.Target
 	realRec.Sign = sign
 	realRec.ScanID = options.ScanID
 

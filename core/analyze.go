@@ -63,7 +63,7 @@ func Analyze(options libs.Options, record *libs.Record) {
 			}
 			vulnInfo := fmt.Sprintf("[%v][%v] %v", record.Sign.ID, record.Sign.Info.Risk, record.Request.URL)
 			if options.Quiet {
-				lTarget := record.Request.Target
+				lTarget := make(map[string]string)
 				lTarget["VulnURL"] = record.Request.URL
 				lTarget["Payload"] = record.Request.Payload
 				lTarget["payload"] = record.Request.Payload

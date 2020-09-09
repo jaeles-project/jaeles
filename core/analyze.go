@@ -31,14 +31,17 @@ func Analyze(options libs.Options, record *libs.Record) {
 		if record.IsVulnerable && record.Sign.Donce {
 			return
 		}
-		extra, result := RunDetector(*record, analyze)
+		var extra string
+		var result bool
+		if !options.AlwaysTrue {
+			extra, result = RunDetector(*record, analyze)
+		} else {
+			result = true
+		}
 		if extra != "" {
 			record.ExtraOutput = extra
 		}
-		//if options.AlwaysTrue {
-		//	result = true
-		//}
-		if result == true || options.AlwaysTrue {
+		if result == true {
 			record.DetectString = analyze
 			if options.Verbose {
 				color.Magenta("[Found] %v", analyze)
@@ -60,13 +63,15 @@ func Analyze(options libs.Options, record *libs.Record) {
 			}
 			vulnInfo := fmt.Sprintf("[%v][%v] %v", record.Sign.ID, record.Sign.Info.Risk, record.Request.URL)
 			if options.Quiet {
-				record.Request.Target["VulnURL"] = record.Request.URL
-				record.Request.Target["Payload"] = record.Request.Payload
-				record.Request.Target["Status"] = fmt.Sprintf("%v", record.Response.StatusCode)
-				record.Request.Target["Length"] = fmt.Sprintf("%v", record.Response.Length)
-				record.Request.Target["Words"] = fmt.Sprintf("%v", int64(len(strings.Split(record.Response.Beautify, " "))))
-				record.Request.Target["Time"] = fmt.Sprintf("%v", record.Response.ResponseTime)
-				fmt.Printf("%v\n", ResolveVariable(options.QuietFormat, record.Request.Target))
+				lTarget := record.Request.Target
+				lTarget["VulnURL"] = record.Request.URL
+				lTarget["Payload"] = record.Request.Payload
+				lTarget["payload"] = record.Request.Payload
+				lTarget["Status"] = fmt.Sprintf("%v", record.Response.StatusCode)
+				lTarget["Length"] = fmt.Sprintf("%v", record.Response.Length)
+				lTarget["Words"] = fmt.Sprintf("%v", int64(len(strings.Split(record.Response.Beautify, " "))))
+				lTarget["Time"] = fmt.Sprintf("%v", record.Response.ResponseTime)
+				fmt.Printf("%v\n", ResolveVariable(options.QuietFormat, lTarget))
 			} else {
 				// use this libs because we still want to see color when use chunked mode
 				au := aurora.NewAurora(true)

@@ -6,7 +6,7 @@ const (
 	// AUTHOR author of this
 	AUTHOR = "@j3ssiejjj"
 	// DOCS link to official documentation
-	DOCS = "http://jaeles-project.github.io/"
+	DOCS = "https://jaeles-project.github.io/"
 	// SIGNREPO default repo to get signature
 	SIGNREPO = "https://github.com/jaeles-project/jaeles-signatures"
 	// UIREPO default repo to get UI

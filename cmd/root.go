@@ -128,6 +128,7 @@ func initConfig() {
 		_, err = database.InitDB(utils.NormalizePath(options.Server.DBPath))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Can't connect to DB at %v\n", options.Server.DBPath)
+			fmt.Fprintf(os.Stderr, "Use '--no-db' for to disable DB connection if you want.\n")
 			os.Exit(-1)
 		}
 	}

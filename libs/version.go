@@ -2,9 +2,11 @@ package libs
 
 const (
 	// VERSION current Jaeles version
-	VERSION = "beta v0.12.4"
+	VERSION = "beta v0.13"
 	// AUTHOR author of this
 	AUTHOR = "@j3ssiejjj"
+	// DOCS link to official documentation
+	DOCS = "http://jaeles-project.github.io/"
 	// SIGNREPO default repo to get signature
 	SIGNREPO = "https://github.com/jaeles-project/jaeles-signatures"
 	// UIREPO default repo to get UI

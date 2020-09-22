@@ -33,12 +33,12 @@ func UpdatePlugins(options libs.Options) {
 }
 
 // UpdateSignature update latest UI from UI repo
-func UpdateSignature(options libs.Options, customRepo string) {
+func UpdateSignature(options libs.Options) {
 	signPath := path.Join(options.RootFolder, "base-signatures")
-
 	url := libs.SIGNREPO
-	if customRepo != "" {
-		url = customRepo
+	// in case we want to in private repo
+	if options.Config.Repo != "" {
+		url = options.Config.Repo
 	}
 
 	utils.GoodF("Cloning Signature from: %v", url)
@@ -49,16 +49,16 @@ func UpdateSignature(options libs.Options, customRepo string) {
 		os.RemoveAll(options.ResourcesFolder)
 		os.RemoveAll(options.ThirdPartyFolder)
 	}
-	if options.Server.Key != "" {
-		cmd := fmt.Sprintf("GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i %v' git clone --depth=1 %v %v", options.Server.Key, url, signPath)
+	if options.Config.PrivateKey != "" {
+		cmd := fmt.Sprintf("GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no -i %v' git clone --depth=1 %v %v", options.Config.PrivateKey, url, signPath)
 		Execution(cmd)
 	} else {
 		var err error
 		if options.Server.Username != "" && options.Server.Password != "" {
 			_, err = git.PlainClone(signPath, false, &git.CloneOptions{
 				Auth: &http.BasicAuth{
-					Username: options.Server.Username,
-					Password: options.Server.Password,
+					Username: options.Config.Username,
+					Password: options.Config.Password,
 				},
 				URL:               url,
 				RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,

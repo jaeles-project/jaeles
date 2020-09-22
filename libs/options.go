@@ -52,12 +52,13 @@ type Options struct {
 	AlwaysTrue        bool
 	BaseRoot          bool
 	BurpProxy         bool
-	Server            Server
-	Report            Report
 	ChunkDir          string
 	ChunkRun          bool
 	ChunkSize         int
 	ChunkLimit        int
+	Server            Server
+	Report            Report
+	Config            Config
 }
 
 // Report options for api server
@@ -82,6 +83,16 @@ type Server struct {
 	Username     string
 	Password     string
 	Key          string
+}
+
+// Config options for api server
+type Config struct {
+	Forced     bool
+	SkipMics   bool
+	Username   string
+	Password   string
+	Repo       string
+	PrivateKey string
 }
 
 // Job define job for running routine

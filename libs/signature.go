@@ -13,6 +13,7 @@ type Signature struct {
 	Donce bool
 	Info  struct {
 		Name       string
+		Author     string
 		Risk       string
 		Confidence string
 		Category   string

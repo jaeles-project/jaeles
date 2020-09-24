@@ -84,6 +84,8 @@ func runConfig(cmd *cobra.Command, args []string) error {
 				}
 			}
 		}
+		core.UpdatePlugins(options)
+		core.UpdateSignature(options)
 		reloadSignature(options.SignFolder, options.Config.SkipMics)
 		break
 	case "update":
@@ -100,7 +102,6 @@ func runConfig(cmd *cobra.Command, args []string) error {
 				}
 			}
 		}
-
 		core.UpdatePlugins(options)
 		core.UpdateSignature(options)
 		reloadSignature(path.Join(options.RootFolder, "base-signatures"), options.Config.SkipMics)

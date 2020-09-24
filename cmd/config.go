@@ -72,36 +72,28 @@ func runConfig(cmd *cobra.Command, args []string) error {
 
 	switch action {
 	case "init":
-		if utils.FolderExists(options.RootFolder) {
-			if options.Config.Forced {
-				os.RemoveAll(options.RootFolder)
-			} else {
-				mess := fmt.Sprintf("Looks like you already have signatures in %s\nDo you want to to override it?", options.RootFolder)
-				c := utils.PromptConfirm(mess)
-				if c {
-					utils.InforF("Cleaning root folder")
-					os.RemoveAll(options.RootFolder)
-				}
-			}
+		if options.Config.Forced {
+			os.RemoveAll(options.SignFolder)
+			core.UpdatePlugins(options)
+			core.UpdateSignature(options)
 		}
-		core.UpdatePlugins(options)
-		core.UpdateSignature(options)
 		reloadSignature(options.SignFolder, options.Config.SkipMics)
 		break
 	case "update":
 		if options.Config.Forced {
-			os.RemoveAll(options.RootFolder)
+			os.RemoveAll(options.SignFolder)
 		} else {
 			// only ask if use default Repo
-			if utils.FolderExists(options.RootFolder) && options.Config.Repo == "" {
+			if utils.FolderExists(options.SignFolder) && options.Config.Repo == "" {
 				mess := fmt.Sprintf("Looks like you already have signatures in %s\nDo you want to to override it?", options.RootFolder)
 				c := utils.PromptConfirm(mess)
 				if c {
 					utils.InforF("Cleaning root folder")
-					os.RemoveAll(options.RootFolder)
+					os.RemoveAll(options.SignFolder)
 				}
 			}
 		}
+		database.CleanSigns()
 		core.UpdatePlugins(options)
 		core.UpdateSignature(options)
 		reloadSignature(path.Join(options.RootFolder, "base-signatures"), options.Config.SkipMics)
@@ -113,6 +105,7 @@ func runConfig(cmd *cobra.Command, args []string) error {
 		database.CleanRecords()
 		break
 	case "clean":
+		utils.InforF("Cleaning root folder: %v", options.RootFolder)
 		os.RemoveAll(options.RootFolder)
 		break
 	case "cred":
@@ -129,10 +122,20 @@ func runConfig(cmd *cobra.Command, args []string) error {
 		break
 	case "reload":
 		os.RemoveAll(path.Join(options.RootFolder, "base-signatures"))
+		InitDB()
 		reloadSignature(options.SignFolder, options.Config.SkipMics)
 		break
 	case "add":
 		addSignature(options.SignFolder)
+		break
+	case "select":
+		SelectSign()
+		if len(options.SelectedSigns) == 0 {
+			fmt.Fprintf(os.Stderr, "[Error] No signature loaded\n")
+			fmt.Fprintf(os.Stderr, "Use 'jaeles -h' for more information about a command.\n")
+		} else {
+			utils.GoodF("Signatures Loaded: %v", strings.Join(options.SelectedSigns, " "))
+		}
 		break
 	default:
 		HelpMessage()
@@ -171,7 +174,7 @@ func reloadSignature(signFolder string, skipMics bool) {
 		SignFolder = signFolder
 	}
 	allSigns := utils.GetFileNames(SignFolder, ".yaml")
-	if allSigns != nil {
+	if len(allSigns) > 0 {
 		utils.InforF("Load Signature from: %v", SignFolder)
 		for _, signFile := range allSigns {
 			if skipMics {
@@ -185,7 +188,11 @@ func reloadSignature(signFolder string, skipMics bool) {
 					continue
 				}
 			}
-			database.ImportSign(signFile)
+			utils.DebugF("Importing signature: %v", signFile)
+			err := database.ImportSign(signFile)
+			if err != nil {
+				utils.ErrorF("Error importing signature: %v", signFile)
+			}
 		}
 	}
 

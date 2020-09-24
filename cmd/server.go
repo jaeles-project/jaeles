@@ -137,8 +137,7 @@ func runServer(cmd *cobra.Command, _ []string) error {
 	options.Server.NoAuth, _ = cmd.Flags().GetBool("no-auth")
 	bind := fmt.Sprintf("%v:%v", host, port)
 	options.Server.Bind = bind
-	utils.InforF("Start API server at %v", fmt.Sprintf("http://%v/#/", bind))
-
+	utils.GoodF("Start API server at %v", fmt.Sprintf("http://%v/", bind))
 	server.InitRouter(options, result)
 	wg.Wait()
 	if utils.DirLength(options.Output) == 0 {

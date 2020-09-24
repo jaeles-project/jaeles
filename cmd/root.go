@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -121,8 +122,10 @@ func initConfig() {
 
 	utils.InitLog(&options)
 	core.InitConfig(&options)
+	InitDB()
+}
 
-	// Init DB
+func InitDB() {
 	var err error
 	if !options.NoDB {
 		_, err = database.InitDB(utils.NormalizePath(options.Server.DBPath))
@@ -177,7 +180,7 @@ func SelectSign() {
 
 	if len(selectedSigns) == 0 {
 		fmt.Fprintf(os.Stderr, "[Error] No signature loaded\n")
-		fmt.Fprintf(os.Stderr, "Use 'jaeles -h' for more information about a command.\n")
+		fmt.Fprintf(os.Stderr, "Try '%s' to init default signatures\n", color.GreenString("jaeles config init"))
 		os.Exit(1)
 	}
 	selectedSigns = funk.UniqString(selectedSigns)

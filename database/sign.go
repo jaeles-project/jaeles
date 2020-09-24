@@ -56,10 +56,10 @@ func SelectSign(signName string) []string {
 }
 
 // ImportSign import signature to DB
-func ImportSign(signPath string) {
+func ImportSign(signPath string) error {
 	sign, err := ParseSignature(signPath)
 	if err != nil {
-		return
+		return fmt.Errorf("error parse sign: %v", err)
 	}
 
 	if sign.Info.Category == "" {
@@ -84,6 +84,7 @@ func ImportSign(signPath string) {
 		Type:     sign.Type,
 	}
 	DB.Create(&signObj)
+	return nil
 }
 
 // ParseSign parsing YAML signature file

@@ -2,13 +2,12 @@ package core
 
 import (
 	"fmt"
-	"os"
-	"path"
-
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	"os"
+	"path"
 )
 
 // UpdatePlugins update latest UI and Plugins from default repo

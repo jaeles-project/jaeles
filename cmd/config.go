@@ -131,6 +131,7 @@ func runConfig(cmd *cobra.Command, args []string) error {
 	default:
 		HelpMessage()
 	}
+	CleanOutput()
 	return nil
 }
 

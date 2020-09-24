@@ -87,15 +87,20 @@ func runConfig(cmd *cobra.Command, args []string) error {
 		reloadSignature(options.SignFolder, options.Config.SkipMics)
 		break
 	case "update":
-		// only ask if use default Repo
-		if utils.FolderExists(options.RootFolder) && options.Config.Repo == "" {
-			mess := fmt.Sprintf("Looks like you already have signatures in %s\nDo you want to to override it?", options.RootFolder)
-			c := utils.PromptConfirm(mess)
-			if c {
-				utils.InforF("Cleaning root folder")
-				os.RemoveAll(options.RootFolder)
+		if options.Config.Forced {
+			os.RemoveAll(options.RootFolder)
+		} else {
+			// only ask if use default Repo
+			if utils.FolderExists(options.RootFolder) && options.Config.Repo == "" {
+				mess := fmt.Sprintf("Looks like you already have signatures in %s\nDo you want to to override it?", options.RootFolder)
+				c := utils.PromptConfirm(mess)
+				if c {
+					utils.InforF("Cleaning root folder")
+					os.RemoveAll(options.RootFolder)
+				}
 			}
 		}
+
 		core.UpdatePlugins(options)
 		core.UpdateSignature(options)
 		reloadSignature(path.Join(options.RootFolder, "base-signatures"), options.Config.SkipMics)
@@ -331,7 +336,6 @@ func ScanHelp(cmd *cobra.Command, _ []string) {
 	fmt.Println(libs.Banner())
 	fmt.Println(cmd.UsageString())
 	ScanMessage()
-	fmt.Printf("Official Documentation can be found here: %s\n", color.GreenString(libs.DOCS))
 }
 
 // ScanMessage print help message

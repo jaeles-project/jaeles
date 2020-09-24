@@ -1,12 +1,9 @@
-FROM ubuntu
+FROM golang:1.14.4-buster as builder
+RUN GO111MODULE=on GOOS=linux go get -v -ldflags "-linkmode external -extldflags -static" github.com/jaeles-project/jaeles
 
-RUN apt-get update -y; apt-get install golang git -y; go get -u github.com/jaeles-project/jaeles; /root/go/bin/jaeles config -a init
-
-WORKDIR /root/go/bin/
-
-VOLUME /root/go/bin/out
-VOLUME /root/.jaeles/ 
-
+FROM alpine:latest
+WORKDIR /
+COPY --from=builder /go/bin/jaeles /bin/jaeles
+RUN jaeles config init
 EXPOSE 5000
-
-CMD [ "/root/go/bin/jaeles", "server", "--host", "0.0.0.0" ]
+ENTRYPOINT ["/bin/jaeles"]

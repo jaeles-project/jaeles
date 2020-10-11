@@ -272,14 +272,17 @@ Mics Flags:
   -N  --no-output bool          Disable store output
       --json bool               Store output as JSON format
       --chunk bool              Enable chunk running against big input
+  -I, --inline string           Inline Detections
   -q, --quiet                   Enable Quiet Output
   -Q, --quietFormat string      Format for quiet output (default "{{.VulnURL}}")
   -R, --report string           HTML report file name
       --title string            HTML report title
       --html string             Enable generate HTML reports after the scan done 
       --hh string               Full help message
+      --re                      Shortcut for disable replicate request (avoid sending many request to timeout)
+      --at                      Enable Always True Detection for observe response
       --lc                      Shortcut for '--proxy http://127.0.0.1:8080'
-      --ba                      Shortcut for -p 'BaseURL=[[.Raw]]' or -p 'root=[[.Raw]]'
+      --ba                      Shortcut for take raw input as '{{.BaseURL}}'
 `
 	h += "\n\nExamples Commands:\n"
 	h += "  jaeles scan -s <signature> -u <url>\n"

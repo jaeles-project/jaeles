@@ -52,23 +52,16 @@ func runServer(cmd *cobra.Command, _ []string) error {
 
 	var wg sync.WaitGroup
 	p, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
-		startSingleJob(i)
+		CreateRunner(i)
 		wg.Done()
 	}, ants.WithPreAlloc(true))
 	defer p.Release()
-	// pool for parallel job
-	pp, _ := ants.NewPoolWithFunc(options.Concurrency, func(i interface{}) {
-		parallelJob(i)
-		wg.Done()
-	}, ants.WithPreAlloc(true))
-	defer pp.Release()
 
 	result := make(chan libs.Record)
 	go func() {
 		for {
 			record := <-result
 			utils.InforF("[Receive] %v %v \n", record.OriginReq.Method, record.OriginReq.URL)
-
 			for _, signFile := range options.SelectedSigns {
 				sign, err := core.ParseSign(signFile)
 				if err != nil {
@@ -106,22 +99,6 @@ func runServer(cmd *cobra.Command, _ []string) error {
 					}
 					url = record.OriginReq.URL
 					sign = fuzzSign
-				}
-				// run in parallel
-				if !options.DisableParallel || sign.Parallel {
-					originRec, sign, target := InitJob(url, sign)
-					realReqs := genRequests(sign, target)
-					for _, req := range realReqs {
-						wg.Add(1)
-						// parsing request here
-						job := libs.PJob{
-							Req:  req,
-							ORec: originRec,
-							Sign: sign,
-						}
-						_ = pp.Invoke(job)
-					}
-					continue
 				}
 
 				// single routine

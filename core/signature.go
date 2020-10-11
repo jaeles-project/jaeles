@@ -73,7 +73,7 @@ func SingleSign(signName string) []string {
 	return Signs
 }
 
-// AltResolveRequest resolve all request but look for [[ ]] delimiter
+// AltResolveRequest resolve all request again but look for [[ ]] delimiter
 func AltResolveRequest(req *libs.Request) {
 	target := req.Target
 	if len(req.Values) > 0 {

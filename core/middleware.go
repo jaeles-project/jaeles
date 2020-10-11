@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/thoas/go-funk"
 
@@ -20,53 +19,99 @@ import (
 // @NOTE: Middleware allow execute command on your machine
 // So make sure you read the signature before you run it
 
-// MiddleWare is main function for middleware
-func MiddleWare(rec *libs.Record, options libs.Options) {
-	// func MiddleWare(req *libs.Request) {
+// Conclude is main function for detections
+func (r *Record) MiddleWare() {
+	//record := *r
 	vm := otto.New()
 	var middlewareOutput string
 
 	vm.Set("Host2IP", func(call otto.FunctionCall) otto.Value {
 		var realHeaders []map[string]string
-		for _, head := range rec.Request.Headers {
+		for _, head := range r.Request.Headers {
 			containHost := funk.Contains(head, "Host")
 			if containHost == false {
 				realHeaders = append(realHeaders, head)
 			}
 		}
-		HostHeader := Host2IP(rec.Request.URL)
+		HostHeader := Host2IP(r.Request.URL)
 		if !funk.IsEmpty(HostHeader) {
 			realHeaders = append(realHeaders, HostHeader)
 		}
-		rec.Request.Headers = realHeaders
+		r.Request.Headers = realHeaders
 		return otto.Value{}
 	})
 
 	vm.Set("InvokeCmd", func(call otto.FunctionCall) otto.Value {
 		rawCmd := call.Argument(0).String()
-		result := InvokeCmd(rec, rawCmd)
+		result := InvokeCmd(r, rawCmd)
 		middlewareOutput += result
 		utils.DebugF(result)
 		return otto.Value{}
 	})
 
 	vm.Set("TurboIntruder", func(call otto.FunctionCall) otto.Value {
-		if rec.Request.Raw != "" {
-			result := TurboIntruder(rec)
+		if r.Request.Raw != "" {
+			result := TurboIntruder(r)
 			utils.DebugF(result)
 		}
 		return otto.Value{}
 	})
 
-	for _, middleString := range rec.Request.Middlewares {
-		utils.DebugF(middleString)
-		vm.Run(middleString)
+	for _, middleScript := range r.Request.Middlewares {
+		utils.DebugF("[MiddleWare]: %s", middleScript)
+		vm.Run(middleScript)
 	}
-
-	if middlewareOutput != "" {
-		rec.Request.MiddlewareOutput = middlewareOutput
-	}
+	r.Request.MiddlewareOutput = middlewareOutput
 }
+
+//
+//// MiddleWare is main function for middleware
+//func MiddleWare(rec *libs.Record, options libs.Options) {
+//	// func MiddleWare(req *libs.Request) {
+//	vm := otto.New()
+//	var middlewareOutput string
+//
+//	vm.Set("Host2IP", func(call otto.FunctionCall) otto.Value {
+//		var realHeaders []map[string]string
+//		for _, head := range rec.Request.Headers {
+//			containHost := funk.Contains(head, "Host")
+//			if containHost == false {
+//				realHeaders = append(realHeaders, head)
+//			}
+//		}
+//		HostHeader := Host2IP(rec.Request.URL)
+//		if !funk.IsEmpty(HostHeader) {
+//			realHeaders = append(realHeaders, HostHeader)
+//		}
+//		rec.Request.Headers = realHeaders
+//		return otto.Value{}
+//	})
+//
+//	vm.Set("InvokeCmd", func(call otto.FunctionCall) otto.Value {
+//		rawCmd := call.Argument(0).String()
+//		result := InvokeCmd(rec, rawCmd)
+//		middlewareOutput += result
+//		utils.DebugF(result)
+//		return otto.Value{}
+//	})
+//
+//	vm.Set("TurboIntruder", func(call otto.FunctionCall) otto.Value {
+//		if rec.Request.Raw != "" {
+//			result := TurboIntruder(rec)
+//			utils.DebugF(result)
+//		}
+//		return otto.Value{}
+//	})
+//
+//	for _, middleString := range rec.Request.Middlewares {
+//		utils.DebugF(middleString)
+//		vm.Run(middleString)
+//	}
+//
+//	if middlewareOutput != "" {
+//		rec.Request.MiddlewareOutput = middlewareOutput
+//	}
+//}
 
 // Host2IP replace Host header with IP address
 func Host2IP(rawURL string) map[string]string {
@@ -92,7 +137,7 @@ func Host2IP(rawURL string) map[string]string {
 }
 
 // InvokeCmd execute external command
-func InvokeCmd(rec *libs.Record, rawCmd string) string {
+func InvokeCmd(rec *Record, rawCmd string) string {
 	target := ParseTarget(rec.Request.URL)
 	realCommand := Encoder(rec.Request.Encoding, ResolveVariable(rawCmd, target))
 	utils.DebugF("Execute Command: %v", realCommand)
@@ -107,7 +152,7 @@ func InvokeCmd(rec *libs.Record, rawCmd string) string {
 }
 
 // TurboIntruder execute Turbo Intruder CLI
-func TurboIntruder(rec *libs.Record) string {
+func TurboIntruder(rec *Record) string {
 	req := rec.Request
 	turboPath := ResolveVariable("{{.homePath}}/plugins/turbo-intruder/turbo-intruder-all.jar", req.Target)
 	scriptPath := ResolveVariable("{{.homePath}}/plugins/turbo-intruder/basic.py", req.Target)

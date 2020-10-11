@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/robertkrimen/otto"
 	"os/exec"
@@ -9,19 +8,15 @@ import (
 	"strings"
 )
 
-// RunConclusions set new value for next request
-func RunConclusions(record libs.Record, sign *libs.Signature) {
-	if len(record.Request.Conclusions) == 0 {
-		return
-	}
-	for _, concludeScript := range record.Request.Conclusions {
-		utils.DebugF("[Conclude]: %v", concludeScript)
-		RunConclude(concludeScript, record, sign)
-	}
+// check conditions before sending request
+func (r *Record) Condition() bool {
+	check := r.RequestScripts("condition", r.Request.Conditions)
+	return check
 }
 
-// RunConclude run conclusion script
-func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature) {
+// Conclude is main function for detections
+func (r *Record) Conclude() {
+	record := *r
 	vm := otto.New()
 
 	// ExecCmd execute command command
@@ -99,7 +94,7 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 		right := call.Argument(3).String()
 		component := GetComponent(record, componentName)
 		value := Between(component, left, right)
-		sign.Target[valueName] = value
+		r.Request.Target[valueName] = value
 		utils.DebugF("StringSelect: %v --> %v", valueName, value)
 		return otto.Value{}
 	})
@@ -111,7 +106,7 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 		if len(result) > 0 {
 			for k, value := range result {
 				utils.DebugF("New variales: %v -- %v", k, value)
-				sign.Target[k] = value
+				r.Request.Target[k] = value
 			}
 		}
 		return otto.Value{}
@@ -123,11 +118,14 @@ func RunConclude(concludeScript string, record libs.Record, sign *libs.Signature
 		valueName := call.Argument(0).String()
 		value := call.Argument(1).String()
 		utils.DebugF("SetValue: %v -- %v", valueName, value)
-		sign.Target[valueName] = value
+		r.Request.Target[valueName] = value
 		return otto.Value{}
 	})
 
-	vm.Run(concludeScript)
+	for _, concludeScript := range record.Request.Conclusions {
+		utils.DebugF("[Conclude]: %v", concludeScript)
+		vm.Run(concludeScript)
+	}
 }
 
 // Between get string between left and right
@@ -149,7 +147,7 @@ func Between(value string, left string, right string) string {
 }
 
 // RegexSelect get regex string from component
-func RegexSelect(realRec libs.Record, arguments []otto.Value) map[string]string {
+func RegexSelect(realRec Record, arguments []otto.Value) map[string]string {
 	result := make(map[string]string)
 	//  - RegexSelect("component", "var_name", "regex")
 	utils.DebugF("arguments -- %v", arguments)

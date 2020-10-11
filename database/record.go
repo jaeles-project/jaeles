@@ -46,7 +46,4 @@ func ImportRecord(rec libs.Record) {
 	}
 	DB.Create(&recObj)
 
-	// if dbObj := DB.Create(&recObj); dbObj.Error != nil != true {
-	// 	fmt.Printf("[Error] something woringcreate record\n")
-	// }
 }

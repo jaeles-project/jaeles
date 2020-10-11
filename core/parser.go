@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jaeles-project/jaeles/database"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/thoas/go-funk"
 	"gopkg.in/yaml.v2"
@@ -33,6 +32,37 @@ func ParseSign(signFile string) (sign libs.Signature, err error) {
 		sign.Parallel = false
 	}
 	sign.RawPath = signFile
+	if sign.Info.Category == "" {
+		if strings.Contains(sign.ID, "-") {
+			sign.Info.Category = strings.Split(sign.ID, "-")[0]
+		} else {
+			sign.Info.Category = sign.ID
+		}
+	}
+	if sign.Info.Name == "" {
+		sign.Info.Name = sign.ID
+	}
+	if sign.Info.Risk == "" {
+		sign.Info.Risk = "Potential"
+	}
+	if sign.Info.Confidence == "" {
+		sign.Info.Confidence = "Tentative"
+	}
+
+	return sign, err
+}
+
+// ParseSignFromContent parsing YAML signature file
+func ParseSignFromContent(content string) (sign libs.Signature, err error) {
+	err = yaml.Unmarshal([]byte(content), &sign)
+	if err != nil {
+		utils.ErrorF("Error parsing signature: %v", err)
+	}
+	// set some default value
+	sign.Parallel = true
+	if sign.Single {
+		sign.Parallel = false
+	}
 	if sign.Info.Category == "" {
 		if strings.Contains(sign.ID, "-") {
 			sign.Info.Category = strings.Split(sign.ID, "-")[0]
@@ -158,13 +188,18 @@ func ParseInputFormat(raw string) map[string]string {
 
 // MoreVariables get more options to render in sign template
 func MoreVariables(target map[string]string, sign libs.Signature, options libs.Options) map[string]string {
-	realTarget := target
-	ssrf := database.GetDefaultBurpCollab()
-	if ssrf != "" {
-		target["oob"] = ssrf
-	} else {
-		target["oob"] = database.GetCollab()
+	realTarget := make(map[string]string)
+	if len(target) > 0 {
+		realTarget = target
 	}
+
+	// @NOTE: deprecated for now
+	//ssrf := database.GetDefaultBurpCollab()
+	//if ssrf != "" {
+	//	target["oob"] = ssrf
+	//} else {
+	//	target["oob"] = database.GetCollab()
+	//}
 
 	// more options
 	realTarget["Root"] = options.RootFolder

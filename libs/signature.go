@@ -2,16 +2,29 @@ package libs
 
 // Signature base signature struct
 type Signature struct {
-	ID       string
-	RawPath  string
-	Type     string
-	Level    int
-	Passive  bool
-	Parallel bool
-	Single   bool
+	ID      string
+	RawPath string
+	Type    string
+	Level   int
+	// some mics options
+	Threads    int
+	Passive    bool
+	Parallel   bool
+	Single     bool
+	Serial     bool
+	CleanSlash bool
 	// Detect once
-	Donce bool
-	Info  struct {
+	Noutput      bool
+	Donce        bool
+	StopOnSucces bool
+
+	// Default variables for gen more inputs
+	Replicate struct {
+		Ports    string
+		Prefixes string
+	}
+
+	Info struct {
 		Name       string
 		Author     string
 		Risk       string

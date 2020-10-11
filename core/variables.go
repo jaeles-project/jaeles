@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/jinzhu/copier"
 	"github.com/thoas/go-funk"
 	"math/rand"
 	"net/url"
@@ -262,6 +263,11 @@ func RunVariables(variableString string) []string {
 		return otto.Value{}
 	})
 
+	vm.Set("Bytes", func(call otto.FunctionCall) otto.Value {
+		extra = append(extra, Bytes()...)
+		return otto.Value{}
+	})
+
 	vm.Set("URLEncode", func(call otto.FunctionCall) otto.Value {
 		data := call.Argument(0).String()
 		extra = append(extra, URLEncode(data))
@@ -299,6 +305,19 @@ func RunVariables(variableString string) []string {
 	utils.DebugF("variableString: %v", variableString)
 	vm.Run(variableString)
 	return extra
+}
+
+// Bytes return a random string with length
+func Bytes() []string {
+	var bytes []string
+	letter := "0123456789abcdef"
+	for i := range letter {
+		for j := range letter {
+			singByte := fmt.Sprintf("%%%s%s", string(letter[j]), string(letter[i]))
+			bytes = append(bytes, singByte)
+		}
+	}
+	return bytes
 }
 
 // RandomString return a random string with length
@@ -356,4 +375,148 @@ func Base64Encode(raw string) string {
 // URLEncode just URL Encode
 func URLEncode(raw string) string {
 	return url.QueryEscape(raw)
+}
+
+// GenPorts gen list of ports based on input
+func GenPorts(raw string) []string {
+	var ports []string
+	if strings.Contains(raw, ",") {
+		items := strings.Split(raw, ",")
+		for _, item := range items {
+			if strings.Contains(item, "-") {
+				min, err := strconv.Atoi(strings.Split(item, "-")[0])
+				if err != nil {
+					continue
+				}
+				max, err := strconv.Atoi(strings.Split(item, "-")[1])
+				if err != nil {
+					continue
+				}
+				for i := min; i <= max; i++ {
+					ports = append(ports, fmt.Sprintf("%v", i))
+				}
+			} else {
+				ports = append(ports, item)
+			}
+		}
+	} else {
+		if strings.Contains(raw, "-") {
+			min, err := strconv.Atoi(strings.Split(raw, "-")[0])
+			if err != nil {
+				return ports
+			}
+			max, err := strconv.Atoi(strings.Split(raw, "-")[1])
+			if err != nil {
+				return ports
+			}
+			for i := min; i <= max; i++ {
+				ports = append(ports, fmt.Sprintf("%v", i))
+			}
+		} else {
+			ports = append(ports, raw)
+		}
+	}
+
+	return ports
+}
+
+// ReplicationJob replication more jobs based on the signature
+func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
+	var jobs []libs.Job
+
+	u, err := url.Parse(input)
+	// something wrong so parsing it again
+	if err != nil || u.Scheme == "" || strings.Contains(u.Scheme, ".") {
+		input = fmt.Sprintf("https://%v", input)
+		u, err = url.Parse(input)
+		if err != nil {
+			return jobs, fmt.Errorf("error parsing input: %s", input)
+		}
+	}
+
+	var urls, ports, prefiixes []string
+	if sign.Replicate.Ports != "" {
+		ports = GenPorts(sign.Replicate.Ports)
+	}
+
+	if strings.TrimSpace(sign.Replicate.Prefixes) != "" {
+		value := sign.Replicate.Prefixes
+		// variable as a script
+		if strings.Contains(value, "(") && strings.Contains(value, ")") {
+			if strings.Contains(value, "{{.") && strings.Contains(value, "}}") {
+				value = ResolveVariable(value, sign.Target)
+			}
+			prefiixes = append(prefiixes, RunVariables(value)...)
+		}
+		/*
+			- variable: foo,bar
+		*/
+		// variable as a list
+		if strings.Contains(value, ",") {
+			prefiixes = append(prefiixes, strings.Split(strings.TrimSpace(value), ",")...)
+		}
+		/*
+			- variable: |
+				google.com
+				example.com
+		*/
+		if strings.Contains(value, "\n") {
+			value = strings.Trim(value, "\n\n")
+			prefiixes = append(prefiixes, strings.Split(value, "\n")...)
+
+		}
+	}
+
+	if len(ports) > 0 {
+		for _, port := range ports {
+			cloneURL := url.URL{}
+			err = copier.Copy(&cloneURL, u)
+			if err != nil {
+				continue
+			}
+			oPort := cloneURL.Port()
+			nPort := fmt.Sprintf(":%s", port)
+			if oPort == "" {
+				cloneURL.Host += nPort
+			} else {
+				cloneURL.Host = strings.Replace(cloneURL.Host, fmt.Sprintf(":%s", oPort), nPort, -1)
+			}
+
+			urlWithPort := cloneURL.String()
+			urls = append(urls, urlWithPort)
+		}
+	}
+
+	if len(prefiixes) > 0 {
+		if len(urls) == 0 {
+			urls = append(urls, input)
+		}
+
+		for _, urlRaw := range urls {
+			u, err := url.Parse(urlRaw)
+			if err != nil {
+				continue
+			}
+			for _, prefix := range prefiixes {
+				cloneURL := url.URL{}
+				err = copier.Copy(&cloneURL, u)
+				if err != nil {
+					continue
+				}
+
+				cloneURL.Path = cloneURL.Path + strings.TrimSpace(prefix)
+				urlWithPostfix := cloneURL.String()
+				urls = append(urls, urlWithPostfix)
+			}
+		}
+	}
+
+	for _, urlRaw := range urls {
+		job := libs.Job{
+			URL:  urlRaw,
+			Sign: sign,
+		}
+		jobs = append(jobs, job)
+	}
+	return jobs, nil
 }

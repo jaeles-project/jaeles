@@ -479,6 +479,10 @@ func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
 			if oPort == "" {
 				cloneURL.Host += nPort
 			} else {
+				// avoid duplicate port here
+				if strings.Contains(cloneURL.Host, nPort) {
+					continue
+				}
 				cloneURL.Host = strings.Replace(cloneURL.Host, fmt.Sprintf(":%s", oPort), nPort, -1)
 			}
 

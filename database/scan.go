@@ -19,6 +19,9 @@ func CleanScans() {
 
 // NewScan select signature to gen request
 func NewScan(options libs.Options, mode string, signs []string) string {
+	if options.NoDB {
+		return "0"
+	}
 	id, _ := uuid.NewUUID()
 	rawScanID, _ := id.MarshalText()
 

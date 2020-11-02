@@ -38,6 +38,12 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		timeout = req.Timeout
 	}
 
+
+	disableCompress := false
+	if len(headers) > 0 && strings.Contains(headers["Accept-Encoding"], "gzip") {
+		disableCompress = true
+	}
+
 	// update it again
 	var newHeader []map[string]string
 	for k, v := range headers {
@@ -62,6 +68,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	}
 
 	if proxy != "" {
+		// some times burp reject default cipher
 		tlsCfg = &tls.Config{
 			CipherSuites: []uint16{
 				tls.TLS_RSA_WITH_RC4_128_SHA,
@@ -81,7 +88,8 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		ExpectContinueTimeout: time.Duration(timeout) * time.Second,
 		ResponseHeaderTimeout: time.Duration(timeout) * time.Second,
 		TLSHandshakeTimeout:   time.Duration(timeout) * time.Second,
-		DisableCompression:    true,
+		DisableCompression:    disableCompress,
+		DisableKeepAlives:     true,
 		TLSClientConfig:       tlsCfg,
 	})
 
@@ -165,7 +173,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			Get(url)
 		break
 	case "post":
-		resp, err = client.R().
+		resp, err = client.R().EnableTrace().
 			SetBody([]byte(body)).
 			Post(url)
 		break
@@ -203,6 +211,9 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 
 	if err != nil || resp == nil {
 		utils.ErrorF("%v %v", url, err)
+		if string(resp.Body()) != "" {
+			return ParseResponse(*resp), err
+		}
 		return libs.Response{}, err
 	}
 

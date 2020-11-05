@@ -209,10 +209,10 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		return res, nil
 	}
 
-	if err != nil || resp == nil {
+	if err != nil {
 		utils.ErrorF("%v %v", url, err)
-		if string(resp.Body()) != "" {
-			return ParseResponse(*resp), err
+		if strings.Contains(err.Error(), "EOF") && resp.StatusCode() != 0 {
+			return ParseResponse(*resp), nil
 		}
 		return libs.Response{}, err
 	}

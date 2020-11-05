@@ -22,6 +22,10 @@ func (r *Record) Analyze() {
 	}
 
 	r.Detector()
+	if r.Opt.Mics.AlwaysTrue {
+		r.IsVulnerable = true
+		r.Output()
+	}
 
 	// set new values for next request here
 	if len(r.Request.Conclusions) > 0 {

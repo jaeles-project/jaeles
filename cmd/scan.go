@@ -149,6 +149,9 @@ func CreateRunner(j interface{}) {
 	jobs := []libs.Job{job}
 
 	if (job.Sign.Replicate.Ports != "" || job.Sign.Replicate.Prefixes != "") && !options.Mics.DisableReplicate {
+		if options.Mics.BaseRoot {
+			job.Sign.BasePath = true
+		}
 		moreJobs, err := core.ReplicationJob(job.URL, job.Sign)
 		if err == nil {
 			jobs = append(jobs, moreJobs...)

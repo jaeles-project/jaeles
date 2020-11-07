@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/url"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -501,16 +502,21 @@ func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
 			if err != nil {
 				continue
 			}
+
 			for _, prefix := range prefiixes {
+				prefix = strings.TrimSpace(prefix)
 				cloneURL := url.URL{}
 				err = copier.Copy(&cloneURL, u)
 				if err != nil {
 					continue
 				}
 
-				cloneURL.Path = cloneURL.Path + strings.TrimSpace(prefix)
-				urlWithPostfix := cloneURL.String()
-				urls = append(urls, urlWithPostfix)
+				cloneURL.Path = path.Join(cloneURL.Path, prefix)
+				urlWithPrefix := cloneURL.String()
+				if !sign.BasePath {
+					urlWithPrefix = fmt.Sprintf("%s://%s/%s", cloneURL.Scheme, cloneURL.Host, prefix)
+				}
+				urls = append(urls, urlWithPrefix)
 			}
 		}
 	}

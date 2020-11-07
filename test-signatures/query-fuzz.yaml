@@ -1,0 +1,21 @@
+id: common-error-01
+type: fuzz
+info:
+  name: Common case to trigger the error
+  risk: Info
+
+variables:
+  - prefix: |
+      %20
+      %09
+
+
+payloads:
+  - "{{.prefix}}"
+
+requests:
+  - generators:
+      - Query("[[.original]]{{.payload}}", "*")
+    detections:
+      - >-
+        StatusCode() < 300 && StatusCode() >= 500 && StatusCode() != OriginStatusCode() && !StringSearch("response", "Not found") && !StringSearch("response", "Request Rejected") && CommonError()

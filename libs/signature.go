@@ -12,6 +12,7 @@ type Signature struct {
 	Parallel   bool
 	Single     bool
 	Serial     bool
+	BasePath   bool
 	CleanSlash bool
 	// Detect once
 	Noutput      bool

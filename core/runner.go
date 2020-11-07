@@ -90,7 +90,7 @@ func (r *Runner) PrepareTarget() {
 		Target = ParseTarget(r.Input)
 	}
 
-	if r.Opt.Mics.BaseRoot {
+	if r.Opt.Mics.BaseRoot || r.Sign.Replicate.Prefixes != "" {
 		Target["BaseURL"] = Target["Raw"]
 	}
 

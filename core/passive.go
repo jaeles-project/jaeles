@@ -16,23 +16,21 @@ import (
 func (r *Record) Passives() {
 	passiveScripts := r.GetPassivesRules()
 	if len(passiveScripts) == 0 {
-		utils.ErrorF("No passive rule selected")
+		return
 	}
-
 	r.RequestScripts("passives", passiveScripts)
 }
 
 // GetPassivesRule do passive analyzer based on default passive signature
 func (r *Record) GetPassivesRules() []string {
 	var passiveScripts []string
-	if !utils.FolderExists(r.Opt.PassiveFolder) {
-		return passiveScripts
-	}
 	passives := GetPassives(r.Opt)
 	if len(passives) <= 0 {
+		utils.ErrorF("No passive rule selected")
 		return passiveScripts
 	}
 
+	r.PassiveRules = make(map[string]libs.Rule)
 	for _, passive := range passives {
 		// filter by level
 		if passive.Level > r.Opt.Level {
@@ -58,7 +56,10 @@ func (r *Record) GetPassivesRules() []string {
 			}
 
 			passiveScripts = append(passiveScripts, rule.Detections...)
+			//spew.Dump(passiveScripts)
 			for _, passiveScript := range rule.Detections {
+				//spew.Dump(rule)
+				//spew.Dump(passiveScript)
 				r.PassiveRules[passiveScript] = rule
 			}
 		}
@@ -89,6 +90,12 @@ func (r *Record) PassiveOutput() string {
 func GetPassives(options libs.Options) []libs.Passive {
 	var passives []libs.Passive
 	passives = append(passives, defaultPassive())
+
+	utils.DebugF("Reading passive from: %s", utils.NormalizePath(options.PassiveFolder))
+	if !utils.FolderExists(options.PassiveFolder) {
+		utils.ErrorF("Error create found signatures: %s", options.PassiveFolder)
+		return passives
+	}
 	passiveFiles := utils.GetFileNames(utils.NormalizePath(options.PassiveFolder), "yaml")
 	for _, passiveFile := range passiveFiles {
 		passive, err := ParsePassive(passiveFile)

@@ -51,7 +51,6 @@ type Options struct {
 	EnablePassive     bool
 	DisableParallel   bool
 
-
 	// Chunk Options
 	ChunkDir     string
 	ChunkRun     bool
@@ -74,11 +73,11 @@ type Scan struct {
 
 // Mics some shortcut options
 type Mics struct {
-	FullHelp bool
-	AlwaysTrue bool
-	BaseRoot   bool
-	BurpProxy  bool
-	DisableReplicate  bool
+	FullHelp         bool
+	AlwaysTrue       bool
+	BaseRoot         bool
+	BurpProxy        bool
+	DisableReplicate bool
 }
 
 // Report options for api server

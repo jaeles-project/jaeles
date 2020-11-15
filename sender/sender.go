@@ -38,7 +38,6 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		timeout = req.Timeout
 	}
 
-
 	disableCompress := false
 	if len(headers) > 0 && strings.Contains(headers["Accept-Encoding"], "gzip") {
 		disableCompress = true

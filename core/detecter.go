@@ -39,6 +39,15 @@ func (r *Record) RequestScripts(scriptType string, scripts []string) bool {
 		return result
 	})
 
+	// Component get component content
+	vm.Set("Component", func(call otto.FunctionCall) otto.Value {
+		componentName := call.Argument(0).String()
+		content := GetComponent(record, componentName)
+		fmt.Println(content)
+		result, _ := vm.ToValue(true)
+		return result
+	})
+
 	vm.Set("PrintVarf", func(call otto.FunctionCall) otto.Value {
 		varName := call.Argument(0).String()
 		fmt.Println(record.Request.Target[varName])
@@ -512,8 +521,19 @@ func GetComponent(record Record, component string) string {
 	utils.DebugF("Get Component: %v", component)
 	switch component {
 	case "orequest":
+
 		return record.OriginReq.Beautify
-	case "oresponse":
+	case "oresheaders", "oheaders", "ohead", "oresheader":
+		beautifyHeader := fmt.Sprintf("%v \n", record.OriginRes.Status)
+		for _, header := range record.OriginRes.Headers {
+			for key, value := range header {
+				beautifyHeader += fmt.Sprintf("%v: %v\n", key, value)
+			}
+		}
+		return beautifyHeader
+	case "obody", "oresbody":
+		return record.OriginRes.Body
+	case "oresponse", "ores":
 		return record.OriginRes.Beautify
 	case "request":
 		return record.Request.Beautify
@@ -572,6 +592,7 @@ func RegexSearch(component string, analyzeString string) (string, bool) {
 		result = true
 		extra = strings.Join(matches, "\n")
 	}
+	utils.DebugF("Component: %v", component)
 	utils.DebugF("analyzeRegex: %v -- %v", analyzeString, result)
 	return extra, result
 }

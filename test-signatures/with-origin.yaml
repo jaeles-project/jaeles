@@ -1,0 +1,34 @@
+id: sensitive-dotfile-01
+donce: true
+info:
+  name: Common Dot Secret Files (Without Extension)
+  risk: Potential
+  confidence: Tentative
+
+params:
+  - root: "{{.BaseURL}}"
+
+origin:
+  method: GET
+  redirect: false
+  headers:
+    - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55
+  url: >-
+    {{.BaseURL}}/.hopefullyget404
+
+variables:
+  - secret: |
+      .7z
+      .DS_Store
+requests:
+  - method: GET
+    redirect: false
+    headers:
+      - User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3984.0 Safari/537.36
+    url: >-
+      {{.root}}/{{.secret}}
+    detections:
+      # - >-
+        # StatusCode() == 200 && !RegexSearch("response", "(?i)(Oops!|Whoops!|AutodiscoverService|not\sfound|Request\sRejected|Access\sDenied|a\sbad\sURL|has\sbeen\slocked)") && (RegexSearch("resHeaders", ".*Content-Type:.*octet-stream") || RegexSearch("resHeaders", "text/plain")) && (Math.abs(ContentLength() - OriginContentLength()) > 100) && !RegexSearch("body", "(?i)(\<\!doctype|\<html|\<head|\<body)") && ContentLength('body') > 100 && !RegexSearch("oHeaders", "(?m)text/plain")
+      - >-
+        Component('obody') && Component('oHeaders') && Component('ores')

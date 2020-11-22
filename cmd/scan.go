@@ -145,8 +145,21 @@ func runScan(cmd *cobra.Command, _ []string) error {
 }
 
 func CreateRunner(j interface{}) {
+	var jobs []libs.Job
 	job := j.(libs.Job)
-	jobs := []libs.Job{job}
+
+	// auto append http and https prefix if not present
+	if !strings.HasPrefix(job.URL, "http://") && !strings.HasPrefix(job.URL, "https://") {
+		withPrefixJob := job
+		job.URL = "http://" + job.URL
+		jobs = append(jobs, withPrefixJob)
+
+		withPrefixJob = job
+		job.URL = "https://" + job.URL
+		jobs = append(jobs, withPrefixJob)
+	} else {
+		jobs = append(jobs, job)
+	}
 
 	if (job.Sign.Replicate.Ports != "" || job.Sign.Replicate.Prefixes != "") && !options.Mics.DisableReplicate {
 		if options.Mics.BaseRoot {
@@ -159,6 +172,14 @@ func CreateRunner(j interface{}) {
 	}
 
 	for _, job := range jobs {
+		if job.Sign.Type == "routine" {
+			routine, err := core.InitRoutine(job.URL, job.Sign, options)
+			if err != nil {
+				utils.ErrorF("Error create new routine: %v", err)
+			}
+			routine.Start()
+			continue
+		}
 		runner, err := core.InitRunner(job.URL, job.Sign, options)
 		if err != nil {
 			utils.ErrorF("Error create new runner: %v", err)

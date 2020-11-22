@@ -15,8 +15,13 @@ type Runner struct {
 	Opt         libs.Options
 	Sign        libs.Signature
 	Origin      Record
-	Target      map[string]string
-	Records     []Record
+
+	CRecords  []Record
+	CMatched  bool
+	InRoutine bool
+
+	Target  map[string]string
+	Records []Record
 }
 
 // Record all information about request
@@ -27,6 +32,7 @@ type Record struct {
 	Sign     libs.Signature
 
 	// passive check
+	NoOutput            bool
 	DoPassive           bool
 	SelectPassive       string
 	IsVulnerablePassive bool
@@ -69,6 +75,10 @@ func InitRunner(url string, sign libs.Signature, opt libs.Options) (Runner, erro
 	// sending origin if we have it here
 	if runner.Sign.Origin.Method != "" || runner.Sign.Origin.Res != "" {
 		runner.PrePareOrigin()
+	}
+
+	if len(runner.Sign.CRequests) > 0 {
+		runner.GenCRequests()
 	}
 
 	// generate requests
@@ -156,6 +166,7 @@ func (r *Runner) GenRequests() []libs.Request {
 	return realReqs
 }
 
+// PrePareOrigin parsing origin request
 func (r *Runner) PrePareOrigin() {
 	var originRec libs.Record
 	var origin libs.Origin
@@ -185,7 +196,7 @@ func (r *Runner) PrePareOrigin() {
 	r.Target = Target
 }
 
-// sending origin request
+// SendOrigin sending origin request
 func (r *Runner) SendOrigin(originReq libs.Request) (libs.Origin, map[string]string) {
 	var origin libs.Origin
 	var err error
@@ -228,4 +239,64 @@ func (r *Runner) SendOrigin(originReq libs.Request) (libs.Origin, map[string]str
 	origin.OResponse = originRes
 	r.Origin = originRec
 	return origin, r.Target
+}
+
+// GenCRequests generate condition requests
+func (r *Runner) GenCRequests() {
+	// quick param for calling resource
+	r.Sign.Target = MoreVariables(r.Sign.Target, r.Sign, r.Opt)
+
+	var realReqs []libs.Request
+	globalVariables := ParseVariable(r.Sign)
+	if len(globalVariables) > 0 {
+		for _, globalVariable := range globalVariables {
+			r.Sign.Target = r.Target
+			for k, v := range globalVariable {
+				r.Sign.Target[k] = v
+			}
+			// start to send stuff
+			for _, req := range r.Sign.CRequests {
+				// receive request from "-r req.txt"
+				if r.Sign.RawRequest != "" {
+					req.Raw = r.Sign.RawRequest
+				}
+				// gen bunch of request to send
+				realReqs = append(realReqs, ParseRequest(req, r.Sign, r.Opt)...)
+			}
+		}
+	} else {
+		r.Sign.Target = r.Target
+		// start to send stuff
+		for _, req := range r.Sign.CRequests {
+			// receive request from "-r req.txt"
+			if r.Sign.RawRequest != "" {
+				req.Raw = r.Sign.RawRequest
+			}
+			// gen bunch of request to send
+			realReqs = append(realReqs, ParseRequest(req, r.Sign, r.Opt)...)
+		}
+	}
+
+	if len(realReqs) > 0 {
+		for _, req := range realReqs {
+			var rec Record
+
+			rec.NoOutput = true
+			if r.Sign.COutput {
+				rec.NoOutput = false
+			}
+
+			// set somethings in record
+			rec.Request = req
+			rec.Request.Target = r.Target
+			rec.Sign = r.Sign
+			rec.Opt = r.Opt
+			// assign origins here
+			rec.OriginReq = r.Origin.Request
+			rec.OriginRes = r.Origin.Response
+
+			r.CRecords = append(r.CRecords, rec)
+		}
+	}
+
 }

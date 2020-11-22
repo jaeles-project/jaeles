@@ -1,0 +1,19 @@
+id: test-sign
+type: routine
+info:
+  name: Test Routine
+  risk: Potential
+
+params:
+  - root: '{{.BaseURL}}'
+
+routines:
+  - signs:
+      # - sign1: '{{.BaseSign}}/products/dependencies/gemfile-exposed.yaml'
+      - sign2: 'test-signatures/with-origin.yaml'
+      # - sign3: '{{.SignPwd}}/with-prefix.yaml'
+    logics:
+      - expr: 'sign2()'
+        invokes:
+          - '~/pro-signatures/products/dependencies/gemfile-exposed.yaml'
+ 

@@ -3,14 +3,27 @@ package core
 import (
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/sender"
+	"github.com/jaeles-project/jaeles/utils"
 	"github.com/panjf2000/ants"
 	"github.com/thoas/go-funk"
 	"sync"
 )
 
 func (r *Runner) Sending() {
+	if len(r.CRecords) > 0 {
+		if r.Sign.Match == "" {
+			r.Sign.Match = "all"
+		}
+		r.SendCRequests()
+		if !r.CMatched {
+			utils.DebugF("Check request not matched")
+			return
+		}
+		utils.DebugF("Passed check request")
+	}
+
 	switch r.SendingType {
-	case "single":
+	case "serial":
 		r.SendingSerial()
 		break
 	case "parallels":
@@ -22,14 +35,21 @@ func (r *Runner) Sending() {
 }
 
 func (r *Runner) SendingSerial() {
+	var recordsSent []Record
 	// Submit tasks one by one.
 	for _, record := range r.Records {
 		record.DoSending()
+		if r.InRoutine {
+			recordsSent = append(recordsSent, record)
+		}
+	}
+	if r.InRoutine {
+		r.Records = recordsSent
 	}
 }
 
 func (r *Runner) SendingParallels() {
-	//fmt.Println("== Start with Concurrency", r.Opt.Concurrency)
+	var recordsSent []Record
 	threads := r.Opt.Threads
 	if r.Sign.Threads != 0 {
 		threads = r.Sign.Threads
@@ -40,8 +60,11 @@ func (r *Runner) SendingParallels() {
 
 	var wg sync.WaitGroup
 	p, _ := ants.NewPoolWithFunc(threads, func(j interface{}) {
-		r := j.(Record)
-		r.DoSending()
+		rec := j.(Record)
+		rec.DoSending()
+		if r.InRoutine {
+			recordsSent = append(recordsSent, rec)
+		}
 		wg.Done()
 	}, ants.WithPreAlloc(true))
 	defer p.Release()
@@ -52,6 +75,9 @@ func (r *Runner) SendingParallels() {
 		_ = p.Invoke(record)
 	}
 	wg.Wait()
+	if r.InRoutine {
+		r.Records = recordsSent
+	}
 }
 
 // sending func for parallel mode
@@ -88,6 +114,65 @@ func (r *Record) DoSending() {
 	}
 	r.Request = req
 	r.Response = res
-
 	r.Analyze()
+}
+
+// SendCRequests sending condition requests
+func (r *Runner) SendCRequests() {
+	var matchCount int
+	for _, rec := range r.CRecords {
+
+		// sending func for parallel mode
+		// replace things second time here with new values section
+		AltResolveRequest(&rec.Request)
+		// check conditions
+		if len(rec.Request.Conditions) > 0 {
+			validate := rec.Condition()
+			if !validate {
+				return
+			}
+		}
+
+		// run middleware here
+		if !funk.IsEmpty(rec.Request.Middlewares) {
+			rec.MiddleWare()
+		}
+
+		req := rec.Request
+		// if middleware return the response skip sending it
+		var res libs.Response
+		if rec.Response.StatusCode == 0 && rec.Request.Method != "" && rec.Request.MiddlewareOutput == "" && req.Res == "" {
+			// sending with real browser
+			if req.Engine == "chrome" {
+				res, _ = sender.SendWithChrome(rec.Opt, req)
+			} else {
+				res, _ = sender.JustSend(rec.Opt, req)
+			}
+		}
+		// parse response directly without sending
+		if req.Res != "" {
+			res = ParseBurpResponse("", req.Res)
+		}
+		rec.Request = req
+		rec.Response = res
+
+		rec.Analyze()
+		if rec.IsVulnerable {
+			matchCount += 1
+		}
+
+	}
+
+	switch r.Sign.Match {
+	case "all":
+		if matchCount == len(r.CRecords) {
+			r.CMatched = true
+		}
+		break
+	case "any":
+		if matchCount > 0 {
+			r.CMatched = true
+		}
+		break
+	}
 }

@@ -1,0 +1,33 @@
+id: test-sign-04
+info:
+  name: Test sign
+  risk: Potential
+
+params:
+  - root: '{{.BaseURL}}'
+
+# checking request
+crequests:
+  - method: GET
+    redirect: false
+    url: >-
+      {{.root}}/Gemfile
+    headers:
+      - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55
+    detections:
+      - >-
+        StatusCode() == 200 && StringSearch("body", 'source') && StringSearch("body", 'end')
+
+requests:
+  - method: GET
+    redirect: false
+    url: >-
+      {{.root}}/Gemfile.lock
+    headers:
+      - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55
+    detections:
+      - >-
+        StatusCode() == 200 && StringSearch("body", 'GEM') && StringSearch("body", 'specs')
+
+
+

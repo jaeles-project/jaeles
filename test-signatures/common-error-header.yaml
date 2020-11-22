@@ -1,0 +1,30 @@
+id: common-error-header
+type: fuzz
+info:
+  name: Common case to trigger the error 02
+  risk: Info
+  confidence: Tentative
+
+variables:
+  - head: |
+      X-Forwarded-By
+      X-Original-Url
+      X-Rewrite-URL
+      X-Forwarded-For
+  - prefix: |
+      %00
+      %20
+      %09
+      %0A
+      %0D
+      %ff
+
+payloads:
+  - '{{.prefix}}'
+
+requests:
+  - generators:
+      - Header("{{.payload}}", "{{.head}}")
+    detections:
+      - >-
+        StatusCode() < 300 && StatusCode() >= 500 && !RegexSearch("response", "(?i)(Oops!|Whoops!|not\sfound|Request\sRejected|Access\sDenied|a\sbad\sURL|has\sbeen\slocked)") && (Math.abs(ContentLength('body') - OriginContentLength('body')) > 100) && CommonError()        

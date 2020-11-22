@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -18,6 +19,7 @@ import (
 
 // ParseSign parsing YAML signature file
 func ParseSign(signFile string) (sign libs.Signature, err error) {
+	signFile = utils.NormalizePath(signFile)
 	yamlFile, err := ioutil.ReadFile(signFile)
 	if err != nil {
 		utils.ErrorF("Error parsing Signature:  #%v - %v", err, signFile)
@@ -203,11 +205,13 @@ func MoreVariables(target map[string]string, sign libs.Signature, options libs.O
 
 	// more options
 	realTarget["Root"] = options.RootFolder
-	realTarget["Version"] = fmt.Sprintf("Jaeles - %v", libs.VERSION)
+	realTarget["BaseSign"] = strings.TrimRight(options.SignFolder, "/")
+	realTarget["SignPwd"] = strings.TrimRight(path.Dir(sign.RawPath), "/")
 	realTarget["Resources"] = options.ResourcesFolder
 	realTarget["ThirdParty"] = options.ThirdPartyFolder
 	realTarget["proxy"] = options.Proxy
 	realTarget["output"] = options.Output
+	realTarget["Version"] = fmt.Sprintf("Jaeles - %v", libs.VERSION)
 
 	// default params in signature
 	signParams := sign.Params

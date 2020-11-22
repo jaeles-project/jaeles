@@ -279,7 +279,7 @@ Mics Flags:
       --title string            HTML report title
       --html string             Enable generate HTML reports after the scan done 
       --hh string               Full help message
-      --re                      Shortcut for disable replicate request (avoid sending many request to timeout)
+      --dr                      Shortcut for disable replicate request (avoid sending many timeout requests)
       --at                      Enable Always True Detection for observe response
       --lc                      Shortcut for '--proxy http://127.0.0.1:8080'
       --ba                      Shortcut for take raw input as '{{.BaseURL}}'

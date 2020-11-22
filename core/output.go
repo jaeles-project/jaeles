@@ -18,7 +18,6 @@ func (r *Record) Output() string {
 	if !r.IsVulnerable {
 		return ""
 	}
-
 	utils.InforF("[Found] %v", color.MagentaString(r.DetectString))
 
 	// do passive analyze if got called from detector
@@ -82,11 +81,21 @@ func (r *Record) Output() string {
 		Execution(r.Opt.FoundCmd)
 	}
 
+	//// do passive analyze if got called from detector
+	//if strings.Contains(strings.ToLower(r.DetectString), "invokesign") {
+	//	r.InvokeSign()
+	// options.SignFolder/sign-name.yaml
+	//}
+
 	return "stop"
 }
 
 // StoreOutput store vulnerable request to a file
 func (r *Record) StoreOutput() {
+	// disable out
+	if r.NoOutput {
+		return
+	}
 	// store output to a file
 	if r.Request.URL == "" {
 		r.Request.URL = r.Request.Target["URL"]

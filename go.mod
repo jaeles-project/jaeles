@@ -30,6 +30,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/thoas/go-funk v0.7.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
+	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0

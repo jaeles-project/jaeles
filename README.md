@@ -14,7 +14,7 @@
 
 
 
-## Painless integrate it into your recon workflow?
+## Painless integrate Jaeles into your recon workflow?
 
 <p align="center">
   <img alt="huntersuite" src="https://user-images.githubusercontent.com/23289085/101143253-35ea6b80-3649-11eb-9130-d1fc306c9a76.png" height="200" />

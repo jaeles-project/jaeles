@@ -58,7 +58,9 @@ type Routine struct {
 	Signs  []map[string]string
 	Names  []string
 	Passed bool
+
 	Logics []struct {
+		Level  int
 		Expression string   `yaml:"expr"`
 		Invokes    []string `yaml:"invokes"`
 	} `yaml:"logics"`

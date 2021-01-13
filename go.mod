@@ -23,6 +23,8 @@ require (
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/onsi/ginkgo v1.14.2 // indirect
+	github.com/onsi/gomega v1.10.4 // indirect
 	github.com/panjf2000/ants v1.3.0
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac
 	github.com/sirupsen/logrus v1.7.0
@@ -30,7 +32,6 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/thoas/go-funk v0.7.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0

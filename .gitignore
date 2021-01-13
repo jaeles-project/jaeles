@@ -9,3 +9,4 @@ passive-*
 old-out
 http-out
 test-scripts
+Makefile

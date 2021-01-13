@@ -62,6 +62,8 @@ func (r *RoutineRunner) Start() {
 			utils.DebugF("Expression: %s -- %v", logic.Expression, IsPassed)
 
 			if IsPassed {
+				// set new level
+				r.Opt.Level = logic.Level
 				r.DoInvokes(logic.Invokes)
 			}
 		}

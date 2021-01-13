@@ -100,6 +100,7 @@ func (r *Runner) PrepareTarget() {
 		Target = ParseTarget(r.Input)
 	}
 
+	// auto turn on baseRoot when we have prefix
 	if r.Opt.Mics.BaseRoot || r.Sign.Replicate.Prefixes != "" {
 		Target["BaseURL"] = Target["Raw"]
 	}

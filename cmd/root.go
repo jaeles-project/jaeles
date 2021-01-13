@@ -133,6 +133,7 @@ func InitDB() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Can't connect to DB at %v\n", options.Server.DBPath)
 			fmt.Fprintf(os.Stderr, "Use '--no-db' for to disable DB connection if you want.\n")
+			fmt.Fprintf(os.Stderr, "[Tips] run 'rm -rf ~/.jaeles/' and run 'jaeles config init' to reload the DB\n")
 			os.Exit(-1)
 		}
 	}

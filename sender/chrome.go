@@ -22,33 +22,32 @@ func SendWithChrome(options libs.Options, req libs.Request) (libs.Response, erro
 	// method := req.Method
 	// body := req.Body
 	// headers := GetHeaders(req)
-	fmt.Printf("[Sent][Chrome] %v \n", url)
+	if options.Verbose {
+		fmt.Printf("[Sent][Chrome] %v \n", url)
+	}
 	var res libs.Response
 
+	isHeadless := true
+	if options.Debug {
+
+		isHeadless = false
+	}
 	// prepare the chrome options
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),
+		chromedp.Flag("headless", isHeadless),
 		chromedp.Flag("ignore-certificate-errors", true),
 		chromedp.Flag("disable-gpu", true),
 		chromedp.Flag("enable-automation", true),
 		chromedp.Flag("disable-extensions", false),
 		chromedp.Flag("disable-setuid-sandbox", true),
+		chromedp.Flag("no-first-run", true),
+		chromedp.Flag("no-default-browser-check", true),
+		chromedp.Flag("single-process", true),
+		chromedp.Flag("no-zygote", true),
 	)
 
-	if options.Debug {
-		// show the chrome page in debug mode
-		opts = append(chromedp.DefaultExecAllocatorOptions[:],
-			chromedp.Flag("headless", false),
-			chromedp.Flag("ignore-certificate-errors", true),
-			chromedp.Flag("disable-gpu", true),
-			chromedp.Flag("enable-automation", true),
-			chromedp.Flag("disable-extensions", false),
-			chromedp.Flag("disable-setuid-sandbox", true),
-		)
-	}
-
 	allocCtx, bcancel := chromedp.NewExecAllocator(context.Background(), opts...)
-	allocCtx, bcancel = context.WithTimeout(allocCtx, time.Duration(options.Timeout)*time.Second)
+	allocCtx, bcancel = context.WithTimeout(allocCtx, time.Duration(options.Timeout*2)*time.Second)
 	defer bcancel()
 	chromeContext, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
 	defer cancel()

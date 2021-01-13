@@ -464,11 +464,15 @@ func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
 		if strings.Contains(value, "\n") {
 			value = strings.Trim(value, "\n\n")
 			prefiixes = append(prefiixes, strings.Split(value, "\n")...)
+		}
 
+		if !strings.Contains(strings.TrimSpace(value), "\n") && !strings.Contains(strings.TrimSpace(value), ",") {
+			prefiixes = append(prefiixes, value)
 		}
 	}
 
 	if len(ports) > 0 {
+		utils.DebugF("Replicate Ports: %v", prefiixes)
 		for _, port := range ports {
 			cloneURL := url.URL{}
 			err = copier.Copy(&cloneURL, u)
@@ -493,6 +497,7 @@ func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
 	}
 
 	if len(prefiixes) > 0 {
+		utils.DebugF("Replicate Prefixes: %v", prefiixes)
 		if len(urls) == 0 {
 			urls = append(urls, input)
 		}
@@ -505,6 +510,9 @@ func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
 
 			for _, prefix := range prefiixes {
 				prefix = strings.TrimSpace(prefix)
+				if prefix == "" {
+					continue
+				}
 				cloneURL := url.URL{}
 				err = copier.Copy(&cloneURL, u)
 				if err != nil {
@@ -522,11 +530,17 @@ func ReplicationJob(input string, sign libs.Signature) ([]libs.Job, error) {
 	}
 
 	for _, urlRaw := range urls {
+		// avoid duplicate here
+		if urlRaw == input {
+			continue
+		}
+
 		job := libs.Job{
 			URL:  urlRaw,
 			Sign: sign,
 		}
 		jobs = append(jobs, job)
 	}
+	utils.DebugF("New job created: %v", len(jobs))
 	return jobs, nil
 }

@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -407,4 +408,19 @@ func PromptConfirm(s string) bool {
 			return false
 		}
 	}
+}
+
+func JoinURL(raw string, suffix string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		if strings.HasSuffix(raw, "/") {
+			return fmt.Sprintf("%s%s", raw, suffix)
+		} else {
+			return fmt.Sprintf("%s/%s", raw, suffix)
+		}
+	}
+
+	u.Path = path.Join(u.Path, suffix)
+	s := u.String()
+	return s
 }

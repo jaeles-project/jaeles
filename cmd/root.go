@@ -94,6 +94,7 @@ func init() {
 	RootCmd.PersistentFlags().IntVar(&options.ChunkLimit, "chunk-limit", 200000, "Limit size to trigger chunk run")
 	// some shortcuts
 	RootCmd.PersistentFlags().StringVarP(&options.InlineDetection, "inline", "I", "", "Inline Detections")
+	RootCmd.PersistentFlags().BoolVar(&options.EnableFiltering, "fi", false, "Enable filtering mode (to use Diff() detection)")
 	RootCmd.PersistentFlags().BoolVar(&options.Mics.DisableReplicate, "dr", false, "Shortcut for disable replicate request (avoid sending many request to timeout)")
 	RootCmd.PersistentFlags().BoolVar(&options.Mics.BaseRoot, "ba", false, "Shortcut for take raw input as {{.BaseURL}}'")
 	RootCmd.PersistentFlags().BoolVar(&options.Mics.BurpProxy, "lc", false, "Shortcut for '--proxy http://127.0.0.1:8080'")

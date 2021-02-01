@@ -98,6 +98,10 @@ func (r *Record) DoSending() {
 	}
 
 	req := r.Request
+	if r.Opt.EnableFiltering || r.Sign.Filter {
+		req.EnableChecksum = true
+	}
+
 	// if middleware return the response skip sending it
 	var res libs.Response
 	if r.Response.StatusCode == 0 && r.Request.Method != "" && r.Request.MiddlewareOutput == "" && req.Res == "" {
@@ -114,6 +118,10 @@ func (r *Record) DoSending() {
 	}
 	r.Request = req
 	r.Response = res
+
+	if r.Response.Checksum != "" {
+		utils.DebugF("[Checksum] %s - %s", req.URL, res.Checksum)
+	}
 	r.Analyze()
 }
 

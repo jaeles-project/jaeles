@@ -3,12 +3,12 @@ package database
 import (
 	"fmt"
 	"github.com/jaeles-project/jaeles/utils"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 
-	"github.com/Shopify/yaml"
 	"github.com/jaeles-project/jaeles/database/models"
 	"github.com/jaeles-project/jaeles/libs"
 )

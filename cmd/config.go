@@ -250,13 +250,13 @@ Core Flags:
   -s, --signs strings           Signature selector (Multiple -s flags are accepted)
   -x, --exclude strings         Exclude Signature selector (Multiple -x flags are accepted)
   -L, --level int               Filter signatures by level (default 1)
-  -G, --passive                 Turn on passive detections
+  -G, --passive                 Turn on passive detections (default: false)
   -p, --params strings          Custom params -p='foo=bar' (Multiple -p flags are accepted)
   -H, --headers strings         Custom headers (e.g: -H 'Referer: {{.BaseURL}}') (Multiple -H flags are accepted)
 
 Mics Flags:
-      --proxy string            proxy
-      --timeout int             HTTP timeout (default 20)
+      --proxy string            Proxy for sending request
+      --timeout int             HTTP timeout (default 20s)
       --debug                   Debug
   -v, --verbose                 Verbose
       --no-db                   Disable Database
@@ -280,8 +280,9 @@ Mics Flags:
       --html string             Enable generate HTML reports after the scan done 
       --hh string               Full help message
       --dr                      Shortcut for disable replicate request (avoid sending many timeout requests)
-      --at                      Enable Always True Detection for observe response
+      --fi                      Enable filtering mode (to use Diff() detection)
       --lc                      Shortcut for '--proxy http://127.0.0.1:8080'
+      --at                      Enable Always True Detection for observe response
       --ba                      Shortcut for take raw input as '{{.BaseURL}}'
 `
 	h += "\n\nExamples Commands:\n"
@@ -297,7 +298,7 @@ Mics Flags:
 	h += "  cat list_target.txt | jaeles scan -c 100 -s <signature>\n"
 
 	h += "\nOthers Commands:\n"
-	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
+	h += "  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2 --fi\n"
 	h += "  jaeles server --host 0.0.0.0 --port 5000 -s '/tmp/custom-signature/sensitive/.*' -L 2\n"
 	h += "  jaeles config reload --signDir /tmp/standard-signatures/\n"
 	h += "  jaeles config add -B /tmp/custom-active-signatures/\n"

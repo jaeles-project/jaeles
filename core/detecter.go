@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jaeles-project/jaeles/sender"
 	"github.com/jaeles-project/jaeles/utils"
+	"github.com/thoas/go-funk"
 	"regexp"
 	"strconv"
 	"strings"
@@ -243,6 +244,22 @@ func (r *Record) RequestScripts(scriptType string, scripts []string) bool {
 		return result
 	})
 
+	// if checksum is different with all previous checksum
+	vm.Set("Diff", func(call otto.FunctionCall) otto.Value {
+		rchecksum := record.Response.Checksum
+		isDiff := true
+		if funk.ContainsString(record.Sign.Checksums, rchecksum) {
+			isDiff = false
+		}
+
+		utils.DebugF("Checksums: %v", record.Sign.Checksums)
+		utils.DebugF("Current Checksum: %v", rchecksum)
+		utils.DebugF("Diff() -- %v", isDiff)
+
+		result, _ := vm.ToValue(isDiff)
+		return result
+	})
+
 	// Origin field
 	vm.Set("OriginStatusCode", func(call otto.FunctionCall) otto.Value {
 		statusCode := record.OriginRes.StatusCode
@@ -272,6 +289,7 @@ func (r *Record) RequestScripts(scriptType string, scripts []string) bool {
 		result, _ := vm.ToValue(componentLength)
 		return result
 	})
+
 	// Origins('1', 'status')
 	// Origins('response')
 	vm.Set("Origins", func(call otto.FunctionCall) otto.Value {

@@ -116,20 +116,28 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	}, ants.WithPreAlloc(true))
 	defer p.Release()
 
-	for _, signFile := range options.SelectedSigns {
-		sign, err := core.ParseSign(signFile)
-		if err != nil {
-			utils.ErrorF("Error parsing YAML sign: %v", signFile)
-			continue
-		}
-		// filter signature by level
-		if sign.Level > options.Level {
-			continue
+	for _, url := range urls {
+		wg.Add(1)
+		// calculate filtering result first if enabled from cli
+		baseJob := libs.Job{URL: url}
+		if options.EnableFiltering {
+			core.BaseCalculateFiltering(&baseJob, options)
 		}
 
-		// Submit tasks one by one.
-		for _, url := range urls {
-			wg.Add(1)
+		for _, signFile := range options.SelectedSigns {
+			sign, err := core.ParseSign(signFile)
+			if err != nil {
+				utils.ErrorF("Error parsing YAML sign: %v", signFile)
+				continue
+			}
+
+			// filter signature by level
+			if sign.Level > options.Level {
+				continue
+			}
+			sign.Checksums = baseJob.Checksums
+
+			// Submit tasks one by one.
 			job := libs.Job{URL: url, Sign: sign}
 			_ = p.Invoke(job)
 		}
@@ -172,6 +180,13 @@ func CreateRunner(j interface{}) {
 	}
 
 	for _, job := range jobs {
+		// custom calculate filtering if enabled inside signature
+		if job.Sign.Filter || len(job.Sign.FilteringPaths) > 0 {
+			core.CalculateFiltering(&job, options)
+		}
+
+		utils.DebugF("Raw Checksum: %v", job.Sign.Checksums)
+
 		if job.Sign.Type == "routine" {
 			routine, err := core.InitRoutine(job.URL, job.Sign, options)
 			if err != nil {

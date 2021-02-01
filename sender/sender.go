@@ -144,6 +144,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			res.Body = bodyString
 			res.ResponseTime = resTime
 			res.Length = resLength
+
 			// beautify
 			res.Beautify = BeautifyResponse(res)
 			return errors.New("auto redirect is disabled")
@@ -205,6 +206,9 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 
 	// in case we want to get redirect stuff
 	if res.StatusCode != 0 {
+		if req.EnableChecksum {
+			GenCheckSum(&res)
+		}
 		return res, nil
 	}
 
@@ -216,7 +220,11 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 		return libs.Response{}, err
 	}
 
-	return ParseResponse(*resp), nil
+	res = ParseResponse(*resp)
+	if req.EnableChecksum {
+		GenCheckSum(&res)
+	}
+	return res, nil
 }
 
 // ParseResponse field to Response
@@ -245,6 +253,7 @@ func ParseResponse(resp resty.Response) (res libs.Response) {
 	res.Body = string(resp.Body())
 	res.ResponseTime = resTime
 	res.Length = resLength
+
 	// beautify
 	res.Beautify = BeautifyResponse(res)
 	return res

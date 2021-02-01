@@ -202,6 +202,7 @@ func (r *Runner) SendOrigin(originReq libs.Request) (libs.Origin, map[string]str
 	var origin libs.Origin
 	var err error
 	var originRes libs.Response
+	originReq.EnableChecksum = true
 
 	originSign := r.Sign
 	if r.Opt.Scan.RawRequest != "" {
@@ -239,6 +240,11 @@ func (r *Runner) SendOrigin(originReq libs.Request) (libs.Origin, map[string]str
 	origin.ORequest = originReq
 	origin.OResponse = originRes
 	r.Origin = originRec
+
+	if originRes.Checksum != "" {
+		utils.DebugF("[Checksum Origin] %s - %s", originReq.URL, originRes.Checksum)
+		r.Sign.Checksums = append(r.Sign.Checksums, originRes.Checksum)
+	}
 	return origin, r.Target
 }
 

@@ -56,6 +56,7 @@ Please visit the [Official Documention](https://jaeles-project.github.io/) for m
   jaeles scan -G -c 50 -s '/tmp/custom-signature/.*' -U list_of_urls.txt
   jaeles scan -v -s '~/my-signatures/products/wordpress/.*' -u 'https://wp.example.com' -p 'root=[[.URL]]'
   cat urls.txt | grep 'interesting' | jaeles scan -L 5 -c 50 -s 'fuzz/.*' -U list_of_urls.txt --proxy http://127.0.0.1:8080
+  jaeles server -s '/tmp/custom-signature/sensitive/.*' -L 2 --fi
 
 ```
 

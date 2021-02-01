@@ -117,7 +117,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	defer p.Release()
 
 	for _, url := range urls {
-		wg.Add(1)
+
 		// calculate filtering result first if enabled from cli
 		baseJob := libs.Job{URL: url}
 		if options.EnableFiltering {
@@ -137,6 +137,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 			}
 			sign.Checksums = baseJob.Checksums
 
+			wg.Add(1)
 			// Submit tasks one by one.
 			job := libs.Job{URL: url, Sign: sign}
 			_ = p.Invoke(job)

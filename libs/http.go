@@ -55,9 +55,14 @@ type Request struct {
 	Middlewares       []string
 	Conclusions       []string
 	Detections        []string
-	Generators        []string
-	Encoding          string
-	Target            map[string]string
+
+	// run when detection is true
+	PostRun []string
+
+	// for fuzzing
+	Generators []string
+	Encoding   string
+	Target     map[string]string
 }
 
 // Response all information about response

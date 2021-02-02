@@ -12,6 +12,7 @@ import (
 type Runner struct {
 	Input       string
 	SendingType string
+	RunnerType  string
 	Opt         libs.Options
 	Sign        libs.Signature
 	Origin      Record
@@ -30,6 +31,9 @@ type Record struct {
 	Request  libs.Request
 	Response libs.Response
 	Sign     libs.Signature
+
+	// for dns part
+	Dns libs.Dns
 
 	// passive check
 	NoOutput            bool
@@ -54,10 +58,6 @@ type Record struct {
 	DetectResult  string
 	ScanID        string
 }
-
-//
-//func InitRunnerWithDefaultOpt(url string, sign string) {
-//}
 
 // InitRunner init task
 func InitRunner(url string, sign libs.Signature, opt libs.Options) (Runner, error) {

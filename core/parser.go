@@ -338,6 +338,7 @@ func ParseRequest(req libs.Request, sign libs.Signature, options libs.Options) [
 	req.Middlewares = ResolveDetection(req.Middlewares, target)
 	req.Conditions = ResolveDetection(req.Conditions, target)
 	req.Conclusions = ResolveDetection(req.Conclusions, target)
+	req.PostRun = ResolveDetection(req.PostRun, target)
 
 	if sign.Type != "fuzz" {
 		if req.Res != "" {

@@ -81,6 +81,13 @@ func (r *Record) Output() string {
 		Execution(r.Opt.FoundCmd)
 	}
 
+	if len(r.Request.PostRun) > 0 {
+		r.Request.PostRun = ResolveDetection(r.Request.PostRun, r.Request.Target)
+		for _, postrun := range r.Request.PostRun {
+			Execution(postrun)
+		}
+	}
+
 	//// do passive analyze if got called from detector
 	//if strings.Contains(strings.ToLower(r.DetectString), "invokesign") {
 	//	r.InvokeSign()

@@ -53,6 +53,8 @@ type Options struct {
 
 	// only enable when doing sensitive mode
 	EnableFiltering bool
+	// for DNS
+	Resolver string
 
 	// Chunk Options
 	ChunkDir     string

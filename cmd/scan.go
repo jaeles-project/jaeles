@@ -117,7 +117,6 @@ func runScan(cmd *cobra.Command, _ []string) error {
 	defer p.Release()
 
 	for _, url := range urls {
-
 		// calculate filtering result first if enabled from cli
 		baseJob := libs.Job{URL: url}
 		if options.EnableFiltering {
@@ -156,6 +155,11 @@ func runScan(cmd *cobra.Command, _ []string) error {
 func CreateRunner(j interface{}) {
 	var jobs []libs.Job
 	job := j.(libs.Job)
+
+	if job.Sign.Type == "dns" {
+		CreateDnsRunner(job)
+		return
+	}
 
 	// auto append http and https prefix if not present
 	if !strings.HasPrefix(job.URL, "http://") && !strings.HasPrefix(job.URL, "https://") {
@@ -202,6 +206,15 @@ func CreateRunner(j interface{}) {
 		}
 		runner.Sending()
 	}
+}
+
+// CreateDnsRunner create runner for dns
+func CreateDnsRunner(job libs.Job) {
+	runner, err := core.InitDNSRunner(job.URL, job.Sign, options)
+	if err != nil {
+		utils.ErrorF("Error create new dns runner: %v", err)
+	}
+	runner.Resolving()
 }
 
 /////////////////////// Chunk options (very experimental)

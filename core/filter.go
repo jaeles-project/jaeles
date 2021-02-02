@@ -9,11 +9,12 @@ import (
 )
 
 var baseFiltering = []string{
+	"/",
 	"hopetoget404" + RandomString(6),
 	fmt.Sprintf("%s", RandomString(16)+"/"+RandomString(5)),
 	fmt.Sprintf("%s.html", RandomString(16)),
 	fmt.Sprintf("%s.php~", RandomString(16)),
-	fmt.Sprintf("%s.%00", RandomString(16)),
+	fmt.Sprintf("%%00%s", RandomString(16)),
 	fmt.Sprintf("%s.json", RandomString(16)),
 }
 

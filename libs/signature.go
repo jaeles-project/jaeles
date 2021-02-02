@@ -56,6 +56,8 @@ type Signature struct {
 	Variables  []map[string]string
 	Target     map[string]string
 
+	Dns []Dns // for dns part only
+
 	// routines
 	Routines []Routine
 }

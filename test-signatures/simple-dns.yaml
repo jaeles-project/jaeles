@@ -1,0 +1,14 @@
+id: simple-dns
+type: 'dns'
+info:
+  name: Spring Boot Common Paths
+  risk: Potential
+
+dns:
+  - domain: '{{.Domain}}'
+    record: 'NS'
+    detections:
+      - >-
+        DnsString('NS', 'nsone.')
+      - >-
+        DnsRegex('NS', '*.nsone.*')

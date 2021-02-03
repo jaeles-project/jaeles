@@ -133,10 +133,12 @@ func (r *Record) DnsDetector() bool {
 }
 
 func GetDnsComponent(record Record, componentName string) string {
+	var any string
 	for _, dnsResult := range record.Dns.Results {
 		if dnsResult.RecordType == strings.TrimSpace(componentName) {
 			return dnsResult.Data
 		}
+		any += dnsResult.Data + "\n"
 	}
-	return ""
+	return any
 }

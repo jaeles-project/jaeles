@@ -6,6 +6,7 @@ import (
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/robertkrimen/otto"
+	"regexp"
 	"strings"
 )
 
@@ -17,6 +18,12 @@ func InitDNSRunner(url string, sign libs.Signature, opt libs.Options) (Runner, e
 	runner.Sign = sign
 	runner.RunnerType = "dns"
 	runner.PrepareTarget()
+
+	// @NOTE: add some variables due to the escape issue
+	runner.Target["RexDomain"] = regexp.QuoteMeta(runner.Target["Domain"])
+	if strings.Contains(runner.Target["RexDomain"], `\.`) {
+		runner.Target["RexDomain"] = strings.ReplaceAll(runner.Target["RexDomain"], `\.`, `\\.`)
+	}
 
 	return runner, nil
 }
@@ -118,7 +125,7 @@ func (r *Record) DnsDetector() bool {
 
 		// add extra things for standard output
 		r.Request.URL = r.Dns.Domain
-		r.Request.Beautify = fmt.Sprintf("dig %s %s", r.Dns.RecordType, r.Dns.Domain)
+		r.Request.Beautify = fmt.Sprintf("dig %s %s @%s", r.Dns.RecordType, r.Dns.Domain, r.Dns.Resolver)
 		r.Response.Beautify = record.Response.Beautify
 
 		utils.DebugF("[Detection] %v -- %v", analyze, r.IsVulnerable)

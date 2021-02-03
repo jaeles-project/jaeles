@@ -32,10 +32,11 @@ func QueryDNS(dnsRecord *libs.Dns, options libs.Options) {
 	}
 	domain := dnsRecord.Domain
 	queryType := dnsRecord.RecordType
+	dnsRecord.Resolver = resolver
 
 	var dig dnsutil.Dig
 	dig.Retry = options.Retry
-	dig.SetDNS(resolver)
+	dig.SetDNS(dnsRecord.Resolver)
 	utils.InforF("[resolved] %v -- %v", domain, queryType)
 
 	if queryType == "ANY" || queryType == "" {
@@ -47,6 +48,7 @@ func QueryDNS(dnsRecord *libs.Dns, options libs.Options) {
 				return
 			}
 			dnsResult.Data = msg.String()
+			//utils.DebugF(dnsResult.Data)
 			dnsResult.RecordType = k
 			dnsRecord.Results = append(dnsRecord.Results, dnsResult)
 		}
@@ -58,6 +60,7 @@ func QueryDNS(dnsRecord *libs.Dns, options libs.Options) {
 			return
 		}
 		dnsResult.Data = msg.String()
+		//utils.DebugF(dnsResult.Data)
 		dnsResult.RecordType = queryType
 		dnsRecord.Results = append(dnsRecord.Results, dnsResult)
 	}

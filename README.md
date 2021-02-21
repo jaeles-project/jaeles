@@ -71,20 +71,13 @@ docker run j3ssie/jaeles scan -s '<selector>' -u http://example.com
 
 ## Showcases
 
-|     ![apache-status.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/apache-status.png?raw=true) [**
-Apache Server Status**](https://youtu.be/nkBcIvzi3H4)
-| ![tableau-dom-xss.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/tableau-dom-xss.png?raw=true) [**
-Tableau DOM XSS CVE-2019-19719**](https://youtu.be/EG7Qmt8kt58) | |:
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:
-|:
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:
-|
-| ![rabbitmq-cred.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/rabbitmq-cred.png?raw=true) [**
-RabbitMQ Default Credentials**](https://youtu.be/ed4n1sCNu3s)
-|       ![jenkins-xss.png](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/jenkins-xss.png?raw=true) [**
-Jenkins XSS CVE-2020-2096**](https://youtu.be/JfihhEOEWSE)        |
+|  [![asciicast](https://asciinema.org/a/392827.svg)](https://asciinema.org/a/392827) [**Jenkins Gitlab XSS CVE-2020-2096**](https://asciinema.org/a/392827)  |  [![asciicast](https://asciinema.org/a/392822.svg)](https://asciinema.org/a/392822) [**Grafana DoS Probing CVE-2020-13379**](https://asciinema.org/a/392822) |
+|:----------:|:-------------:|
+| [![asciicast](https://asciinema.org/a/392824.svg)](https://asciinema.org/a/392824) [**SolarWindsOrion LFI CVE-2020-10148**](https://asciinema.org/a/392824) | [![asciicast](https://asciinema.org/a/392821.svg)](https://asciinema.org/a/392821) [**Nginx Vhost XSS**](https://asciinema.org/a/392821) |
 
 <h4 align='center'> More showcase can be found <a href="https://jaeles-project.github.io/showcases/">here</a></h4>
+
+***
 
 ### HTML Report summary
 

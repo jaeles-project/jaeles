@@ -44,6 +44,7 @@ func SendWithChrome(options libs.Options, req libs.Request) (libs.Response, erro
 		chromedp.Flag("no-default-browser-check", true),
 		chromedp.Flag("single-process", true),
 		chromedp.Flag("no-zygote", true),
+		chromedp.Flag("no-sandbox", true),
 	)
 
 	allocCtx, bcancel := chromedp.NewExecAllocator(context.Background(), opts...)

@@ -1,11 +1,13 @@
 package core
 
 import (
+	"fmt"
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/sender"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/panjf2000/ants"
 	"github.com/thoas/go-funk"
+	"strings"
 	"sync"
 )
 
@@ -23,6 +25,9 @@ func (r *Runner) Sending() {
 	}
 
 	switch r.SendingType {
+	case "local":
+		r.LocalSending()
+		break
 	case "serial":
 		r.SendingSerial()
 		break
@@ -32,6 +37,42 @@ func (r *Runner) Sending() {
 	default:
 		r.SendingParallels()
 	}
+}
+
+func (r *Runner) LocalSending() {
+	utils.DebugF("Start local analyze for: %s", r.Input)
+	if !strings.HasPrefix(r.Input, "file://") {
+		// just make it up for beautiful output
+		r.Input = fmt.Sprintf("http://jaeles.local/?file=%s", r.Input)
+	}
+
+	record := Record{
+		Opt:  r.Opt,
+		Sign: r.Sign,
+		Request: libs.Request{
+			URL: r.Input,
+		},
+		Response: r.Sign.Response,
+	}
+	var localScripts []string
+
+	for _, rule := range r.Sign.Rules {
+		localScripts = append(localScripts, rule.Detections...)
+		if rule.Regex != "" {
+			analyze := rule.Regex
+			utils.DebugF("LocalRegex: %s", analyze)
+			extra, validate := RegexSearch(r.Sign.Response.Beautify, rule.Regex)
+			record.DetectString = analyze
+			record.IsVulnerable = validate
+			record.DetectResult = extra
+			record.ExtraOutput = extra
+
+			utils.DebugF("[Detection] %v -- %v", analyze, record.IsVulnerable)
+			// deal with vulnerable one here
+			record.Output()
+		}
+	}
+	record.RequestScripts("detections", localScripts)
 }
 
 func (r *Runner) SendingSerial() {
@@ -80,7 +121,7 @@ func (r *Runner) SendingParallels() {
 	}
 }
 
-// sending func for parallel mode
+// DoSending really sending the request
 func (r *Record) DoSending() {
 	// replace things second time here with new values section
 	AltResolveRequest(&r.Request)

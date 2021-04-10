@@ -37,6 +37,7 @@ type Options struct {
 	Refresh           int
 	Retry             int
 	SaveRaw           bool
+	LocalAnalyze      bool
 	JsonOutput        bool
 	VerboseSummary    bool
 	Quiet             bool
@@ -124,6 +125,8 @@ type Job struct {
 	URL       string
 	Checksums []string
 	Sign      Signature
+	// the base response
+	Response Response
 }
 
 //// PJob define job for running routine
@@ -145,4 +148,9 @@ type VulnData struct {
 	Confidence      string
 	Req             string
 	Res             string
+	// little information
+	StatusCode    string
+	ContentLength string
+	OutputFile    string
+	SignatureFile string
 }

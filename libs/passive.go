@@ -16,5 +16,7 @@ type Rule struct {
 	Risk       string
 	Confidence string
 	Reason     string
+	// raw regex to avoid the pain of escape char
+	Regex      string
 	Detections []string
 }

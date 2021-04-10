@@ -154,31 +154,36 @@ func runScan(cmd *cobra.Command, _ []string) error {
 
 func CreateRunner(j interface{}) {
 	var jobs []libs.Job
-	job := j.(libs.Job)
+	rawJob := j.(libs.Job)
 
-	if job.Sign.Type == "dns" {
-		CreateDnsRunner(job)
+	if rawJob.Sign.Type == "dns" {
+		CreateDnsRunner(rawJob)
 		return
 	}
 
-	// auto append http and https prefix if not present
-	if !strings.HasPrefix(job.URL, "http://") && !strings.HasPrefix(job.URL, "https://") {
-		withPrefixJob := job
-		job.URL = "http://" + job.URL
-		jobs = append(jobs, withPrefixJob)
-
-		withPrefixJob = job
-		job.URL = "https://" + job.URL
-		jobs = append(jobs, withPrefixJob)
-	} else {
-		jobs = append(jobs, job)
+	// enable local analyze
+	if options.LocalAnalyze {
+		core.LocalFileToResponse(&rawJob)
 	}
 
-	if (job.Sign.Replicate.Ports != "" || job.Sign.Replicate.Prefixes != "") && !options.Mics.DisableReplicate {
+	// auto prepend http and https prefix if not present
+	if !options.LocalAnalyze && !strings.HasPrefix(rawJob.URL, "http://") && !strings.HasPrefix(rawJob.URL, "https://") {
+		withPrefixJob := rawJob
+		rawJob.URL = "http://" + rawJob.URL
+		jobs = append(jobs, withPrefixJob)
+
+		withPrefixJob = rawJob
+		rawJob.URL = "https://" + rawJob.URL
+		jobs = append(jobs, withPrefixJob)
+	} else {
+		jobs = append(jobs, rawJob)
+	}
+
+	if (rawJob.Sign.Replicate.Ports != "" || rawJob.Sign.Replicate.Prefixes != "") && !options.Mics.DisableReplicate {
 		if options.Mics.BaseRoot {
-			job.Sign.BasePath = true
+			rawJob.Sign.BasePath = true
 		}
-		moreJobs, err := core.ReplicationJob(job.URL, job.Sign)
+		moreJobs, err := core.ReplicationJob(rawJob.URL, rawJob.Sign)
 		if err == nil {
 			jobs = append(jobs, moreJobs...)
 		}
@@ -189,7 +194,6 @@ func CreateRunner(j interface{}) {
 		if job.Sign.Filter || len(job.Sign.FilteringPaths) > 0 {
 			core.CalculateFiltering(&job, options)
 		}
-
 		utils.DebugF("Raw Checksum: %v", job.Sign.Checksums)
 
 		if job.Sign.Type == "routine" {
@@ -250,9 +254,9 @@ func runChunk(command string, urlFiles []string, threads int) {
 		wg.Done()
 	}, ants.WithPreAlloc(true))
 	defer p.Release()
-	for _, command := range commands {
+	for _, cmd := range commands {
 		wg.Add(1)
-		_ = p.Invoke(command)
+		_ = p.Invoke(cmd)
 	}
 	wg.Wait()
 }

@@ -12,6 +12,9 @@ type Signature struct {
 	OverrideFilerPaths bool
 	FilteringPaths     []string `yaml:"fpaths"`
 	Checksums          []string
+	// local analyze
+	Local    bool
+	Response Response
 
 	// some mics options
 	Threads    int
@@ -56,7 +59,11 @@ type Signature struct {
 	Variables  []map[string]string
 	Target     map[string]string
 
-	Dns []Dns // for dns part only
+	// for dns part only
+	Dns []Dns
+
+	// similar to passive but only applied in local check
+	Rules []Rule
 
 	// routines
 	Routines []Routine

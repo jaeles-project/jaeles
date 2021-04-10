@@ -72,6 +72,10 @@ func InitRunner(url string, sign libs.Signature, opt libs.Options) (Runner, erro
 		runner.SendingType = "serial"
 	}
 
+	if runner.Sign.Local == true {
+		runner.SendingType = "local"
+	}
+
 	// sending origin if we have it here
 	if runner.Sign.Origin.Method != "" || runner.Sign.Origin.Res != "" {
 		runner.PrePareOrigin()

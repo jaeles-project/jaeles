@@ -71,9 +71,14 @@ docker run j3ssie/jaeles scan -s '<selector>' -u http://example.com
 
 ## Showcases
 
-|  [![asciicast](https://asciinema.org/a/392827.svg)](https://asciinema.org/a/392827) [**Jenkins Gitlab XSS CVE-2020-2096**](https://asciinema.org/a/392827)  |  [![asciicast](https://asciinema.org/a/392822.svg)](https://asciinema.org/a/392822) [**Grafana DoS Probing CVE-2020-13379**](https://asciinema.org/a/392822) |
-|:----------:|:-------------:|
-| [![asciicast](https://asciinema.org/a/392824.svg)](https://asciinema.org/a/392824) [**SolarWindsOrion LFI CVE-2020-10148**](https://asciinema.org/a/392824) | [![asciicast](https://asciinema.org/a/392821.svg)](https://asciinema.org/a/392821) [**Nginx Vhost XSS**](https://asciinema.org/a/392821) |
+|  [![asciicast](https://asciinema.org/a/392827.svg)](https://asciinema.org/a/392827) [**Jenkins Gitlab XSS
+CVE-2020-2096**](https://asciinema.org/a/392827)
+|  [![asciicast](https://asciinema.org/a/392822.svg)](https://asciinema.org/a/392822) [**
+Grafana DoS Probing CVE-2020-13379**](https://asciinema.org/a/392822) | |:----------:|:-------------:|
+| [![asciicast](https://asciinema.org/a/392824.svg)](https://asciinema.org/a/392824) [**SolarWindsOrion LFI
+CVE-2020-10148**](https://asciinema.org/a/392824)
+| [![asciicast](https://asciinema.org/a/392821.svg)](https://asciinema.org/a/392821) [**
+Nginx Vhost XSS**](https://asciinema.org/a/392821) |
 
 <h4 align='center'> More showcase can be found <a href="https://jaeles-project.github.io/showcases/">here</a></h4>
 

@@ -8,6 +8,7 @@ import (
 	"github.com/jaeles-project/jaeles/utils"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/logrusorgru/aurora/v3"
+	"github.com/spf13/cast"
 	"net/url"
 	"os"
 	"path"
@@ -53,7 +54,7 @@ func (r *Record) Output() string {
 		// use this libs because we still want to see color when use chunked mode
 		au := aurora.NewAurora(true)
 		colorSignID := fmt.Sprintf("%s", au.Cyan(r.Sign.ID))
-		colorRisk := fmt.Sprintf("%s", au.Cyan(r.Sign.Info.Risk))
+		colorRisk := fmt.Sprintf("%s", au.BrightCyan(r.Sign.Info.Risk))
 		risk := strings.ToLower(r.Sign.Info.Risk)
 		switch risk {
 		case "critical":
@@ -94,7 +95,10 @@ func (r *Record) Output() string {
 	// options.SignFolder/sign-name.yaml
 	//}
 
-	return "stop"
+	if r.Sign.Donce {
+		return "stop"
+	}
+	return "continue"
 }
 
 // StoreOutput store vulnerable request to a file
@@ -114,6 +118,7 @@ func (r *Record) StoreOutput() {
 		moreInfo := fmt.Sprintf("%v-%v-%v-%v", r.Response.StatusCode, r.Response.Length, len(strings.Split(r.Response.Beautify, " ")), r.Response.ResponseTime)
 		head = fmt.Sprintf("[%v][%v-%v][%v] - %v\n", r.Sign.ID, r.Sign.Info.Confidence, r.Sign.Info.Risk, moreInfo, r.Request.URL)
 	}
+
 	sInfo := fmt.Sprintf("[Sign-Info][%v-%v] - %v - %v\n", r.Sign.Info.Confidence, r.Sign.Info.Risk, r.Sign.RawPath, r.Sign.Info.Name)
 	content := "[Vuln-Info]" + head + sInfo + fmt.Sprintf("[Detect-String] - %v\n\n", r.DetectString)
 	if r.Request.MiddlewareOutput != "" {
@@ -182,11 +187,31 @@ func (r *Record) StoreOutput() {
 		}
 	}
 
-	// normal output
+	// detail normal output
 	utils.WriteToFile(p, content)
+	// summary file
 	sum := fmt.Sprintf("%v - %v", strings.TrimSpace(head), p)
+	if r.Opt.JsonOutput {
+		vulnData := libs.VulnData{
+			SignID:          r.Sign.ID,
+			SignName:        r.Sign.Info.Name,
+			Risk:            r.Sign.Info.Risk,
+			Confidence:      r.Sign.Info.Confidence,
+			DetectionString: r.DetectString,
+			DetectResult:    r.DetectResult,
+			URL:             r.Request.URL,
+			StatusCode:      cast.ToString(r.Response.StatusCode),
+			ContentLength:   cast.ToString(r.Response.Length),
+			SignatureFile:   r.Sign.RawPath,
+			OutputFile:      p,
+		}
+		if data, err := jsoniter.MarshalToString(vulnData); err == nil {
+			sum = data
+		}
+	}
 	utils.AppendToContent(r.Opt.SummaryOutput, sum)
 
+	// file to parse single vulnerable
 	vulnSum := fmt.Sprintf("[%v][%v] - %v", r.Sign.ID, r.Sign.Info.Risk, r.Request.Target["Raw"])
 	utils.AppendToContent(r.Opt.SummaryVuln, vulnSum)
 	r.RawOutput = p

@@ -21,7 +21,7 @@ func (r *Record) Passives() {
 	r.RequestScripts("passives", passiveScripts)
 }
 
-// GetPassivesRule do passive analyzer based on default passive signature
+// GetPassivesRules do passive analyzer based on default passive signature
 func (r *Record) GetPassivesRules() []string {
 	var passiveScripts []string
 	passives := GetPassives(r.Opt)
@@ -56,10 +56,7 @@ func (r *Record) GetPassivesRules() []string {
 			}
 
 			passiveScripts = append(passiveScripts, rule.Detections...)
-			//spew.Dump(passiveScripts)
 			for _, passiveScript := range rule.Detections {
-				//spew.Dump(rule)
-				//spew.Dump(passiveScript)
 				r.PassiveRules[passiveScript] = rule
 			}
 		}

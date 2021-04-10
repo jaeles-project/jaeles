@@ -1,0 +1,15 @@
+id: test-sign-local-analyze
+info:
+  name: Test Routine
+  risk: Potential
+
+# jaeles scan -s test-signatures/local-analyze.yaml -u /tmp/jtt/req.txt -v  --debug   --local
+rules:
+  - detections:
+      - >-
+        StringSearch("response", "nginx")
+      - >-
+        RegexSearch("response", 'application\\/json;')
+  - detections:
+      - >-
+        RegexSearch("response", '(?m)nginx\/1\.14.*')

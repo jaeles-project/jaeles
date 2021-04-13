@@ -169,11 +169,11 @@ func CreateRunner(j interface{}) {
 	// auto prepend http and https prefix if not present
 	if !options.LocalAnalyze && !strings.HasPrefix(rawJob.URL, "http://") && !strings.HasPrefix(rawJob.URL, "https://") {
 		withPrefixJob := rawJob
-		rawJob.URL = "http://" + rawJob.URL
+		withPrefixJob.URL = "http://" + rawJob.URL
 		jobs = append(jobs, withPrefixJob)
 
 		withPrefixJob = rawJob
-		rawJob.URL = "https://" + rawJob.URL
+		withPrefixJob.URL = "https://" + rawJob.URL
 		jobs = append(jobs, withPrefixJob)
 	} else {
 		jobs = append(jobs, rawJob)

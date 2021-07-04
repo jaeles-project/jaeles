@@ -1,7 +1,6 @@
 package core
 
 import (
-	"crypto/sha1"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jaeles-project/jaeles/libs"
@@ -142,9 +141,10 @@ func (r *Record) StoreOutput() {
 	}
 
 	// hash the content
-	h := sha1.New()
-	h.Write([]byte(content))
-	checksum := h.Sum(nil)
+	checksum := utils.GenHash(r.Response.Body)
+	if r.Response.Body == "" {
+		checksum = utils.GenHash(r.Response.Beautify)
+	}
 
 	parts := []string{r.Opt.Output}
 	if r.Request.URL == "" {
@@ -160,7 +160,7 @@ func (r *Record) StoreOutput() {
 		}
 		parts = append(parts, host)
 	}
-	parts = append(parts, fmt.Sprintf("%v-%x", r.Sign.ID, checksum))
+	parts = append(parts, fmt.Sprintf("%v-%s", r.Sign.ID, checksum))
 
 	p := path.Join(parts...)
 	if _, err := os.Stat(path.Dir(p)); os.IsNotExist(err) {
@@ -189,6 +189,7 @@ func (r *Record) StoreOutput() {
 
 	// detail normal output
 	utils.WriteToFile(p, content)
+
 	// summary file
 	sum := fmt.Sprintf("%v - %v", strings.TrimSpace(head), p)
 	if r.Opt.JsonOutput {

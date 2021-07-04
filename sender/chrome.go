@@ -29,7 +29,6 @@ func SendWithChrome(options libs.Options, req libs.Request) (libs.Response, erro
 
 	isHeadless := true
 	if options.Debug {
-
 		isHeadless = false
 	}
 	// prepare the chrome options
@@ -46,6 +45,11 @@ func SendWithChrome(options libs.Options, req libs.Request) (libs.Response, erro
 		chromedp.Flag("no-zygote", true),
 		chromedp.Flag("no-sandbox", true),
 	)
+
+	// proxy chrome headless
+	if options.Proxy != "" {
+		opts = append(opts, chromedp.ProxyServer(options.Proxy))
+	}
 
 	allocCtx, bcancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	allocCtx, bcancel = context.WithTimeout(allocCtx, time.Duration(options.Timeout*2)*time.Second)

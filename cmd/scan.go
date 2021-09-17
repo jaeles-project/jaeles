@@ -123,13 +123,7 @@ func runScan(cmd *cobra.Command, _ []string) error {
 			core.BaseCalculateFiltering(&baseJob, options)
 		}
 
-		for _, signFile := range options.SelectedSigns {
-			sign, err := core.ParseSign(signFile)
-			if err != nil {
-				utils.ErrorF("Error parsing YAML sign: %v", signFile)
-				continue
-			}
-
+		for _, sign := range options.ParsedSelectedSigns {
 			// filter signature by level
 			if sign.Level > options.Level {
 				continue

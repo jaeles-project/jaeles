@@ -2,32 +2,33 @@ package libs
 
 // Options global options
 type Options struct {
-	RootFolder       string
-	SignFolder       string
-	PassiveFolder    string
-	ResourcesFolder  string
-	ThirdPartyFolder string
-	ScanID           string
-	ConfigFile       string
-	FoundCmd         string
-	QuietFormat      string
-	PassiveOutput    string
-	PassiveSummary   string
-	Output           string
-	SummaryOutput    string
-	SummaryVuln      string
-	LogFile          string
-	Proxy            string
-	Selectors        string
-	InlineDetection  string
-	Params           []string
-	Headers          []string
-	Signs            []string
-	Excludes         []string
-	SelectedSigns    []string
-	ParallelSigns    []string
-	SelectedPassive  string
-	GlobalVar        map[string]string
+	RootFolder          string
+	SignFolder          string
+	PassiveFolder       string
+	ResourcesFolder     string
+	ThirdPartyFolder    string
+	ScanID              string
+	ConfigFile          string
+	FoundCmd            string
+	QuietFormat         string
+	PassiveOutput       string
+	PassiveSummary      string
+	Output              string
+	SummaryOutput       string
+	SummaryVuln         string
+	LogFile             string
+	Proxy               string
+	Selectors           string
+	InlineDetection     string
+	Params              []string
+	Headers             []string
+	Signs               []string
+	Excludes            []string
+	SelectedSigns       []string
+	ParsedSelectedSigns []Signature
+	ParallelSigns       []string
+	SelectedPassive     string
+	GlobalVar           map[string]string
 
 	Level             int
 	Concurrency       int
@@ -128,13 +129,6 @@ type Job struct {
 	// the base response
 	Response Response
 }
-
-//// PJob define job for running routine
-//type PJob struct {
-//	Req  Request
-//	ORec Record
-//	Sign Signature
-//}
 
 // VulnData vulnerable Data
 type VulnData struct {

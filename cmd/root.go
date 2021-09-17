@@ -204,4 +204,14 @@ func SelectSign() {
 	}
 	utils.InforF("Start Scan with ID: %v", scanID)
 	options.ScanID = scanID
+
+	// only parse signature once to avoid I/O limit
+	for _, signFile := range options.SelectedSigns {
+		sign, err := core.ParseSign(signFile)
+		if err != nil {
+			utils.ErrorF("Error parsing YAML sign: %v", signFile)
+			continue
+		}
+		options.ParsedSelectedSigns = append(options.ParsedSelectedSigns, sign)
+	}
 }

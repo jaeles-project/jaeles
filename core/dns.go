@@ -28,7 +28,7 @@ func InitDNSRunner(url string, sign libs.Signature, opt libs.Options) (Runner, e
 	return runner, nil
 }
 
-// GetDns get dns ready to resolve
+// Resolving get dns ready to resolve
 func (r *Runner) Resolving() {
 	if len(r.Sign.Dns) == 0 {
 		return

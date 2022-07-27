@@ -32,6 +32,12 @@ If you have a Go environment, make sure you have **Go >= 1.13** with Go Modules 
 GO111MODULE=on go get github.com/jaeles-project/jaeles
 ```
 
+In case of "go get" failure, try the below method.
+
+```shell
+GO111MODULE=on go install github.com/jaeles-project/jaeles@latest
+```
+
 Please visit the [Official Documention](https://jaeles-project.github.io/) for more details.
 
 ### **Note**: Checkout [Signatures Repo](https://github.com/jaeles-project/jaeles-signatures) for install signature.

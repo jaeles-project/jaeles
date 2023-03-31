@@ -38,6 +38,7 @@ type Request struct {
 	Port              string
 	Path              string
 	URL               string
+	Proto             string
 	Proxy             string
 	Method            string
 	Payload           string

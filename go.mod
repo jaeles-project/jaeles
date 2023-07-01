@@ -7,8 +7,8 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/PuerkitoBio/goquery v1.7.0
 	github.com/appleboy/gin-jwt/v2 v2.6.4
-	github.com/chromedp/cdproto v0.0.0-20210625233425-810000e4a4fc
-	github.com/chromedp/chromedp v0.7.3
+	github.com/chromedp/cdproto v0.0.0-20210713064928-7d28b402946a
+	github.com/chromedp/chromedp v0.7.4
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.12.0
 	github.com/gin-contrib/cors v1.3.1

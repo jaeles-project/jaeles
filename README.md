@@ -1,9 +1,9 @@
 <p align="center">
   <img alt="Jaeles" src="https://github.com/jaeles-project/jaeles-plugins/blob/master/assets/jaeles.png?raw=true" height="140" />
   <p align="center">
+    <a href="https://github.com/jaeles-project/jaeles/releases"><img alt="Release" src="https://img.shields.io/github/v/release/jaeles-project/jaeles.svg"></a>
+    <a href="https://jaeles-project.github.io/"><img alt="Documentation" src="https://img.shields.io/badge/Documentation-📖-red.svg?style=flat-square"></a>
     <a href=""><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
-    <a href="https://github.com/jaeles-project/jaeles"><img alt="Release" src="https://img.shields.io/github/v/release/jaeles-project/jaeles.svg"></a>
-    <a href="https://inventory.rawsec.ml/tools.html#Jaeles"><img src="https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg" alt="Rawsec&#39;s CyberSecurity Inventory"></a>
   </p>
 </p>
 
@@ -12,30 +12,15 @@ Scanner.
 
 ![Architecture](https://github.com/jaeles-project/jaeles-plugins/blob/master/imgs/jaeles-architecture.png?raw=true)
 
-## Painless integrate Jaeles into your recon workflow?
-
-<p align="center">
-  <img alt="OsmedeusEngine" src="https://raw.githubusercontent.com/osmedeus/assets/main/logo-transparent.png" height="200" />
-  <p align="center">
-    This project was part of Osmedeus Engine. Check out how it was integrated at <a href="https://twitter.com/OsmedeusEngine">@OsmedeusEngine</a>
-  </p>
-</p>
-
 
 ## Installation
 
 Download [precompiled version here](https://github.com/jaeles-project/jaeles/releases).
 
-If you have a Go environment, make sure you have **Go >= 1.13** with Go Modules enable and run the following command.
+If you have a Go environment, make sure you have **Go >= 1.17** with Go Modules enable and run the following command.
 
 ```shell
-GO111MODULE=on go get github.com/jaeles-project/jaeles
-```
-
-In case of "go get" failure, try the below method.
-
-```shell
-GO111MODULE=on go install github.com/jaeles-project/jaeles@latest
+go install github.com/jaeles-project/jaeles@latest
 ```
 
 Please visit the [Official Documention](https://jaeles-project.github.io/) for more details.
@@ -108,9 +93,18 @@ Guide [here](https://youtu.be/1lxsYhfTq3M)
 * Adding more input sources.
 * Adding more APIs to get access to more properties of the request.
 * Adding proxy plugins to directly receive input from browser of http client.
-* ~~Adding passive signature for passive checking each request.~~
 * Adding more action on Web UI.
 * Integrate with many other tools.
+
+## Painless integrate Jaeles into your recon workflow?
+
+<p align="center">
+  <img alt="OsmedeusEngine" src="https://raw.githubusercontent.com/osmedeus/assets/main/part-of-osmedeus-banner.png" />
+  <p align="center">
+    This project was part of Osmedeus Engine. Check out how it was integrated at <a href="https://twitter.com/OsmedeusEngine">@OsmedeusEngine</a>
+  </p>
+</p>
+
 
 ## Contribute
 

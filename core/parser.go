@@ -11,6 +11,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"bytes"
 
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/thoas/go-funk"
@@ -451,43 +452,91 @@ func ParsePayloads(sign libs.Signature) []string {
 func ParseBurpRequest(raw string) (req libs.Request) {
 	var realReq libs.Request
 	realReq.Raw = raw
-	reader := bufio.NewReader(strings.NewReader(raw))
-	parsedReq, err := http.ReadRequest(reader)
-	if err != nil {
-		return realReq
+	
+	// create a scanner to read the request
+	scanner := bufio.NewScanner(strings.NewReader(raw))
+
+	// read the first request line that contains HTTP version, method and path
+	scanner.Scan()
+	requestLine := scanner.Text()
+	parts := strings.Split(requestLine, " ")
+	if len(parts) != 3 {
+		return
 	}
-	realReq.Method = parsedReq.Method
-	// URL part
-	if parsedReq.URL.Host == "" {
-		realReq.Host = parsedReq.Host
-		parsedReq.URL.Host = parsedReq.Host
+	httpMethod := parts[0]
+	httpVersion := parts[2]
+	path := parts[1]
+
+	// create a new buffer for the request body
+	bodyBuffer := bytes.NewBuffer([]byte{})
+
+	// create a new map to hold the headers
+	headers := make([]map[string]string, 0)
+
+	// read the headers
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			break
+		}
+
+		parts := strings.Split(line, ": ")
+		if len(parts) != 2 {
+			return
+		}
+		headerName := parts[0]
+		headerValue := parts[1]
+
+		header := map[string]string{
+			headerName: headerValue,
+		}
+		headers = append(headers, header)
 	}
-	if parsedReq.URL.Scheme == "" {
-		if parsedReq.Referer() == "" {
-			realReq.Scheme = "https"
-			parsedReq.URL.Scheme = "https"
-		} else {
-			u, err := url.Parse(parsedReq.Referer())
-			if err == nil {
-				realReq.Scheme = u.Scheme
-				parsedReq.URL.Scheme = u.Scheme
+
+	// read the request body
+	for scanner.Scan() {
+		bodyBuffer.Write(scanner.Bytes())
+		bodyBuffer.Write([]byte("\r\n"))
+	}
+
+	body := bodyBuffer.String()
+
+	var urlScheme string
+	referer := headersGet(headers, "Referer")
+	if referer != "" {
+		refURL, err := url.Parse(referer)
+		if err == nil {
+			urlScheme = refURL.Scheme
+		}
+	}
+
+	if urlScheme == "" {
+		urlScheme = "https"
+	}
+
+	url := urlScheme + "://" + headers[0]["Host"] + path
+
+	realReq.Body = body
+	realReq.Headers = headers
+	realReq.Path = path
+	realReq.URL = url
+	realReq.Method = httpMethod
+	realReq.Scheme = urlScheme
+	realReq.Proto = httpVersion
+
+	return realReq
+}
+
+// helper function to get header value
+func headersGet(headers []map[string]string, headerName string) string {
+	for _, header := range headers {
+		for k, v := range header {
+			if strings.ToLower(k) == strings.ToLower(headerName) {
+				return v
 			}
 		}
 	}
-	realReq.URL = parsedReq.URL.String()
-	realReq.Path = parsedReq.RequestURI
-	realReq.Headers = ParseHeaders(parsedReq.Header)
-
-	body, _ := ioutil.ReadAll(parsedReq.Body)
-	realReq.Body = string(body)
-	// net/http parse something weird here
-	if !strings.HasSuffix(raw, realReq.Body) {
-		if strings.Contains(raw, "\n\n") {
-			realReq.Body = strings.Split(raw, "\n\n")[1]
-		}
-	}
-
-	return realReq
+	return ""
 }
 
 // ParseHeaders parse header for sending method

@@ -2,7 +2,7 @@ package libs
 
 const (
 	// VERSION current Jaeles version
-	VERSION = "beta v0.17.0"
+	VERSION = "beta v0.17.1"
 	// AUTHOR author of this
 	AUTHOR = "@j3ssiejjj"
 	// DOCS link to official documentation

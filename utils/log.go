@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -31,7 +30,7 @@ func InitLog(options *libs.Options) {
 	if options.LogFile != "" {
 		options.LogFile = NormalizePath(options.LogFile)
 		dir := path.Dir(options.LogFile)
-		tmpFile, _ := ioutil.TempFile(dir, "jaeles-*.log")
+		tmpFile, _ := os.CreateTemp(dir, "jaeles-*.log")
 		options.LogFile = tmpFile.Name()
 		dir = filepath.Dir(options.LogFile)
 		if !FolderExists(dir) {
@@ -60,7 +59,7 @@ func InitLog(options *libs.Options) {
 		logger.SetLevel(logrus.InfoLevel)
 	} else {
 		logger.SetLevel(logrus.PanicLevel)
-		logger.SetOutput(ioutil.Discard)
+		logger.SetOutput(io.Discard)
 	}
 	if options.LogFile != "" {
 		logger.Info(fmt.Sprintf("Store log file to: %v", options.LogFile))

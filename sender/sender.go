@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jaeles-project/jaeles/utils"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -55,7 +55,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 	// disable log when retry
 	logger := logrus.New()
 	if !options.Debug {
-		logger.Out = ioutil.Discard
+		logger.Out = io.Discard
 	}
 
 	client := resty.New()
@@ -114,7 +114,7 @@ func JustSend(options libs.Options, req libs.Request) (res libs.Response, err er
 			res.StatusCode = req.Response.StatusCode
 			res.Status = req.Response.Status
 			resp := req.Response
-			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			bodyBytes, err := io.ReadAll(resp.Body)
 			if err != nil {
 				utils.ErrorF("%v", err)
 			}

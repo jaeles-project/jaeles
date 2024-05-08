@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -66,7 +65,7 @@ func FileLength(filename string) int {
 // DirLength count len of file
 func DirLength(dir string) int {
 	dir = NormalizePath(dir)
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return 0
 	}
@@ -84,7 +83,7 @@ func GetFileContent(filename string) string {
 		return result
 	}
 	defer file.Close()
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	if err != nil {
 		return result
 	}
@@ -246,7 +245,7 @@ func GenHash(text string) string {
 // CopyDir copy directory to dest
 func CopyDir(src string, dst string) error {
 	var err error
-	var fds []os.FileInfo
+	var fds []os.DirEntry
 	var srcInfo os.FileInfo
 
 	if srcInfo, err = os.Stat(src); err != nil {
@@ -257,7 +256,7 @@ func CopyDir(src string, dst string) error {
 		return err
 	}
 
-	if fds, err = ioutil.ReadDir(src); err != nil {
+	if fds, err = os.ReadDir(src); err != nil {
 		return err
 	}
 	for _, fd := range fds {

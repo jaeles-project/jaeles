@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"github.com/Jeffail/gabs/v2"
 	"github.com/jaeles-project/jaeles/utils"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -21,7 +22,7 @@ import (
 // ParseSign parsing YAML signature file
 func ParseSign(signFile string) (sign libs.Signature, err error) {
 	signFile = utils.NormalizePath(signFile)
-	yamlFile, err := ioutil.ReadFile(signFile)
+	yamlFile, err := os.ReadFile(signFile)
 	if err != nil {
 		utils.ErrorF("Error parsing Signature:  #%v - %v", err, signFile)
 	}
@@ -88,7 +89,7 @@ func ParseSignFromContent(content string) (sign libs.Signature, err error) {
 
 // ParsePassive parsing YAML passive file
 func ParsePassive(passiveFile string) (passive libs.Passive, err error) {
-	yamlFile, err := ioutil.ReadFile(passiveFile)
+	yamlFile, err := os.ReadFile(passiveFile)
 	if err != nil {
 		utils.ErrorF("Error parsing Signature:  #%v - %v", err, passiveFile)
 	}
@@ -582,7 +583,7 @@ func ParseBurpResponse(rawReq string, rawRes string) (res libs.Response) {
 	}
 	res.Headers = headers
 
-	body, _ := ioutil.ReadAll(parsedRes.Body)
+	body, _ := io.ReadAll(parsedRes.Body)
 	res.Body = string(body)
 	return res
 }

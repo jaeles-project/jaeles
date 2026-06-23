@@ -7,7 +7,6 @@ import (
 	"github.com/jaeles-project/jaeles/libs"
 	"github.com/jaeles-project/jaeles/utils"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -48,7 +47,7 @@ func InitConfig(options *libs.Options) {
 		if options.Debug {
 			utils.InforF("Load config from: %v", configPath)
 		}
-		b, _ := ioutil.ReadFile(configPath)
+		b, _ := os.ReadFile(configPath)
 		v.ReadConfig(bytes.NewBuffer(b))
 	}
 

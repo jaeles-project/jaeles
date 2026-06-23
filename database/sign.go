@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jaeles-project/jaeles/utils"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -89,7 +88,7 @@ func ImportSign(signPath string) error {
 
 // ParseSign parsing YAML signature file
 func ParseSignature(signFile string) (sign libs.Signature, err error) {
-	yamlFile, err := ioutil.ReadFile(signFile)
+	yamlFile, err := os.ReadFile(signFile)
 	if err != nil {
 		utils.ErrorF("yamlFile.Get err  #%v - %v", err, signFile)
 	}
